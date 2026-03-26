@@ -86,4 +86,20 @@ export const authController = {
       return res.status(401).json({ error: message });
     }
   },
+
+  async logout(req: Request, res: Response) {
+    try {
+      const token = req.cookies.refreshToken;
+
+      if (!token) {
+        return res.json({ success: true });
+      }
+
+      res.clearCookie("refreshToken");
+
+      return res.json({ success: true });
+    } catch (_err) {
+      return res.status(500).json({ error: "Logout failed" });
+    }
+  },
 };
