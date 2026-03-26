@@ -29,3 +29,10 @@ model OTP {
   code      String
   expiresAt DateTime
 }
+
+model City {
+  id       String  @id @default(cuid())
+  name     String
+  state    String
+  isActive Boolean @default(true)
+}
