@@ -1,19 +1,14 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function Home() {
-  const { user, loading, logout } = useAuth();
+export default function ProtectedIndexPage() {
+  const router = useRouter();
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  useEffect(() => {
+    router.replace("/home");
+  }, [router]);
 
-  return (
-    <div className="p-10">
-      <h1>Canovet</h1>
-      {user ? <p>Welcome user</p> : <p>Not logged in</p>}
-      <button onClick={logout}>Logout</button>
-    </div>
-  );
+  return <div>Loading...</div>;
 }
