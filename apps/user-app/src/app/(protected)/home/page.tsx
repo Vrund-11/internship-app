@@ -1,17 +1,22 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { ServiceType } from "@canovet/shared";
 import { useCity } from "@/context/CityContext";
 import { useAuth } from "@/context/AuthContext";
+import { useBooking } from "@/context/BookingContext";
 import { SERVICES } from "@/constants/services";
 
 export default function HomePage() {
   const { city } = useCity();
   const { logout } = useAuth();
+  const { reset, setService } = useBooking();
   const router = useRouter();
 
-  const handleClick = (serviceId: string) => {
-    router.push(`/service/${serviceId}`);
+  const handleClick = (serviceId: ServiceType) => {
+    reset();
+    setService(serviceId);
+    router.push("/booking/pet");
   };
 
   return (
