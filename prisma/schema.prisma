@@ -74,13 +74,15 @@ model Address {
 }
 
 model Partner {
-  id         String   @id @default(cuid())
-  name       String
-  phone      String   @unique
-  cityId     String
-  isOnline   Boolean  @default(false)
-  isVerified Boolean  @default(true)
-  createdAt  DateTime @default(now())
+  id                     String   @id @default(cuid())
+  name                   String
+  phone                  String   @unique
+  cityId                 String
+  isOnline               Boolean  @default(false)
+  isVerified             Boolean  @default(true)
+  activeBookings         Int      @default(0)
+  todayCompletedBookings Int      @default(0)
+  createdAt              DateTime @default(now())
 
   city     City             @relation(fields: [cityId], references: [id])
   services PartnerService[]

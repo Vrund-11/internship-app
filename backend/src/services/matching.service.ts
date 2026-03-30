@@ -38,11 +38,19 @@ export const matchingService = {
       },
     });
 
-    const eligible = partners.filter((partner) =>
-      partner.services.some(
-        (service) => service.serviceType === booking.serviceType
+    const eligible = partners
+      .filter((partner) =>
+        partner.services.some(
+          (service) => service.serviceType === booking.serviceType
+        )
       )
-    );
+      .sort((a, b) => {
+        if (a.activeBookings !== b.activeBookings) {
+          return a.activeBookings - b.activeBookings;
+        }
+
+        return a.todayCompletedBookings - b.todayCompletedBookings;
+      });
 
     const allPartners = eligible
       .map((partner) => ({

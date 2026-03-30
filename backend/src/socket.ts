@@ -55,6 +55,8 @@ export const initSocket = (server: HttpServer) => {
     });
 
     socket.on("booking_accept", async ({ bookingId }) => {
+      const partnerId = socketPartners.get(socket.id);
+
       const updated = await prisma.booking.updateMany({
         where: {
           id: bookingId,
@@ -68,6 +70,15 @@ export const initSocket = (server: HttpServer) => {
       if (updated.count === 0) {
         console.log("ALREADY_TAKEN");
         return;
+      }
+
+      if (partnerId) {
+        await prisma.partner.update({
+          where: { id: partnerId },
+          data: {
+            activeBookings: { increment: 1 },
+          },
+        });
       }
 
       console.log("BOOKING_CONFIRMED");
