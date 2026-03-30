@@ -12,6 +12,9 @@ model User {
   createdAt DateTime      @default(now())
 
   sessions  UserSession[]
+  pets      Pet[]
+  addresses Address[]
+  bookings  Booking[]
 }
 
 model UserSession {
@@ -35,4 +38,36 @@ model City {
   name     String
   state    String
   isActive Boolean @default(true)
+
+  bookings Booking[]
+}
+
+model Booking {
+  id          String   @id @default(cuid())
+  userId      String
+  cityId      String
+  serviceType String
+  petId       String
+  addressId   String
+  status      String   @default("SEARCHING_PARTNER")
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  city City @relation(fields: [cityId], references: [id])
+}
+
+model Pet {
+  id     String @id @default(cuid())
+  userId String
+  name   String
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Address {
+  id     String @id @default(cuid())
+  userId String
+  text   String
+
+  user User @relation(fields: [userId], references: [id])
 }
