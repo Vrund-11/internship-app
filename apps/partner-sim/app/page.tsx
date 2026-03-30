@@ -13,6 +13,7 @@ type Booking = {
 
 export default function Page() {
   const [connected, setConnected] = useState(false);
+  const [partnerId, setPartnerId] = useState("");
   const [booking, setBooking] = useState<Booking | null>(null);
 
   useEffect(() => {
@@ -47,8 +48,12 @@ export default function Page() {
   };
 
   const goOnline = () => {
+    if (!partnerId) {
+      return;
+    }
+
     socket.emit("partner_online", {
-      partnerId: socket.id,
+      partnerId,
     });
   };
 
@@ -70,6 +75,11 @@ export default function Page() {
 
       {connected && (
         <>
+          <input
+            placeholder="Partner ID"
+            value={partnerId}
+            onChange={(e) => setPartnerId(e.target.value)}
+          />
           <button onClick={goOnline}>Go Online</button>
 
           {booking && (

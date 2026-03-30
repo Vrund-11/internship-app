@@ -4,7 +4,8 @@ import { BookingStatus } from "@canovet/shared";
 import { activeMatches } from "./services/matching.service";
 import { prisma } from "./utils/prisma";
 
-const onlinePartners = new Map<string, string>();
+const partnerSocketMap = new Map<string, string>();
+const socketPartners = new Map<string, string>();
 
 let io: Server | null = null;
 
@@ -17,9 +18,40 @@ export const initSocket = (server: HttpServer) => {
   });
 
   io.on("connection", (socket) => {
-    socket.on("partner_online", ({ partnerId }: { partnerId?: string }) => {
-      onlinePartners.set(socket.id, socket.id);
-      console.log("PARTNER_ONLINE:", partnerId || socket.id);
+    socket.on("partner_online", async ({ partnerId }: { partnerId?: string }) => {
+      if (!partnerId) {
+        return;
+      }
+
+      await prisma.partner.update({
+        where: { id: partnerId },
+        data: { isOnline: true },
+      });
+
+      partnerSocketMap.set(partnerId, socket.id);
+      socketPartners.set(socket.id, partnerId);
+      console.log("PARTNER_ONLINE:", partnerId);
+    });
+
+    socket.on("partner_offline", async ({ partnerId }: { partnerId?: string }) => {
+      if (!partnerId) {
+        return;
+      }
+
+      await prisma.partner.update({
+        where: { id: partnerId },
+        data: { isOnline: false },
+      });
+
+      partnerSocketMap.delete(partnerId);
+
+      for (const [socketId, mappedPartnerId] of socketPartners.entries()) {
+        if (mappedPartnerId === partnerId) {
+          socketPartners.delete(socketId);
+        }
+      }
+
+      console.log("PARTNER_OFFLINE:", partnerId);
     });
 
     socket.on("booking_accept", async ({ bookingId }) => {
@@ -56,9 +88,20 @@ export const initSocket = (server: HttpServer) => {
     });
 
     socket.on("disconnect", () => {
-      if (onlinePartners.has(socket.id)) {
-        onlinePartners.delete(socket.id);
-        console.log("PARTNER_OFFLINE:", socket.id);
+      const partnerId = socketPartners.get(socket.id);
+
+      if (partnerId) {
+        partnerSocketMap.delete(partnerId);
+        socketPartners.delete(socket.id);
+
+        prisma.partner
+          .update({
+            where: { id: partnerId },
+            data: { isOnline: false },
+          })
+          .catch(() => {});
+
+        console.log("PARTNER_OFFLINE:", partnerId);
       }
     });
   });
@@ -74,4 +117,4 @@ export const getIO = () => {
   return io;
 };
 
-export const getOnlinePartners = () => onlinePartners;
+export const getPartnerSocketMap = () => partnerSocketMap;

@@ -1,7 +1,11 @@
-import { getIO, getOnlinePartners } from "../socket";
+import { BookingStatus } from "@canovet/shared";
+import { getIO, getPartnerSocketMap } from "../socket";
+import { prisma } from "../utils/prisma";
 
 type BookingForMatching = {
   id: string;
+  cityId: string;
+  serviceType: string;
 };
 
 const BATCH_SIZE = 3;
@@ -19,10 +23,47 @@ export const matchingService = {
   async startMatching(booking: BookingForMatching) {
     console.log("MATCHING_START:", booking.id);
 
-    const allPartners = Array.from(getOnlinePartners().values());
+    const partnerSocketMap = getPartnerSocketMap();
+    const partners = await prisma.partner.findMany({
+      where: {
+        isOnline: true,
+        isVerified: true,
+        cityId: booking.cityId,
+      },
+      include: {
+        services: true,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+
+    const eligible = partners.filter((partner) =>
+      partner.services.some(
+        (service) => service.serviceType === booking.serviceType
+      )
+    );
+
+    const allPartners = eligible
+      .map((partner) => ({
+        partnerId: partner.id,
+        socketId: partnerSocketMap.get(partner.id),
+      }))
+      .filter(
+        (
+          partner
+        ): partner is {
+          partnerId: string;
+          socketId: string;
+        } => Boolean(partner.socketId)
+      );
 
     if (allPartners.length === 0) {
-      console.log("NO_PARTNERS_AVAILABLE");
+      console.log("NO_ELIGIBLE_PARTNERS");
+      await prisma.booking.update({
+        where: { id: booking.id },
+        data: { status: BookingStatus.FAILED },
+      });
       return;
     }
 
@@ -36,7 +77,10 @@ export const matchingService = {
     await this.dispatchNextBatch(booking, allPartners);
   },
 
-  async dispatchNextBatch(booking: BookingForMatching, allPartners: string[]) {
+  async dispatchNextBatch(
+    booking: BookingForMatching,
+    allPartners: Array<{ partnerId: string; socketId: string }>
+  ) {
     const state = activeMatches.get(booking.id);
 
     if (!state) {
@@ -44,7 +88,7 @@ export const matchingService = {
     }
 
     const remaining = allPartners.filter(
-      (partner) => !state.attemptedPartners.has(partner)
+      (partner) => !state.attemptedPartners.has(partner.partnerId)
     );
 
     if (remaining.length === 0) {
@@ -57,9 +101,9 @@ export const matchingService = {
 
     const io = getIO();
 
-    batch.forEach((socketId) => {
-      state.attemptedPartners.add(socketId);
-      io.to(socketId).emit("booking_request", booking);
+    batch.forEach((partner) => {
+      state.attemptedPartners.add(partner.partnerId);
+      io.to(partner.socketId).emit("booking_request", booking);
     });
 
     console.log("BATCH_SENT:", batch.length);
