@@ -7,6 +7,7 @@ type BookingState = {
   service: ServiceType | null;
   petId: string | null;
   addressId: string | null;
+  bookingId: string | null;
 };
 
 type BookingContextType = {
@@ -14,6 +15,7 @@ type BookingContextType = {
   setService: (service: ServiceType) => void;
   setPet: (id: string) => void;
   setAddress: (id: string) => void;
+  setBookingId: (id: string | null) => void;
   reset: () => void;
 };
 
@@ -28,6 +30,7 @@ export const BookingProvider = ({
     service: null,
     petId: null,
     addressId: null,
+    bookingId: null,
   });
 
   const setService = (service: ServiceType) =>
@@ -39,12 +42,15 @@ export const BookingProvider = ({
   const setAddress = (addressId: string) =>
     setBooking((prev) => ({ ...prev, addressId }));
 
+  const setBookingId = (bookingId: string | null) =>
+    setBooking((prev) => ({ ...prev, bookingId }));
+
   const reset = () =>
-    setBooking({ service: null, petId: null, addressId: null });
+    setBooking({ service: null, petId: null, addressId: null, bookingId: null });
 
   return (
     <BookingContext.Provider
-      value={{ booking, setService, setPet, setAddress, reset }}
+      value={{ booking, setService, setPet, setAddress, setBookingId, reset }}
     >
       {children}
     </BookingContext.Provider>

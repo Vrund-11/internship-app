@@ -55,6 +55,7 @@ model Booking {
 
   user User @relation(fields: [userId], references: [id])
   city City @relation(fields: [cityId], references: [id])
+  payments Payment[]
 }
 
 model Pet {
@@ -94,4 +95,14 @@ model PartnerService {
   serviceType String
 
   partner Partner @relation(fields: [partnerId], references: [id])
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  bookingId String
+  amount    Int
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id])
 }

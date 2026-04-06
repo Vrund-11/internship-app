@@ -5,7 +5,7 @@ import { useBooking } from "@/context/BookingContext";
 import { useCity } from "@/context/CityContext";
 
 export default function ConfirmPage() {
-  const { booking } = useBooking();
+  const { booking, setBookingId } = useBooking();
   const { city } = useCity();
 
   const handleConfirm = async () => {
@@ -13,14 +13,24 @@ export default function ConfirmPage() {
       return;
     }
 
-    await api.post("/booking", {
-      serviceType: booking.service,
-      petId: booking.petId,
-      addressId: booking.addressId,
-      cityId: city.id,
+    if (!booking.bookingId) {
+      const bookingRes = await api.post("/booking", {
+        serviceType: booking.service,
+        petId: booking.petId,
+        addressId: booking.addressId,
+        cityId: city.id,
+      });
+
+      setBookingId(bookingRes.data.id);
+      alert("Booking Created");
+      return;
+    }
+
+    await api.post("/payment/pay", {
+      bookingId: booking.bookingId,
     });
 
-    alert("Booking Created");
+    alert("Payment Completed");
   };
 
   return (
@@ -29,7 +39,9 @@ export default function ConfirmPage() {
 
       <pre>{JSON.stringify(booking, null, 2)}</pre>
 
-      <button onClick={handleConfirm}>Confirm</button>
+      <button onClick={handleConfirm}>
+        {booking.bookingId ? "Pay Now" : "Confirm"}
+      </button>
     </div>
   );
 }

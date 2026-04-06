@@ -63,7 +63,7 @@ export const initSocket = (server: HttpServer) => {
           status: BookingStatus.SEARCHING_PARTNER,
         },
         data: {
-          status: BookingStatus.CONFIRMED,
+          status: BookingStatus.AWAITING_PAYMENT,
         },
       });
 
@@ -80,6 +80,14 @@ export const initSocket = (server: HttpServer) => {
           },
         });
       }
+
+      await prisma.payment.create({
+        data: {
+          bookingId,
+          amount: 500,
+          status: "PENDING",
+        },
+      });
 
       console.log("BOOKING_CONFIRMED");
 
