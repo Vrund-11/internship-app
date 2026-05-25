@@ -1,16 +1,16 @@
 # Graph Report - canovet  (2026-05-25)
 
 ## Corpus Check
-- 135 files · ~60,760 words
+- 135 files · ~61,248 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 302 nodes · 332 edges · 82 communities (74 shown, 8 thin omitted)
-- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 13 edges (avg confidence: 0.8)
+- 302 nodes · 333 edges · 82 communities (74 shown, 8 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9b4531d9`
+- Built from commit: `40957eda`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -42,10 +42,10 @@
 3. `useAuth()` - 12 edges
 4. `useCity()` - 9 edges
 5. `resolveServiceType()` - 7 edges
-6. `runTests()` - 7 edges
-7. `lock()` - 6 edges
-8. `delay()` - 6 edges
-9. `main()` - 6 edges
+6. `main()` - 7 edges
+7. `runTests()` - 7 edges
+8. `lock()` - 6 edges
+9. `delay()` - 6 edges
 10. `getServiceSlug()` - 5 edges
 
 ## Surprising Connections (you probably didn't know these)
@@ -66,9 +66,9 @@
 Cohesion: 0.11
 Nodes (37): addBot(), askAddresses(), askDates(), askFeedbackStars(), askNegativeCategories(), askPets(), askPositiveAttributes(), askRescheduleDate() (+29 more)
 
-### Community 1 - "Community 1"
-Cohesion: 0.07
-Nodes (10): handleAddAddress(), toDisplayAddress(), RootLayout(), AppProviders(), AuthProvider(), BookingProvider(), useBooking(), setAccessToken() (+2 more)
+### Community 2 - "Community 2"
+Cohesion: 0.1
+Nodes (5): handleAddAddress(), toDisplayAddress(), useBooking(), handleAddPet(), toDisplayPet()
 
 ### Community 3 - "Community 3"
 Cohesion: 0.16
@@ -87,20 +87,20 @@ Cohesion: 0.15
 Nodes (5): handleAdd(), BookingSuccess(), handleAddPet(), calcTotal(), generateId()
 
 ### Community 7 - "Community 7"
+Cohesion: 0.33
+Nodes (10): classifyComplaint(), fallbackSentiment(), getBertSentiment(), regexScan(), fail(), login(), main(), ok() (+2 more)
+
+### Community 8 - "Community 8"
 Cohesion: 0.27
 Nodes (6): cleanup(), main(), makeClient(), makeClientWithCookie(), generateAccessToken(), generateRefreshToken()
 
-### Community 8 - "Community 8"
+### Community 9 - "Community 9"
+Cohesion: 0.2
+Nodes (5): RootLayout(), AppProviders(), AuthProvider(), BookingProvider(), setAccessToken()
+
+### Community 10 - "Community 10"
 Cohesion: 0.25
 Nodes (3): isSlotAvailable(), getDistanceKm(), generateSlots()
-
-### Community 9 - "Community 9"
-Cohesion: 0.67
-Nodes (6): fail(), login(), main(), ok(), printStyled(), section()
-
-### Community 11 - "Community 11"
-Cohesion: 0.7
-Nodes (4): fail(), login(), main(), ok()
 
 ### Community 12 - "Community 12"
 Cohesion: 0.7
@@ -108,7 +108,7 @@ Nodes (4): fail(), login(), main(), ok()
 
 ### Community 13 - "Community 13"
 Cohesion: 0.7
-Nodes (4): classifyComplaint(), fallbackSentiment(), getBertSentiment(), regexScan()
+Nodes (4): fail(), login(), main(), ok()
 
 ## Knowledge Gaps
 - **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
@@ -116,11 +116,11 @@ Nodes (4): classifyComplaint(), fallbackSentiment(), getBertSentiment(), regexSc
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Community 2` to `Community 0`, `Community 3`, `Community 4`, `Community 6`, `Community 10`?**
+- **Why does `cn()` connect `Community 1` to `Community 0`, `Community 3`, `Community 4`, `Community 6`, `Community 11`?**
   _High betweenness centrality (0.137) - this node is a cross-community bridge._
-- **Why does `useAuth()` connect `Community 4` to `Community 0`, `Community 1`, `Community 3`, `Community 5`?**
+- **Why does `useAuth()` connect `Community 4` to `Community 0`, `Community 9`, `Community 3`, `Community 5`?**
   _High betweenness centrality (0.103) - this node is a cross-community bridge._
-- **Why does `useCity()` connect `Community 4` to `Community 0`, `Community 1`, `Community 3`?**
+- **Why does `useCity()` connect `Community 4` to `Community 0`, `Community 2`, `Community 3`?**
   _High betweenness centrality (0.077) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `useAuth()` (e.g. with `ProtectedLayout()` and `Navbar()`) actually correct?**
   _`useAuth()` has 3 INFERRED edges - model-reasoned connections that need verification._
@@ -129,4 +129,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.11 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.07 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
