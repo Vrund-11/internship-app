@@ -1,0 +1,6 @@
+ALTER TABLE "Booking"
+ADD COLUMN "partnerId" TEXT;
+
+ALTER TABLE "Booking"
+ADD CONSTRAINT "Booking_partnerId_fkey"
+FOREIGN KEY ("partnerId") REFERENCES "Partner"("id") ON DELETE SET NULL ON UPDATE CASCADE;

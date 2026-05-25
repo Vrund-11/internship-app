@@ -102,4 +102,25 @@ export const authController = {
       return res.status(500).json({ error: "Logout failed" });
     }
   },
+
+  async updateProfile(req: Request, res: Response) {
+    try {
+      const userId = (req as AuthenticatedRequest).userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { name } = req.body;
+
+      const user = await authService.updateProfile(userId, { name });
+
+      return res.json(user);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to update profile";
+
+      return res.status(400).json({ error: message });
+    }
+  },
 };

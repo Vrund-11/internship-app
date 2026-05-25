@@ -9,5 +9,6 @@ router.post("/verify-otp", authController.verifyOTP);
 router.post("/refresh", authController.refresh);
 router.post("/logout", authController.logout);
 router.get("/me", authMiddleware, authController.me);
+router.patch("/profile", authMiddleware, authController.updateProfile);
 
 export default router;

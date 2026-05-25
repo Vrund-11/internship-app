@@ -7,7 +7,12 @@ type BookingState = {
   service: ServiceType | null;
   petId: string | null;
   addressId: string | null;
+  slotStart: string | null;
+  slotEnd: string | null;
   bookingId: string | null;
+  status: string | null;
+  partnerId: string | null;
+  partnerName: string | null;
 };
 
 type BookingContextType = {
@@ -15,7 +20,16 @@ type BookingContextType = {
   setService: (service: ServiceType) => void;
   setPet: (id: string) => void;
   setAddress: (id: string) => void;
+  setSlot: (slot: { slotStart: string; slotEnd: string } | null) => void;
   setBookingId: (id: string | null) => void;
+  setAssignment: (input: {
+    bookingId: string;
+    slotStart: string;
+    slotEnd: string;
+    status: string;
+    partnerId: string | null;
+    partnerName: string | null;
+  }) => void;
   reset: () => void;
 };
 
@@ -30,7 +44,12 @@ export const BookingProvider = ({
     service: null,
     petId: null,
     addressId: null,
+    slotStart: null,
+    slotEnd: null,
     bookingId: null,
+    status: null,
+    partnerId: null,
+    partnerName: null,
   });
 
   const setService = (service: ServiceType) =>
@@ -42,15 +61,66 @@ export const BookingProvider = ({
   const setAddress = (addressId: string) =>
     setBooking((prev) => ({ ...prev, addressId }));
 
+  const setSlot = (slot: { slotStart: string; slotEnd: string } | null) =>
+    setBooking((prev) => ({
+      ...prev,
+      slotStart: slot?.slotStart ?? null,
+      slotEnd: slot?.slotEnd ?? null,
+    }));
+
   const setBookingId = (bookingId: string | null) =>
     setBooking((prev) => ({ ...prev, bookingId }));
 
+  const setAssignment = ({
+    bookingId,
+    slotStart,
+    slotEnd,
+    status,
+    partnerId,
+    partnerName,
+  }: {
+    bookingId: string;
+    slotStart: string;
+    slotEnd: string;
+    status: string;
+    partnerId: string | null;
+    partnerName: string | null;
+  }) =>
+    setBooking((prev) => ({
+      ...prev,
+      bookingId,
+      slotStart,
+      slotEnd,
+      status,
+      partnerId,
+      partnerName,
+    }));
+
   const reset = () =>
-    setBooking({ service: null, petId: null, addressId: null, bookingId: null });
+    setBooking({
+      service: null,
+      petId: null,
+      addressId: null,
+      slotStart: null,
+      slotEnd: null,
+      bookingId: null,
+      status: null,
+      partnerId: null,
+      partnerName: null,
+    });
 
   return (
     <BookingContext.Provider
-      value={{ booking, setService, setPet, setAddress, setBookingId, reset }}
+      value={{
+        booking,
+        setService,
+        setPet,
+        setAddress,
+        setSlot,
+        setBookingId,
+        setAssignment,
+        reset,
+      }}
     >
       {children}
     </BookingContext.Provider>

@@ -9,12 +9,17 @@ datasource db {
 model User {
   id        String        @id @default(cuid())
   phone     String        @unique
+  name      String?
   createdAt DateTime      @default(now())
 
-  sessions  UserSession[]
-  pets      Pet[]
-  addresses Address[]
-  bookings  Booking[]
+  sessions   UserSession[]
+  pets       Pet[]
+  addresses  Address[]
+  bookings   Booking[]
+  reviews    Review[]
+  complaints Complaint[]
+  promoUsages PromoUsage[]
+  rescheduleLogs RescheduleLog[]
 }
 
 model UserSession {
@@ -47,31 +52,55 @@ model Booking {
   id          String   @id @default(cuid())
   userId      String
   cityId      String
+  partnerId   String?
+  slotStart   DateTime
+  slotEnd     DateTime
   serviceType String
   petId       String
   addressId   String
   status      String   @default("SEARCHING_PARTNER")
+  verificationOtp String?
   createdAt   DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
-  city City @relation(fields: [cityId], references: [id])
-  payments Payment[]
+  user      User     @relation(fields: [userId], references: [id])
+  city      City     @relation(fields: [cityId], references: [id])
+  partner   Partner? @relation(fields: [partnerId], references: [id])
+  pet       Pet      @relation(fields: [petId], references: [id])
+  address   Address  @relation(fields: [addressId], references: [id])
+  payments  Payment[]
+  review    Review?
+  complaints Complaint[]
+  rescheduleLogs RescheduleLog[]
 }
 
 model Pet {
   id     String @id @default(cuid())
   userId String
   name   String
+  type   String @default("dog")
+  breed  String @default("Mixed")
+  age    Int    @default(1)
+  weight Float  @default(5)
 
-  user User @relation(fields: [userId], references: [id])
+  user     User      @relation(fields: [userId], references: [id])
+  bookings Booking[]
 }
 
 model Address {
-  id     String @id @default(cuid())
-  userId String
-  text   String
+  id        String @id @default(cuid())
+  userId    String
+  text      String
+  latitude  Float  @default(0)
+  longitude Float  @default(0)
+  label     String @default("Home")
+  house     String @default("")
+  area      String @default("")
+  city      String @default("")
+  state     String @default("")
+  pincode   String @default("")
 
-  user User @relation(fields: [userId], references: [id])
+  user     User      @relation(fields: [userId], references: [id])
+  bookings Booking[]
 }
 
 model Partner {
@@ -79,14 +108,21 @@ model Partner {
   name                   String
   phone                  String   @unique
   cityId                 String
+  latitude               Float    @default(0)
+  longitude              Float    @default(0)
+  address                String   @default("")
   isOnline               Boolean  @default(false)
   isVerified             Boolean  @default(true)
   activeBookings         Int      @default(0)
   todayCompletedBookings Int      @default(0)
+  rating                 Float    @default(0)
+  totalCompleted         Int      @default(0)
   createdAt              DateTime @default(now())
 
   city     City             @relation(fields: [cityId], references: [id])
+  bookings Booking[]
   services PartnerService[]
+  reviews  Review[]
 }
 
 model PartnerService {
@@ -106,3 +142,73 @@ model Payment {
 
   booking Booking @relation(fields: [bookingId], references: [id])
 }
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  partnerId String
+  bookingId String   @unique
+
+  rating    Int
+  comment   String?
+
+  createdAt DateTime @default(now())
+
+  user     User    @relation(fields: [userId], references: [id])
+  partner  Partner @relation(fields: [partnerId], references: [id])
+  booking  Booking @relation(fields: [bookingId], references: [id])
+}
+
+model Complaint {
+  id        String   @id @default(cuid())
+  userId    String
+  bookingId String?
+
+  message   String
+  status    String   @default("OPEN")
+  phone     String   @default("")
+  whatsapp  String   @default("")
+  category  String   @default("OTHER")
+  priority  String   @default("LOW")
+  resolution String?
+  resolvedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  booking  Booking? @relation(fields: [bookingId], references: [id])
+}
+
+model PromoCode {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  discountPercent Int      @default(10)
+  maxUsesPerUser  Int      @default(3)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  usages PromoUsage[]
+}
+
+model PromoUsage {
+  id          String   @id @default(cuid())
+  userId      String
+  promoCodeId String
+  createdAt   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+  promoCode PromoCode @relation(fields: [promoCodeId], references: [id])
+
+  @@unique([userId, promoCodeId, createdAt])
+}
+
+model RescheduleLog {
+  id        String   @id @default(cuid())
+  userId    String
+  bookingId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
