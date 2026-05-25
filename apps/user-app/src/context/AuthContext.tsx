@@ -1,5 +1,6 @@
 "use client";
 
+import axios from "axios";
 import {
   createContext,
   useContext,
@@ -13,6 +14,7 @@ import { logger } from "@/lib/logger";
 type User = {
   id: string;
   phone: string;
+  name?: string | null;
 };
 
 type AuthContextType = {
@@ -20,7 +22,7 @@ type AuthContextType = {
   accessToken: string | null;
   loading: boolean;
   setUser: (user: User | null) => void;
-  login: (phone: string, otp: string) => Promise<void>;
+  login: (phone: string, otp: string) => Promise<User>;
   logout: () => Promise<void>;
 };
 
@@ -51,6 +53,7 @@ export const AuthProvider = ({
 
       updateAccessToken(accessToken);
       setUser(user);
+      return user as User;
     } catch (err) {
       console.error("Login failed");
       throw err;
@@ -83,7 +86,12 @@ export const AuthProvider = ({
       setUser(meRes.data);
       logger.info("AUTH_HYDRATE_SUCCESS");
     } catch (err) {
-      logger.error("AUTH_HYDRATE_FAILED", err);
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
+        logger.info("AUTH_HYDRATE_NO_SESSION");
+      } else {
+        logger.error("AUTH_HYDRATE_FAILED", err);
+      }
+
       setUser(null);
       updateAccessToken(null);
     } finally {

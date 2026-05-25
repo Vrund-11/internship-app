@@ -48,19 +48,28 @@ export const authService = {
     try {
       const payload = jwt.verify(oldToken, SECRET) as { userId: string };
 
-      const session = await authRepository.findSessionByUserId(payload.userId);
+      const sessions = await authRepository.findSessionsByUserId(payload.userId);
 
-      if (!session) {
+      if (sessions.length === 0) {
         throw new Error("Session not found");
       }
 
-      const isValid = await bcrypt.compare(oldToken, session.refreshToken);
+      // Compare only the JWT signature (3rd segment) to avoid bcrypt's 72-byte truncation bug.
+      const oldSignature = oldToken.split(".")[2] ?? oldToken;
+      const matched = await Promise.all(
+        sessions.map(async (session) => ({
+          session,
+          isValid: await bcrypt.compare(oldSignature, session.refreshToken),
+        }))
+      );
 
-      if (!isValid) {
+      const active = matched.find((entry) => entry.isValid);
+
+      if (!active) {
         throw new Error("Token reuse detected");
       }
 
-      await authRepository.deleteSession(session.id);
+      await authRepository.deleteSession(active.session.id);
 
       const newRefreshToken = generateRefreshToken(payload.userId);
       const newAccessToken = generateAccessToken(payload.userId);
@@ -83,6 +92,11 @@ export const authService = {
       throw new Error("Unauthorized");
     }
 
+    return user;
+  },
+
+  async updateProfile(userId: string, data: { name?: string }) {
+    const user = await authRepository.updateUser(userId, data);
     return user;
   },
 };

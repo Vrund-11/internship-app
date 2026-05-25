@@ -1,37 +1,18 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { ServiceType } from "@canovet/shared";
-import { useCity } from "@/context/CityContext";
-import { useAuth } from "@/context/AuthContext";
-import { useBooking } from "@/context/BookingContext";
-import { SERVICES } from "@/constants/services";
+import AppShell from "@/features/layout/components/AppShell";
+import HeroSection from "@/features/home/components/HeroSection";
+import ServiceGrid from "@/features/home/components/ServiceGrid";
+import TrustBadges from "@/features/home/components/TrustBadges";
 
 export default function HomePage() {
-  const { city } = useCity();
-  const { logout } = useAuth();
-  const { reset, setService } = useBooking();
-  const router = useRouter();
-
-  const handleClick = (serviceId: ServiceType) => {
-    reset();
-    setService(serviceId);
-    router.push("/booking/pet");
-  };
-
   return (
-    <div className="p-6">
-      <h1>Canovet</h1>
-      <p>{city?.name}</p>
-
-      {SERVICES.map((service) => (
-        <div key={service.id} onClick={() => handleClick(service.id)}>
-          <h2>{service.title}</h2>
-          <p>{service.description}</p>
-        </div>
-      ))}
-
-      <button onClick={logout}>Logout</button>
-    </div>
+    <AppShell>
+      <div className="bg-[#F5FAF7] min-h-screen pb-16">
+        <HeroSection />
+        <ServiceGrid />
+        <TrustBadges />
+      </div>
+    </AppShell>
   );
 }

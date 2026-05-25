@@ -2,7 +2,12 @@ import bcrypt from "bcrypt";
 import { prisma } from "../utils/prisma";
 
 async function hashToken(token: string) {
-  return bcrypt.hash(token, 10);
+  // bcrypt silently truncates inputs at 72 bytes. Two JWTs for the same user share
+  // identical header + userId in the first ~72 bytes, so hashing the full token
+  // makes bcrypt treat different tokens as equal (reuse detection breaks).
+  // Fix: hash only the signature segment (3rd dot-part) — it's always unique and < 72 bytes.
+  const signature = token.split(".")[2] ?? token;
+  return bcrypt.hash(signature, 10);
 }
 
 export const authRepository = {
@@ -65,9 +70,22 @@ export const authRepository = {
     });
   },
 
+  async findSessionsByUserId(userId: string) {
+    return prisma.userSession.findMany({
+      where: { userId },
+    });
+  },
+
   async deleteSession(id: string) {
     return prisma.userSession.delete({
       where: { id },
+    });
+  },
+
+  async updateUser(id: string, data: { name?: string }) {
+    return prisma.user.update({
+      where: { id },
+      data,
     });
   },
 };
