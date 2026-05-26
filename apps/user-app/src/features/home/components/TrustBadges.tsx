@@ -13,13 +13,13 @@ const TrustBadges = () => {
   return (
     <section className="px-4 py-5 pb-8">
       <h2 className="font-serif text-[17px] font-normal text-[#081C13] mb-3">Why Canovet</h2>
-      
+
       <div className="flex md:grid md:grid-cols-4 gap-2.5 md:gap-4 lg:gap-6 overflow-x-auto pb-1 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
         {badges.map((b) => {
           const Icon = b.icon;
           return (
-            <div 
-              key={b.label} 
+            <div
+              key={b.label}
               className="min-w-[112px] bg-white rounded-[16px] p-3.5 border border-[#DDE8E3] shrink-0 text-center"
             >
               <div className="text-[#1D8F60] mb-1 flex justify-center">

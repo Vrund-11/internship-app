@@ -16,22 +16,111 @@ async function seedPartners() {
     }
 
     const partners = [
+      // --- GROOMING ---
       {
-        name: "Dr. Ramesh (Vet)",
-        phone: "9876543210",
-        latitude: 23.0225, 
-        longitude: 72.5714, 
-        address: "CanoVet Navrangpura, CG Road, Ahmedabad",
+        name: "Suresh (Groomer)",
+        phone: "9876543211",
+        latitude: 23.0300,
+        longitude: 72.5800,
+        address: "Mobile Grooming Van, Maninagar, Ahmedabad",
+        isOnline: true,
+        isVerified: true,
+        rating: 4.5,
+        totalCompleted: 320,
+        services: [ServiceType.GROOMING]
+      },
+      {
+        name: "Ramesh Grooming Van",
+        phone: "9876543212",
+        latitude: 23.0232,
+        longitude: 72.5714,
+        address: "CanoVet Mobile Grooming, CG Road, Ahmedabad",
+        isOnline: true,
+        isVerified: true,
+        rating: 4.7,
+        totalCompleted: 140,
+        services: [ServiceType.GROOMING]
+      },
+      {
+        name: "Priya's Pet Salon",
+        phone: "9876543215",
+        latitude: 23.0150,
+        longitude: 72.5200,
+        address: "Priya Pet Care, Vejalpur, Ahmedabad",
+        isOnline: true,
+        isVerified: true,
+        rating: 4.6,
+        totalCompleted: 85,
+        services: [ServiceType.GROOMING]
+      },
+      {
+        name: "Happy Tails Grooming",
+        phone: "9876543216",
+        latitude: 23.0450,
+        longitude: 72.5100,
+        address: "Happy Tails Spa, Gota, Ahmedabad",
         isOnline: true,
         isVerified: true,
         rating: 4.8,
-        totalCompleted: 150,
-        services: [ServiceType.VET_CLINIC, ServiceType.VET_ON_CALL]
+        totalCompleted: 210,
+        services: [ServiceType.GROOMING]
       },
       {
-        name: "Dr. Aditi (Vet)",
+        name: "Whisker & Wag Spa",
+        phone: "9876543217",
+        latitude: 23.0550,
+        longitude: 72.5400,
+        address: "Whisker & Wag, Chandkheda, Ahmedabad",
+        isOnline: true,
+        isVerified: true,
+        rating: 4.4,
+        totalCompleted: 95,
+        services: [ServiceType.GROOMING]
+      },
+
+      // --- VET ON CALL ---
+      {
+        name: "Dr. Anjali (Home Vet)",
+        phone: "9876543218",
+        latitude: 23.0350,
+        longitude: 72.5500,
+        address: "Dr. Anjali Clinic, Paldi, Ahmedabad",
+        isOnline: true,
+        isVerified: true,
+        rating: 4.9,
+        totalCompleted: 175,
+        services: [ServiceType.VET_ON_CALL]
+      },
+      {
+        name: "Dr. Kabir Mobile Vet",
+        phone: "9876543219",
+        latitude: 23.0400,
+        longitude: 72.5300,
+        address: "Dr. Kabir Home Visits, Naranpura, Ahmedabad",
+        isOnline: true,
+        isVerified: true,
+        rating: 4.7,
+        totalCompleted: 112,
+        services: [ServiceType.VET_ON_CALL]
+      },
+      {
+        name: "Dr. Shalini (Vet on Call)",
+        phone: "9876543220",
+        latitude: 23.0200,
+        longitude: 72.5600,
+        address: "Dr. Shalini Home Care, Ellisbridge, Ahmedabad",
+        isOnline: true,
+        isVerified: true,
+        rating: 4.8,
+        totalCompleted: 130,
+        services: [ServiceType.VET_ON_CALL]
+      },
+
+      // --- VET CLINIC ---
+      {
+        name: "Dr. Aditi (Vet Clinic)",
         phone: "9876543213",
-        latitude: 23.03096, 
+        latitude: 23.03096,
         longitude: 72.51857,
         address: "CanoVet Satellite, Satellite Road, Ahmedabad",
         isOnline: true,
@@ -41,9 +130,71 @@ async function seedPartners() {
         services: [ServiceType.VET_CLINIC]
       },
       {
+        name: "CanoVet Clinic - Satellite",
+        phone: "9100000021",
+        latitude: 23.03096,
+        longitude: 72.51857,
+        address: "CanoVet Clinic, Satellite Area, Ahmedabad",
+        isOnline: true,
+        isVerified: true,
+        rating: 4.8,
+        totalCompleted: 405,
+        services: [ServiceType.VET_CLINIC]
+      },
+      {
+        name: "CanoVet Clinic - Prahlad Nagar",
+        phone: "9100000022",
+        latitude: 23.01191,
+        longitude: 72.50456,
+        address: "CanoVet Clinic, Prahlad Nagar, Ahmedabad",
+        isOnline: true,
+        isVerified: true,
+        rating: 4.7,
+        totalCompleted: 350,
+        services: [ServiceType.VET_CLINIC]
+      },
+      {
+        name: "CanoVet Clinic - Bodakdev",
+        phone: "9100000023",
+        latitude: 23.0445,
+        longitude: 72.5273,
+        address: "CanoVet Clinic, Bodakdev Area, Ahmedabad",
+        isOnline: true,
+        isVerified: true,
+        rating: 4.9,
+        totalCompleted: 280,
+        services: [ServiceType.VET_CLINIC]
+      },
+      {
+        name: "CanoVet Clinic - Navrangpura",
+        phone: "9100000024",
+        latitude: 23.037,
+        longitude: 72.566,
+        address: "CanoVet Clinic, CG Road, Navrangpura, Ahmedabad",
+        isOnline: true,
+        isVerified: true,
+        rating: 4.6,
+        totalCompleted: 510,
+        services: [ServiceType.VET_CLINIC]
+      },
+
+      // --- HYBRID (VET CLINIC & VET ON CALL) ---
+      {
+        name: "Dr. Ramesh (Vet)",
+        phone: "9876543210",
+        latitude: 23.0225,
+        longitude: 72.5714,
+        address: "CanoVet Navrangpura, CG Road, Ahmedabad",
+        isOnline: true,
+        isVerified: true,
+        rating: 4.8,
+        totalCompleted: 150,
+        services: [ServiceType.VET_CLINIC, ServiceType.VET_ON_CALL]
+      },
+      {
         name: "Dr. Rohan (Vet)",
         phone: "9876543214",
-        latitude: 23.01191, 
+        latitude: 23.01191,
         longitude: 72.50456,
         address: "CanoVet Prahlad Nagar, Anandnagar Road, Ahmedabad",
         isOnline: true,
@@ -51,18 +202,6 @@ async function seedPartners() {
         rating: 4.7,
         totalCompleted: 180,
         services: [ServiceType.VET_CLINIC, ServiceType.VET_ON_CALL]
-      },
-      {
-        name: "Suresh (Groomer)",
-        phone: "9876543211",
-        latitude: 23.0300, 
-        longitude: 72.5800,
-        address: "Mobile Grooming Van",
-        isOnline: true,
-        isVerified: true,
-        rating: 4.5,
-        totalCompleted: 320,
-        services: [ServiceType.GROOMING]
       }
     ];
 
@@ -97,20 +236,26 @@ async function seedPartners() {
             serviceType: s,
           })),
         });
-        // Update existing with address
+        // Update existing details
         await prisma.partner.update({
           where: { id: existing.id },
           data: {
+            name: p.name,
             address: p.address,
             latitude: p.latitude,
             longitude: p.longitude,
+            cityId: city.id,
+            isOnline: p.isOnline,
+            isVerified: p.isVerified,
+            rating: p.rating,
+            totalCompleted: p.totalCompleted,
           }
         });
         console.log(`[SEED] Updated partner: ${existing.name}`);
       }
     }
     
-    console.log("[SEED] Partners seeding complete.");
+    console.log("[SEED] Partners seeding complete. Total 15 partners seeded/updated.");
   } catch (error) {
     console.error("[SEED] Error:", error);
   } finally {

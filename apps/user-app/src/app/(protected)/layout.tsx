@@ -24,35 +24,54 @@ export default function ProtectedLayout({
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (!user || city || cityLoading || cityHydrating || cityHydrationDone) {
+    if (!user || cityLoading || cityHydrating || cityHydrationDone) {
       return;
     }
 
     let isActive = true;
     setCityHydrating(true);
 
-    const hydrateCity = async () => {
+    const validateAndHydrateCity = async () => {
       try {
         const [addressRes, cityRes] = await Promise.all([
           api.get("/booking/addresses"),
           api.get("/cities"),
         ]);
 
-        const addresses = (addressRes.data?.addresses ?? []) as { city?: string }[];
-        const cityName = addresses[0]?.city?.trim();
         const cities = (cityRes.data ?? []) as { id: string; name: string; state: string }[];
 
-        if (!cityName) return;
+        if (city) {
+          // Check if current city.id exists in the active cities list
+          const exists = cities.some((c) => c.id === city.id);
+          if (!exists) {
+            // ID is stale (e.g. database was re-seeded/reset). Try matching by name.
+            const match = cities.find(
+              (c) => c.name.toLowerCase() === city.name.toLowerCase()
+            );
+            if (match && isActive) {
+              setCity(match);
+            } else if (isActive) {
+              // No match found by name, clear the stale city
+              setCity(null);
+            }
+          }
+        } else {
+          // No city selected yet, try to hydrate from user addresses
+          const addresses = (addressRes.data?.addresses ?? []) as { city?: string }[];
+          const cityName = addresses[0]?.city?.trim();
 
-        const match = cities.find(
-          (entry) => entry.name.toLowerCase() === cityName.toLowerCase()
-        );
+          if (cityName) {
+            const match = cities.find(
+              (entry) => entry.name.toLowerCase() === cityName.toLowerCase()
+            );
 
-        if (match && isActive) {
-          setCity(match);
+            if (match && isActive) {
+              setCity(match);
+            }
+          }
         }
       } catch {
-        // Ignore hydration errors and fall back to manual selection.
+        // Ignore errors and fall back to manual selection
       } finally {
         if (isActive) {
           setCityHydrating(false);
@@ -61,7 +80,7 @@ export default function ProtectedLayout({
       }
     };
 
-    hydrateCity();
+    validateAndHydrateCity();
 
     return () => {
       isActive = false;

@@ -90,79 +90,79 @@ const HeroSection = () => {
   return (
     <section className="px-4 py-3 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5 lg:gap-6">
       <div className="flex flex-col gap-3 h-full">
-      {/* Pet card */}
-      {!petsLoaded ? (
-        // Skeleton while loading
-        <div className="bg-white rounded-[20px] border border-[#DDE8E3] p-4 flex items-center gap-3.5 animate-pulse">
-          <div className="w-14 h-14 rounded-[18px] bg-[#E3F6EE] shrink-0" />
-          <div className="flex-1 space-y-2">
-            <div className="h-4 bg-[#E3F6EE] rounded w-24" />
-            <div className="h-3 bg-[#F0F5F2] rounded w-40" />
-          </div>
-        </div>
-      ) : pets.length === 0 ? (
-        // No pets – prompt to add
-        <button
-          onClick={() => setShowAddPet(true)}
-          className="bg-white rounded-[20px] border border-dashed border-[#27AE78] p-4 flex items-center gap-3.5 w-full text-left transition-colors hover:bg-[#F5FAF7]"
-        >
-          <div className="w-14 h-14 rounded-[18px] bg-[#E3F6EE] flex items-center justify-center shrink-0">
-            <Plus className="w-6 h-6 text-[#27AE78]" />
-          </div>
-          <div>
-            <div className="font-semibold text-[15px] text-[#081C13]">Add Your Pet</div>
-            <div className="text-[12px] text-[#3E6255] mt-0.5">Tap to register your fur baby</div>
-          </div>
-        </button>
-      ) : (
-        // Show active pet
-        <div className="bg-white rounded-[20px] border border-[#DDE8E3] p-4 flex items-center gap-3.5">
-          <div className="w-14 h-14 rounded-[18px] bg-[#E3F6EE] flex items-center justify-center text-[28px] shrink-0">
-            {PET_EMOJIS[activePet?.type ?? "dog"]}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="font-serif text-[17px] font-normal text-[#081C13] truncate">{activePet?.name ?? "Your Pet"}</div>
-            <div className="text-[12px] text-[#3E6255] mt-0.5 truncate">
-              {[activePet?.breed, activePet?.age ? `${activePet.age} yrs` : null, activePet?.weight ? `${activePet.weight} kg` : null]
-                .filter(Boolean).join(" · ")}
-            </div>
-            <div className="flex gap-1.5 mt-2 flex-wrap">
-              <span className="bg-[#E3F6EE] text-[#1D8F60] text-[10px] font-bold px-2.5 py-0.5 rounded-full tracking-[0.6px] uppercase flex items-center gap-1">
-                <Check className="w-2.5 h-2.5" /> Vaccinated
-              </span>
-              {pets.length > 1 && (
-                <span className="bg-[#FEF1E4] text-[#C8731A] text-[10px] font-bold px-2.5 py-0.5 rounded-full tracking-[0.6px] uppercase">
-                  +{pets.length - 1} more
-                </span>
-              )}
+        {/* Pet card */}
+        {!petsLoaded ? (
+          // Skeleton while loading
+          <div className="bg-white rounded-[20px] border border-[#DDE8E3] p-4 flex items-center gap-3.5 animate-pulse">
+            <div className="w-14 h-14 rounded-[18px] bg-[#E3F6EE] shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 bg-[#E3F6EE] rounded w-24" />
+              <div className="h-3 bg-[#F0F5F2] rounded w-40" />
             </div>
           </div>
+        ) : pets.length === 0 ? (
+          // No pets – prompt to add
           <button
             onClick={() => setShowAddPet(true)}
-            className="w-8 h-8 rounded-[10px] bg-[#F0F5F2] border border-[#DDE8E3] flex items-center justify-center shrink-0"
+            className="bg-white rounded-[20px] border border-dashed border-[#27AE78] p-4 flex items-center gap-3.5 w-full text-left transition-colors hover:bg-[#F5FAF7]"
           >
-            <Plus className="w-3.5 h-3.5 text-[#6E8F83]" />
+            <div className="w-14 h-14 rounded-[18px] bg-[#E3F6EE] flex items-center justify-center shrink-0">
+              <Plus className="w-6 h-6 text-[#27AE78]" />
+            </div>
+            <div>
+              <div className="font-semibold text-[15px] text-[#081C13]">Add Your Pet</div>
+              <div className="text-[12px] text-[#3E6255] mt-0.5">Tap to register your fur baby</div>
+            </div>
           </button>
-        </div>
-      )}
-
-      {/* Pet switcher dots */}
-      {pets.length > 1 && (
-        <div className="flex gap-1.5 justify-center">
-          {pets.map((_, i) => (
+        ) : (
+          // Show active pet
+          <div className="bg-white rounded-[20px] border border-[#DDE8E3] p-4 flex items-center gap-3.5">
+            <div className="w-14 h-14 rounded-[18px] bg-[#E3F6EE] flex items-center justify-center text-[28px] shrink-0">
+              {PET_EMOJIS[activePet?.type ?? "dog"]}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-serif text-[17px] font-normal text-[#081C13] truncate">{activePet?.name ?? "Your Pet"}</div>
+              <div className="text-[12px] text-[#3E6255] mt-0.5 truncate">
+                {[activePet?.breed, activePet?.age ? `${activePet.age} yrs` : null, activePet?.weight ? `${activePet.weight} kg` : null]
+                  .filter(Boolean).join(" · ")}
+              </div>
+              <div className="flex gap-1.5 mt-2 flex-wrap">
+                <span className="bg-[#E3F6EE] text-[#1D8F60] text-[10px] font-bold px-2.5 py-0.5 rounded-full tracking-[0.6px] uppercase flex items-center gap-1">
+                  <Check className="w-2.5 h-2.5" /> Vaccinated
+                </span>
+                {pets.length > 1 && (
+                  <span className="bg-[#FEF1E4] text-[#C8731A] text-[10px] font-bold px-2.5 py-0.5 rounded-full tracking-[0.6px] uppercase">
+                    +{pets.length - 1} more
+                  </span>
+                )}
+              </div>
+            </div>
             <button
-              key={i}
-              onClick={() => setActivePetIndex(i)}
-              className="rounded-full transition-all"
-              style={{
-                width: i === activePetIndex ? 20 : 8,
-                height: 8,
-                background: i === activePetIndex ? "#27AE78" : "#DDE8E3",
-              }}
-            />
-          ))}
-        </div>
-      )}
+              onClick={() => setShowAddPet(true)}
+              className="w-8 h-8 rounded-[10px] bg-[#F0F5F2] border border-[#DDE8E3] flex items-center justify-center shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5 text-[#6E8F83]" />
+            </button>
+          </div>
+        )}
+
+        {/* Pet switcher dots */}
+        {pets.length > 1 && (
+          <div className="flex gap-1.5 justify-center">
+            {pets.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActivePetIndex(i)}
+                className="rounded-full transition-all"
+                style={{
+                  width: i === activePetIndex ? 20 : 8,
+                  height: 8,
+                  background: i === activePetIndex ? "#27AE78" : "#DDE8E3",
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Hero promo */}

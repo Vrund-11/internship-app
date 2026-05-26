@@ -35,7 +35,7 @@ const ServiceGrid = () => {
               >
                 {svc.tag && (
                   <div className="absolute top-2.5 right-2.5">
-                    <span 
+                    <span
                       className="text-[10px] font-bold px-2.5 py-[3px] rounded-full tracking-[0.6px] uppercase"
                       style={{ color: inactive ? "#6E8F83" : svc.accentColor, background: inactive ? "#F0F5F2" : svc.softColor }}
                     >
@@ -44,7 +44,7 @@ const ServiceGrid = () => {
                   </div>
                 )}
                 <div className="flex items-center gap-4">
-                  <div 
+                  <div
                     className="w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0"
                     style={{ background: svc.softColor }}
                   >
@@ -69,7 +69,7 @@ const ServiceGrid = () => {
             >
               {svc.tag && (
                 <div className="absolute top-2.5 right-2.5">
-                  <span 
+                  <span
                     className="text-[10px] font-bold px-2.5 py-[3px] rounded-full tracking-[0.6px] uppercase"
                     style={{ color: inactive ? "#6E8F83" : svc.accentColor, background: inactive ? "#F0F5F2" : svc.softColor }}
                   >
@@ -77,21 +77,21 @@ const ServiceGrid = () => {
                   </span>
                 </div>
               )}
-              
-              <div 
+
+              <div
                 className="w-11 h-11 rounded-[14px] flex items-center justify-center mb-3.5"
                 style={{ background: svc.softColor, border: `1px solid ${svc.accentColor}20` }}
               >
                 <span className="text-[18px] font-black" style={{ color: svc.accentColor }}>{svc.emoji}</span>
               </div>
-              
+
               <div className={cn("font-serif text-[14px] font-normal leading-[1.2]", inactive ? "text-[#6E8F83]" : "text-[#081C13]")}>
                 {svc.name}
               </div>
               <div className="text-[11px] text-[#3E6255] mt-[3px] leading-[1.4] line-clamp-2">
                 {svc.tagline}
               </div>
-              
+
               {!inactive && svc.price ? (
                 <div className="mt-2.5 flex items-baseline gap-0.5">
                   <span className="font-serif text-[16px] font-normal" style={{ color: svc.accentColor }}>

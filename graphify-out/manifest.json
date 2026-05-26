@@ -72,8 +72,8 @@
     "hash": "97929dc5e56e28ea65cad7d88eae5c18"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\src\\app\\(protected)\\layout.tsx": {
-    "mtime": 1779175409.3864503,
-    "hash": "b1c376a6240a8c700f5c13717fe0c7de"
+    "mtime": 1779774880.3677218,
+    "hash": "963402d6d9f5be482591dd9855ffac98"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\src\\app\\(protected)\\page.tsx": {
     "mtime": 1774541192.8275957,
@@ -100,7 +100,7 @@
     "hash": "d78edd9c1d7bb0a60457e0daf8f38ce4"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\src\\app\\(protected)\\home\\page.tsx": {
-    "mtime": 1778941710.0198781,
+    "mtime": 1779708398.8015444,
     "hash": "4e8a2c438fe3217782d726c92ff0c2a5"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\src\\app\\(protected)\\profile\\page.tsx": {
@@ -140,8 +140,8 @@
     "hash": "d3f1ee970639380c00abd19cf5bb931d"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\src\\context\\CityContext.tsx": {
-    "mtime": 1774541185.9405584,
-    "hash": "5eda8a16c21aaeae73ec7b475f9f4e54"
+    "mtime": 1779774872.4314919,
+    "hash": "29162c34cb419b4763ade9fb75a64cbe"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\src\\features\\assistant\\components\\AssistantChat.tsx": {
     "mtime": 1779372118.075677,
@@ -220,20 +220,20 @@
     "hash": "e2c15ae4ee34be8101d5bf1de5e8f840"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\src\\features\\home\\components\\HeroSection.tsx": {
-    "mtime": 1779268506.1203382,
-    "hash": "c8be06c5a1b230fa81ec9e6da5287cfe"
+    "mtime": 1779708398.9010704,
+    "hash": "45740779511b54d09986afbf9ac1650f"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\src\\features\\home\\components\\QuoteSection.tsx": {
     "mtime": 1778659294.9678874,
     "hash": "cdf24ac927a6d93923b55dcd257b440c"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\src\\features\\home\\components\\ServiceGrid.tsx": {
-    "mtime": 1779268493.722556,
-    "hash": "e1bd223e0a85fce1ca22ff8a1ce8e195"
+    "mtime": 1779708398.9010704,
+    "hash": "d19a32620480b0551f216ce25265a9d9"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\src\\features\\home\\components\\TrustBadges.tsx": {
-    "mtime": 1779268516.806897,
-    "hash": "8b1dc8e611fc401acd10260fb4f59fd9"
+    "mtime": 1779708398.8996634,
+    "hash": "0b44cb8f146322d07fee83e916b8bf8d"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\src\\features\\home\\data\\doctors.ts": {
     "mtime": 1777550200.7674656,
@@ -308,8 +308,8 @@
     "hash": "259225ae337cf81745524d48e89260d4"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\backend\\src\\test-e2e-simulation.ts": {
-    "mtime": 1779697516.0597513,
-    "hash": "1648b2b9fcfeca5fa0aff098f40b3e16"
+    "mtime": 1779698762.3569307,
+    "hash": "4871093d9d5b875be026b446ff4ff4db"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\backend\\src\\test-otp.ts": {
     "mtime": 1779695296.716065,
@@ -340,8 +340,8 @@
     "hash": "377ff8d89a3f16632c8839a34030915c"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\backend\\src\\controllers\\partner.controller.ts": {
-    "mtime": 1778946431.8554957,
-    "hash": "deb857a16872ed6ce6d1b86eb76dc70f"
+    "mtime": 1779725239.2842793,
+    "hash": "b0e5e1f97d2a1b9c2a26f51074a720b4"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\backend\\src\\controllers\\payment.controller.ts": {
     "mtime": 1777459492.261061,
@@ -432,8 +432,8 @@
     "hash": "1b81c088b593497f73f3149419c7d98c"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\backend\\src\\services\\booking.service.ts": {
-    "mtime": 1779695214.8283515,
-    "hash": "4c58028de8204d6f845a2ec013d9f6f3"
+    "mtime": 1779725230.1227505,
+    "hash": "19fd32da205b5048221501ab99b2cb6d"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\backend\\src\\services\\classifier.service.ts": {
     "mtime": 1779698602.5361733,
@@ -547,21 +547,13 @@
     "mtime": 1778591744.3326993,
     "hash": "5bd3126163e7416a64dcb00c7d2221bc"
   },
-  "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\GIT_WORKFLOW.md": {
-    "mtime": 1777656002.8286653,
-    "hash": "34e4dfd409eb7a2b5b129640b21f529a"
-  },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\README.md": {
-    "mtime": 1777656201.6286268,
-    "hash": "3a0e1d7d9926a38eda14758cd63926f7"
+    "mtime": 1779707490.5875118,
+    "hash": "84c42623841ebbe3c3c8f50c4ccd2993"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\REDIS_IMPLEMENTATION.md": {
     "mtime": 1779185292.6995845,
     "hash": "6c9ad4d611fa0eaf265b85518975869c"
-  },
-  "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\TEAM_WORKFLOW_GUIDE.md": {
-    "mtime": 1779198884.8552766,
-    "hash": "0467595d0c08cba869c144d3bda0f89d"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\AGENTS.md": {
     "mtime": 1774284779.484922,

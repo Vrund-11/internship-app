@@ -19,6 +19,53 @@ export const bookingService = {
   async createBooking(data: CreateBookingInput) {
     const { preferredPartnerId, ...bookingData } = data;
 
+    // Validate address and pet ownership
+    const address = await prisma.address.findUnique({
+      where: { id: bookingData.addressId },
+    });
+    if (!address || address.userId !== bookingData.userId) {
+      throw new Error("Invalid address selected");
+    }
+
+    const pet = await prisma.pet.findUnique({
+      where: { id: bookingData.petId },
+    });
+    if (!pet || pet.userId !== bookingData.userId) {
+      throw new Error("Invalid pet selected");
+    }
+
+    // Resolve cityId: check if the provided cityId exists
+    let city = bookingData.cityId
+      ? await prisma.city.findUnique({ where: { id: bookingData.cityId } })
+      : null;
+
+    if (!city) {
+      // Try resolving by address city name
+      city = await prisma.city.findFirst({
+        where: {
+          name: {
+            equals: address.city,
+            mode: "insensitive",
+          },
+          isActive: true,
+        },
+      });
+    }
+
+    if (!city) {
+      // Fallback to the first active city in the database
+      city = await prisma.city.findFirst({
+        where: { isActive: true },
+        orderBy: { id: "asc" },
+      });
+    }
+
+    if (!city) {
+      throw new Error("No active cities available in the system");
+    }
+
+    bookingData.cityId = city.id;
+
     const now = new Date();
     const dayStart = new Date(now);
     dayStart.setHours(0, 0, 0, 0);
