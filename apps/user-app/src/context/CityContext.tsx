@@ -11,7 +11,7 @@ type City = {
 type CityContextType = {
   city: City | null;
   loading: boolean;
-  setCity: (city: City) => void;
+  setCity: (city: City | null) => void;
 };
 
 const CityContext = createContext<CityContextType | null>(null);
@@ -40,8 +40,12 @@ export const CityProvider = ({
     };
   }, []);
 
-  const setCity = (nextCity: City) => {
-    localStorage.setItem("city", JSON.stringify(nextCity));
+  const setCity = (nextCity: City | null) => {
+    if (nextCity === null) {
+      localStorage.removeItem("city");
+    } else {
+      localStorage.setItem("city", JSON.stringify(nextCity));
+    }
     setCityState(nextCity);
   };
 

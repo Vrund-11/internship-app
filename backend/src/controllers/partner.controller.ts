@@ -37,7 +37,7 @@ export const partnerController = {
           isVerified: true,
           services: {
             some: {
-              serviceType: "vet-at-clinic",
+              serviceType: "VET_CLINIC",
             },
           },
           OR: [
