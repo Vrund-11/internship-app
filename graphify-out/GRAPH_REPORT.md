@@ -1,16 +1,16 @@
 # Graph Report - canovet  (2026-05-26)
 
 ## Corpus Check
-- 135 files · ~60,502 words
+- 136 files · ~60,916 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 304 nodes · 337 edges · 81 communities (73 shown, 8 thin omitted)
+- 306 nodes · 338 edges · 82 communities (74 shown, 8 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d24fc925`
+- Built from commit: `b2bda30a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -59,7 +59,7 @@
 - `ProtectedLayout()` --calls--> `useCity()`  [INFERRED]
   apps/user-app/src/app/(protected)/layout.tsx → apps/user-app/src/context/CityContext.tsx
 
-## Communities (81 total, 8 thin omitted)
+## Communities (82 total, 8 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -112,11 +112,11 @@ Nodes (4): fail(), login(), main(), ok()
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `cn()` connect `Community 2` to `Community 0`, `Community 3`, `Community 4`, `Community 6`, `Community 10`?**
-  _High betweenness centrality (0.138) - this node is a cross-community bridge._
+  _High betweenness centrality (0.136) - this node is a cross-community bridge._
 - **Why does `useAuth()` connect `Community 3` to `Community 0`, `Community 1`, `Community 4`, `Community 5`?**
-  _High betweenness centrality (0.104) - this node is a cross-community bridge._
+  _High betweenness centrality (0.103) - this node is a cross-community bridge._
 - **Why does `useCity()` connect `Community 3` to `Community 0`, `Community 1`, `Community 4`?**
-  _High betweenness centrality (0.078) - this node is a cross-community bridge._
+  _High betweenness centrality (0.077) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `useAuth()` (e.g. with `ProtectedLayout()` and `Navbar()`) actually correct?**
   _`useAuth()` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 2 inferred relationships involving `useCity()` (e.g. with `ProtectedLayout()` and `Navbar()`) actually correct?**

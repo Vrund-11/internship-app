@@ -5,7 +5,6 @@ import {
   createContext,
   useContext,
   useEffect,
-  useEffectEvent,
   useState,
 } from "react";
 import { api, setAccessToken as setApiToken } from "@/lib/api";
@@ -69,7 +68,7 @@ export const AuthProvider = ({
     updateAccessToken(null);
   };
 
-  const hydrateUser = useEffectEvent(async () => {
+  const hydrateUser = async () => {
     try {
       logger.info("AUTH_HYDRATE_START");
 
@@ -97,7 +96,7 @@ export const AuthProvider = ({
     } finally {
       setLoading(false);
     }
-  });
+  };
 
   useEffect(() => {
     hydrateUser();

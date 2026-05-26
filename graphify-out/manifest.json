@@ -72,8 +72,8 @@
     "hash": "97929dc5e56e28ea65cad7d88eae5c18"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\src\\app\\(protected)\\layout.tsx": {
-    "mtime": 1779774880.3677218,
-    "hash": "963402d6d9f5be482591dd9855ffac98"
+    "mtime": 1779787571.3267887,
+    "hash": "ea2ada70b9304c4216223b0a5f876cdf"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\src\\app\\(protected)\\page.tsx": {
     "mtime": 1774541192.8275957,
@@ -132,8 +132,8 @@
     "hash": "ccee79b80927e4eb48ea1c7889066e43"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\src\\context\\AuthContext.tsx": {
-    "mtime": 1779175365.5682628,
-    "hash": "eb65f19ba0d06512803c500f6ce173b9"
+    "mtime": 1779787322.0400507,
+    "hash": "cc59aa066861d3033613263ddd5d38d2"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\apps\\user-app\\src\\context\\BookingContext.tsx": {
     "mtime": 1777544982.584822,
@@ -415,9 +415,13 @@
     "mtime": 1775461974.0968325,
     "hash": "b42c0992efda41e406de8d4b2f62c7a0"
   },
+  "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\backend\\src\\scripts\\query-user.ts": {
+    "mtime": 1779787473.2804105,
+    "hash": "480239b5ddc580cd542cc8882f83a12f"
+  },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\backend\\src\\scripts\\seed-partners.ts": {
-    "mtime": 1779084305.115813,
-    "hash": "124f056e9bcafb51c6bc2e7e466d55c2"
+    "mtime": 1779774982.8003018,
+    "hash": "c688a61cc190f21807c182c3a22a9662"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\backend\\src\\scripts\\seed-promo.ts": {
     "mtime": 1778941021.0061636,
