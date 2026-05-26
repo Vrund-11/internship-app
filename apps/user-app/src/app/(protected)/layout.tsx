@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useCity } from "@/context/CityContext";
 import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function ProtectedLayout({
   children,
@@ -16,6 +16,7 @@ export default function ProtectedLayout({
   const router = useRouter();
   const [cityHydrating, setCityHydrating] = useState(false);
   const [cityHydrationDone, setCityHydrationDone] = useState(false);
+  const hydrationStarted = useRef(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -24,11 +25,11 @@ export default function ProtectedLayout({
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (!user || cityLoading || cityHydrating || cityHydrationDone) {
+    if (!user || cityLoading || hydrationStarted.current) {
       return;
     }
 
-    let isActive = true;
+    hydrationStarted.current = true;
     setCityHydrating(true);
 
     const validateAndHydrateCity = async () => {
@@ -48,9 +49,9 @@ export default function ProtectedLayout({
             const match = cities.find(
               (c) => c.name.toLowerCase() === city.name.toLowerCase()
             );
-            if (match && isActive) {
+            if (match) {
               setCity(match);
-            } else if (isActive) {
+            } else {
               // No match found by name, clear the stale city
               setCity(null);
             }
@@ -65,7 +66,7 @@ export default function ProtectedLayout({
               (entry) => entry.name.toLowerCase() === cityName.toLowerCase()
             );
 
-            if (match && isActive) {
+            if (match) {
               setCity(match);
             }
           }
@@ -73,19 +74,13 @@ export default function ProtectedLayout({
       } catch {
         // Ignore errors and fall back to manual selection
       } finally {
-        if (isActive) {
-          setCityHydrating(false);
-          setCityHydrationDone(true);
-        }
+        setCityHydrating(false);
+        setCityHydrationDone(true);
       }
     };
 
     validateAndHydrateCity();
-
-    return () => {
-      isActive = false;
-    };
-  }, [user, city, cityLoading, cityHydrating, cityHydrationDone, setCity]);
+  }, [user, city, cityLoading, setCity]);
 
   useEffect(() => {
     if (!loading && user && !cityLoading && !city && cityHydrationDone) {

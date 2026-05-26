@@ -9,7 +9,7 @@
       "source_file": "prisma.config.ts",
       "source_location": "L1",
       "id": "prisma_config_ts",
-      "community": 32,
+      "community": 33,
       "norm_label": "prisma.config.ts"
     },
     {
@@ -18,7 +18,7 @@
       "source_file": "apps/partner-sim/eslint.config.mjs",
       "source_location": "L1",
       "id": "apps_partner_sim_eslint_config_mjs",
-      "community": 33,
+      "community": 34,
       "norm_label": "eslint.config.mjs"
     },
     {
@@ -27,7 +27,7 @@
       "source_file": "apps/partner-sim/next-env.d.ts",
       "source_location": "L1",
       "id": "apps_partner_sim_next_env_d_ts",
-      "community": 34,
+      "community": 35,
       "norm_label": "next-env.d.ts"
     },
     {
@@ -36,7 +36,7 @@
       "source_file": "apps/partner-sim/next.config.ts",
       "source_location": "L1",
       "id": "apps_partner_sim_next_config_ts",
-      "community": 35,
+      "community": 36,
       "norm_label": "next.config.ts"
     },
     {
@@ -45,7 +45,7 @@
       "source_file": "apps/partner-sim/postcss.config.mjs",
       "source_location": "L1",
       "id": "apps_partner_sim_postcss_config_mjs",
-      "community": 36,
+      "community": 37,
       "norm_label": "postcss.config.mjs"
     },
     {
@@ -108,7 +108,7 @@
       "source_file": "apps/user-app/capacitor.config.ts",
       "source_location": "L1",
       "id": "apps_user_app_capacitor_config_ts",
-      "community": 37,
+      "community": 38,
       "norm_label": "capacitor.config.ts"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "apps/user-app/eslint.config.mjs",
       "source_location": "L1",
       "id": "apps_user_app_eslint_config_mjs",
-      "community": 38,
+      "community": 39,
       "norm_label": "eslint.config.mjs"
     },
     {
@@ -126,7 +126,7 @@
       "source_file": "apps/user-app/next-env.d.ts",
       "source_location": "L1",
       "id": "apps_user_app_next_env_d_ts",
-      "community": 39,
+      "community": 40,
       "norm_label": "next-env.d.ts"
     },
     {
@@ -135,7 +135,7 @@
       "source_file": "apps/user-app/next.config.ts",
       "source_location": "L1",
       "id": "apps_user_app_next_config_ts",
-      "community": 40,
+      "community": 41,
       "norm_label": "next.config.ts"
     },
     {
@@ -144,7 +144,7 @@
       "source_file": "apps/user-app/postcss.config.mjs",
       "source_location": "L1",
       "id": "apps_user_app_postcss_config_mjs",
-      "community": 41,
+      "community": 42,
       "norm_label": "postcss.config.mjs"
     },
     {
@@ -711,7 +711,7 @@
       "source_file": "apps/user-app/src/constants/services.ts",
       "source_location": "L1",
       "id": "apps_user_app_src_constants_services_ts",
-      "community": 42,
+      "community": 43,
       "norm_label": "services.ts"
     },
     {
@@ -745,7 +745,7 @@
       "label": "AuthProvider()",
       "file_type": "code",
       "source_file": "apps/user-app/src/context/AuthContext.tsx",
-      "source_location": "L31",
+      "source_location": "L30",
       "id": "context_authcontext_authprovider",
       "community": 1,
       "norm_label": "authprovider()"
@@ -754,7 +754,7 @@
       "label": "useAuth()",
       "file_type": "code",
       "source_file": "apps/user-app/src/context/AuthContext.tsx",
-      "source_location": "L115",
+      "source_location": "L114",
       "id": "context_authcontext_useauth",
       "community": 3,
       "norm_label": "useauth()"
@@ -1215,7 +1215,7 @@
       "source_file": "apps/user-app/src/features/booking/components/AssignedPartnerCard.tsx",
       "source_location": "L1",
       "id": "apps_user_app_src_features_booking_components_assignedpartnercard_tsx",
-      "community": 43,
+      "community": 44,
       "norm_label": "assignedpartnercard.tsx"
     },
     {
@@ -1377,7 +1377,7 @@
       "source_file": "apps/user-app/src/features/booking/data/clinics.ts",
       "source_location": "L1",
       "id": "apps_user_app_src_features_booking_data_clinics_ts",
-      "community": 44,
+      "community": 45,
       "norm_label": "clinics.ts"
     },
     {
@@ -1386,7 +1386,7 @@
       "source_file": "apps/user-app/src/features/booking/data/locations.ts",
       "source_location": "L1",
       "id": "apps_user_app_src_features_booking_data_locations_ts",
-      "community": 45,
+      "community": 46,
       "norm_label": "locations.ts"
     },
     {
@@ -1395,7 +1395,7 @@
       "source_file": "apps/user-app/src/features/booking/data/mock-data.ts",
       "source_location": "L1",
       "id": "apps_user_app_src_features_booking_data_mock_data_ts",
-      "community": 46,
+      "community": 47,
       "norm_label": "mock-data.ts"
     },
     {
@@ -1449,7 +1449,7 @@
       "source_file": "apps/user-app/src/features/home/components/DoctorCards.tsx",
       "source_location": "L1",
       "id": "apps_user_app_src_features_home_components_doctorcards_tsx",
-      "community": 47,
+      "community": 48,
       "norm_label": "doctorcards.tsx"
     },
     {
@@ -1521,7 +1521,7 @@
       "source_file": "apps/user-app/src/features/home/data/doctors.ts",
       "source_location": "L1",
       "id": "apps_user_app_src_features_home_data_doctors_ts",
-      "community": 48,
+      "community": 49,
       "norm_label": "doctors.ts"
     },
     {
@@ -1665,7 +1665,7 @@
       "source_file": "apps/user-app/src/lib/logger.ts",
       "source_location": "L1",
       "id": "apps_user_app_src_lib_logger_ts",
-      "community": 49,
+      "community": 50,
       "norm_label": "logger.ts"
     },
     {
@@ -1683,7 +1683,7 @@
       "source_file": "apps/user-app/src/shared/components/ui/calendar.tsx",
       "source_location": "L1",
       "id": "apps_user_app_src_shared_components_ui_calendar_tsx",
-      "community": 50,
+      "community": 51,
       "norm_label": "calendar.tsx"
     },
     {
@@ -1746,7 +1746,7 @@
       "source_file": "apps/user-app/src/types/razorpay.d.ts",
       "source_location": "L1",
       "id": "apps_user_app_src_types_razorpay_d_ts",
-      "community": 51,
+      "community": 52,
       "norm_label": "razorpay.d.ts"
     },
     {
@@ -1755,7 +1755,7 @@
       "source_file": "backend/src/app.ts",
       "source_location": "L1",
       "id": "backend_src_app_ts",
-      "community": 52,
+      "community": 53,
       "norm_label": "app.ts"
     },
     {
@@ -1791,7 +1791,7 @@
       "source_file": "backend/src/server.ts",
       "source_location": "L1",
       "id": "backend_src_server_ts",
-      "community": 53,
+      "community": 54,
       "norm_label": "server.ts"
     },
     {
@@ -2115,7 +2115,7 @@
       "source_file": "backend/src/controllers/auth.controller.ts",
       "source_location": "L1",
       "id": "backend_src_controllers_auth_controller_ts",
-      "community": 54,
+      "community": 55,
       "norm_label": "auth.controller.ts"
     },
     {
@@ -2124,7 +2124,7 @@
       "source_file": "backend/src/controllers/booking.controller.ts",
       "source_location": "L1",
       "id": "backend_src_controllers_booking_controller_ts",
-      "community": 55,
+      "community": 56,
       "norm_label": "booking.controller.ts"
     },
     {
@@ -2133,7 +2133,7 @@
       "source_file": "backend/src/controllers/complaint.controller.ts",
       "source_location": "L1",
       "id": "backend_src_controllers_complaint_controller_ts",
-      "community": 56,
+      "community": 57,
       "norm_label": "complaint.controller.ts"
     },
     {
@@ -2142,7 +2142,7 @@
       "source_file": "backend/src/controllers/partner.controller.ts",
       "source_location": "L1",
       "id": "backend_src_controllers_partner_controller_ts",
-      "community": 57,
+      "community": 58,
       "norm_label": "partner.controller.ts"
     },
     {
@@ -2169,7 +2169,7 @@
       "source_file": "backend/src/controllers/promo.controller.ts",
       "source_location": "L1",
       "id": "backend_src_controllers_promo_controller_ts",
-      "community": 58,
+      "community": 59,
       "norm_label": "promo.controller.ts"
     },
     {
@@ -2178,7 +2178,7 @@
       "source_file": "backend/src/controllers/review.controller.ts",
       "source_location": "L1",
       "id": "backend_src_controllers_review_controller_ts",
-      "community": 59,
+      "community": 60,
       "norm_label": "review.controller.ts"
     },
     {
@@ -2223,7 +2223,7 @@
       "source_file": "backend/src/repositories/booking.repository.ts",
       "source_location": "L1",
       "id": "backend_src_repositories_booking_repository_ts",
-      "community": 60,
+      "community": 61,
       "norm_label": "booking.repository.ts"
     },
     {
@@ -2232,7 +2232,7 @@
       "source_file": "backend/src/repositories/complaint.repository.ts",
       "source_location": "L1",
       "id": "backend_src_repositories_complaint_repository_ts",
-      "community": 61,
+      "community": 62,
       "norm_label": "complaint.repository.ts"
     },
     {
@@ -2241,7 +2241,7 @@
       "source_file": "backend/src/repositories/partner.repository.ts",
       "source_location": "L1",
       "id": "backend_src_repositories_partner_repository_ts",
-      "community": 62,
+      "community": 63,
       "norm_label": "partner.repository.ts"
     },
     {
@@ -2250,7 +2250,7 @@
       "source_file": "backend/src/repositories/review.repository.ts",
       "source_location": "L1",
       "id": "backend_src_repositories_review_repository_ts",
-      "community": 63,
+      "community": 64,
       "norm_label": "review.repository.ts"
     },
     {
@@ -2259,7 +2259,7 @@
       "source_file": "backend/src/routes/auth.routes.ts",
       "source_location": "L1",
       "id": "backend_src_routes_auth_routes_ts",
-      "community": 64,
+      "community": 65,
       "norm_label": "auth.routes.ts"
     },
     {
@@ -2268,7 +2268,7 @@
       "source_file": "backend/src/routes/booking.routes.ts",
       "source_location": "L1",
       "id": "backend_src_routes_booking_routes_ts",
-      "community": 65,
+      "community": 66,
       "norm_label": "booking.routes.ts"
     },
     {
@@ -2277,7 +2277,7 @@
       "source_file": "backend/src/routes/city.routes.ts",
       "source_location": "L1",
       "id": "backend_src_routes_city_routes_ts",
-      "community": 66,
+      "community": 67,
       "norm_label": "city.routes.ts"
     },
     {
@@ -2286,7 +2286,7 @@
       "source_file": "backend/src/routes/complaint.routes.ts",
       "source_location": "L1",
       "id": "backend_src_routes_complaint_routes_ts",
-      "community": 67,
+      "community": 68,
       "norm_label": "complaint.routes.ts"
     },
     {
@@ -2295,7 +2295,7 @@
       "source_file": "backend/src/routes/partner.routes.ts",
       "source_location": "L1",
       "id": "backend_src_routes_partner_routes_ts",
-      "community": 68,
+      "community": 69,
       "norm_label": "partner.routes.ts"
     },
     {
@@ -2304,7 +2304,7 @@
       "source_file": "backend/src/routes/payment.routes.ts",
       "source_location": "L1",
       "id": "backend_src_routes_payment_routes_ts",
-      "community": 69,
+      "community": 70,
       "norm_label": "payment.routes.ts"
     },
     {
@@ -2313,7 +2313,7 @@
       "source_file": "backend/src/routes/promo.routes.ts",
       "source_location": "L1",
       "id": "backend_src_routes_promo_routes_ts",
-      "community": 70,
+      "community": 71,
       "norm_label": "promo.routes.ts"
     },
     {
@@ -2322,7 +2322,7 @@
       "source_file": "backend/src/routes/review.routes.ts",
       "source_location": "L1",
       "id": "backend_src_routes_review_routes_ts",
-      "community": 71,
+      "community": 72,
       "norm_label": "review.routes.ts"
     },
     {
@@ -2331,8 +2331,26 @@
       "source_file": "backend/src/routes/webhook.routes.ts",
       "source_location": "L1",
       "id": "backend_src_routes_webhook_routes_ts",
-      "community": 72,
+      "community": 73,
       "norm_label": "webhook.routes.ts"
+    },
+    {
+      "label": "query-user.ts",
+      "file_type": "code",
+      "source_file": "backend/src/scripts/query-user.ts",
+      "source_location": "L1",
+      "id": "backend_src_scripts_query_user_ts",
+      "community": 29,
+      "norm_label": "query-user.ts"
+    },
+    {
+      "label": "check()",
+      "file_type": "code",
+      "source_file": "backend/src/scripts/query-user.ts",
+      "source_location": "L9",
+      "id": "scripts_query_user_check",
+      "community": 29,
+      "norm_label": "check()"
     },
     {
       "label": "seed-partners.ts",
@@ -2340,7 +2358,7 @@
       "source_file": "backend/src/scripts/seed-partners.ts",
       "source_location": "L1",
       "id": "backend_src_scripts_seed_partners_ts",
-      "community": 29,
+      "community": 30,
       "norm_label": "seed-partners.ts"
     },
     {
@@ -2349,7 +2367,7 @@
       "source_file": "backend/src/scripts/seed-partners.ts",
       "source_location": "L4",
       "id": "scripts_seed_partners_seedpartners",
-      "community": 29,
+      "community": 30,
       "norm_label": "seedpartners()"
     },
     {
@@ -2358,7 +2376,7 @@
       "source_file": "backend/src/scripts/seed-promo.ts",
       "source_location": "L1",
       "id": "backend_src_scripts_seed_promo_ts",
-      "community": 30,
+      "community": 31,
       "norm_label": "seed-promo.ts"
     },
     {
@@ -2367,7 +2385,7 @@
       "source_file": "backend/src/scripts/seed-promo.ts",
       "source_location": "L3",
       "id": "scripts_seed_promo_seedpromo",
-      "community": 30,
+      "community": 31,
       "norm_label": "seedpromo()"
     },
     {
@@ -2376,7 +2394,7 @@
       "source_file": "backend/src/scripts/update-user.ts",
       "source_location": "L1",
       "id": "backend_src_scripts_update_user_ts",
-      "community": 31,
+      "community": 32,
       "norm_label": "update-user.ts"
     },
     {
@@ -2385,7 +2403,7 @@
       "source_file": "backend/src/scripts/update-user.ts",
       "source_location": "L9",
       "id": "scripts_update_user_update",
-      "community": 31,
+      "community": 32,
       "norm_label": "update()"
     },
     {
@@ -2457,7 +2475,7 @@
       "source_file": "backend/src/services/complaint.service.ts",
       "source_location": "L1",
       "id": "backend_src_services_complaint_service_ts",
-      "community": 73,
+      "community": 74,
       "norm_label": "complaint.service.ts"
     },
     {
@@ -2484,7 +2502,7 @@
       "source_file": "backend/src/services/partner.service.ts",
       "source_location": "L1",
       "id": "backend_src_services_partner_service_ts",
-      "community": 74,
+      "community": 75,
       "norm_label": "partner.service.ts"
     },
     {
@@ -2493,7 +2511,7 @@
       "source_file": "backend/src/services/review.service.ts",
       "source_location": "L1",
       "id": "backend_src_services_review_service_ts",
-      "community": 75,
+      "community": 76,
       "norm_label": "review.service.ts"
     },
     {
@@ -2565,7 +2583,7 @@
       "source_file": "backend/src/utils/prisma.ts",
       "source_location": "L1",
       "id": "backend_src_utils_prisma_ts",
-      "community": 76,
+      "community": 77,
       "norm_label": "prisma.ts"
     },
     {
@@ -2574,7 +2592,7 @@
       "source_file": "backend/src/utils/razorpay.ts",
       "source_location": "L1",
       "id": "backend_src_utils_razorpay_ts",
-      "community": 77,
+      "community": 78,
       "norm_label": "razorpay.ts"
     },
     {
@@ -2601,7 +2619,7 @@
       "source_file": "packages/shared/index.ts",
       "source_location": "L1",
       "id": "packages_shared_index_ts",
-      "community": 78,
+      "community": 79,
       "norm_label": "index.ts"
     },
     {
@@ -2610,7 +2628,7 @@
       "source_file": "packages/shared/src/enums/booking.ts",
       "source_location": "L1",
       "id": "packages_shared_src_enums_booking_ts",
-      "community": 79,
+      "community": 80,
       "norm_label": "booking.ts"
     },
     {
@@ -2619,7 +2637,7 @@
       "source_file": "packages/shared/src/enums/service.ts",
       "source_location": "L1",
       "id": "packages_shared_src_enums_service_ts",
-      "community": 80,
+      "community": 81,
       "norm_label": "service.ts"
     },
     {
@@ -6019,6 +6037,16 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "backend/src/scripts/query-user.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_src_scripts_query_user_ts",
+      "target": "scripts_query_user_check"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "backend/src/scripts/seed-partners.ts",
       "source_location": "L3",
       "weight": 1.0,
@@ -6268,5 +6296,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "d24fc925e087e2346ea2d6544f24d418a7b39f6d"
+  "built_at_commit": "b2bda30a3f330403dfc9cc7dbb1257fbdc1f416e"
 }
