@@ -226,6 +226,23 @@ async function seedPartners() {
           }
         });
         console.log(`[SEED] Created partner: ${newPartner.name}`);
+
+        // Create ClinicAddress for VET_CLINIC partners
+        if (p.services.includes(ServiceType.VET_CLINIC)) {
+          await prisma.clinicAddress.create({
+            data: {
+              partnerId: newPartner.id,
+              name: p.name,
+              text: p.address,
+              latitude: p.latitude,
+              longitude: p.longitude,
+              area: p.address,
+              city: "Ahmedabad",
+              state: "Gujarat",
+            },
+          });
+          console.log(`[SEED] Created clinic address for: ${newPartner.name}`);
+        }
       } else {
         await prisma.partnerService.deleteMany({
           where: { partnerId: existing.id },
@@ -252,6 +269,42 @@ async function seedPartners() {
           }
         });
         console.log(`[SEED] Updated partner: ${existing.name}`);
+
+        // Ensure ClinicAddress exists for VET_CLINIC partners
+        if (p.services.includes(ServiceType.VET_CLINIC)) {
+          const existingClinicAddr = await prisma.clinicAddress.findFirst({
+            where: { partnerId: existing.id },
+          });
+          if (!existingClinicAddr) {
+            await prisma.clinicAddress.create({
+              data: {
+                partnerId: existing.id,
+                name: p.name,
+                text: p.address,
+                latitude: p.latitude,
+                longitude: p.longitude,
+                area: p.address,
+                city: "Ahmedabad",
+                state: "Gujarat",
+              },
+            });
+            console.log(`[SEED] Created clinic address for: ${existing.name}`);
+          } else {
+            await prisma.clinicAddress.update({
+              where: { id: existingClinicAddr.id },
+              data: {
+                name: p.name,
+                text: p.address,
+                latitude: p.latitude,
+                longitude: p.longitude,
+                area: p.address,
+                city: "Ahmedabad",
+                state: "Gujarat",
+              },
+            });
+            console.log(`[SEED] Updated clinic address for: ${existing.name}`);
+          }
+        }
       }
     }
     

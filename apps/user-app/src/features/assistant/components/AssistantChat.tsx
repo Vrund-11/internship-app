@@ -17,9 +17,9 @@ import type { AskCanoContext } from "./AssistantFab";
 type Chip = { label: string; value: string; disabled?: boolean; emoji?: string };
 type BotTurn = {
   id: string; text: string;
-  chips?: Chip[]; form?: "pet" | "address" | "complaint"; answer?: string;
+  chips?: Chip[]; form?: "pet" | "address" | "complaint" | "review"; answer?: string;
 };
-type Intent = "idle" | "root" | "book" | "mybookings" | "addPet" | "addAddress" | "rate" | "report" | "feedback" | "help" | "cancel" | "reschedule";
+type Intent = "idle" | "root" | "book" | "mybookings" | "addPet" | "addAddress" | "rate" | "report" | "feedback" | "help" | "cancel" | "reschedule" | "complain";
 type ServiceKey = "grooming" | "vet-on-call" | "at-clinic";
 
 const SERVICE_MAP: Record<ServiceKey, ServiceType> = {
@@ -88,12 +88,18 @@ export default function AssistantChat({ onClose, active, context }: { onClose: (
   useEffect(() => {
     if (!active) return;
     // If opened with a specific context, go directly to that intent
-    if (context?.intent === "report" && context?.bookingId) {
+    if ((context?.intent === "report" || context?.intent === "feedback") && context?.bookingId) {
       setFeedbackBookingId(context.bookingId);
       setTurns([]);
       setIntent("idle");
       // Load the specific booking and start the feedback flow
       setTimeout(() => startContextualFeedback(context.bookingId!), 100);
+      return;
+    }
+    if (context?.intent === "complain") {
+      setTurns([]);
+      setIntent("idle");
+      setTimeout(() => startComplainFlow(), 100);
       return;
     }
     if (context?.intent === "reschedule" && context?.bookingId) {
@@ -302,52 +308,40 @@ export default function AssistantChat({ onClose, active, context }: { onClose: (
   // Start feedback flow for a specific booking (contextual trigger)
   const startContextualFeedback = async (bookingId: string) => {
     setIntent("feedback");
+    delay(() => askBookingOptions(bookingId));
+  };
+
+  const askBookingOptions = (bookingId: string) => {
     setFeedbackBookingId(bookingId);
-    // Jump straight to star rating for this booking
-    addBot("How would you rate your experience?", [1,2,3,4,5].map(n => ({
-      label: "⭐".repeat(n),
-      value: `fbstars:${n}:::${bookingId}`,
-    })));
+    addBot("What would you like to do for this booking?", [
+      { label: "⭐ Give a Review", value: `btn_review:::${bookingId}` },
+      { label: "🚩 Have an issue with the booking", value: `btn_issue:::${bookingId}` },
+    ]);
   };
 
-  // Show star rating chips after booking selection
-  const askFeedbackStars = (bookingId: string) => {
+  const askBookingFaqs = (bookingId: string) => {
     setFeedbackBookingId(bookingId);
-    addBot("How would you rate your experience?", [1,2,3,4,5].map(n => ({
-      label: "⭐".repeat(n),
-      value: `fbstars:${n}:::${bookingId}`,
-    })));
-  };
-
-  // Path A: Positive feedback (4-5 stars) — positive attribute chips
-  const askPositiveAttributes = (stars: number, bookingId: string) => {
-    addBot("Great! What did you love most?", [
-      { label: "⏱️ Punctual", value: `posattr:Punctual:::${stars}:::${bookingId}` },
-      { label: "🐾 Gentle with pet", value: `posattr:Gentle:::${stars}:::${bookingId}` },
-      { label: "🧼 Cleanliness", value: `posattr:Cleanliness:::${stars}:::${bookingId}` },
-      { label: "💬 Great communication", value: `posattr:Communication:::${stars}:::${bookingId}` },
-      { label: "🌟 Everything!", value: `posattr:Everything:::${stars}:::${bookingId}` },
+    addBot("I can help with that. Here are some common booking issues:", [
+      { label: "How to reschedule/cancel?", value: `faq_resch_cancel:::${bookingId}` },
+      { label: "Partner delayed/details?", value: `faq_partner_delay:::${bookingId}` },
+      { label: "Payment or Refund status?", value: `faq_payment_refund:::${bookingId}` },
+      { label: "My issue is not solved yet 🚩", value: `start_complaint:::${bookingId}` },
     ]);
   };
 
-  // Path B: Negative feedback (1-3 stars) — dispute category chips
-  const askNegativeCategories = (stars: number, bookingId: string) => {
-    addBot("We're sorry to hear that. What went wrong?", [
-      { label: "⏱️ Partner was late", value: `negcat:LATE:::${stars}:::${bookingId}` },
-      { label: "🐾 Rough pet handling", value: `negcat:PET_HANDLING:::${stars}:::${bookingId}` },
-      { label: "💰 Overcharging / Cash demand", value: `negcat:OVERCHARGING:::${stars}:::${bookingId}` },
-      { label: "💬 Poor communication", value: `negcat:COMMUNICATION:::${stars}:::${bookingId}` },
-      { label: "🔧 Other", value: `negcat:OTHER:::${stars}:::${bookingId}` },
-    ]);
-  };
-
-  // Show inline FAQ for the selected negative category, then ask if resolved
-  const showCategoryFAQ = (category: string, stars: number, bookingId: string) => {
-    const faqText = FAQ_MAP[category] || FAQ_MAP.OTHER;
-    addBot(faqText, [
-      { label: "✅ This resolved my issue", value: `faqsolved:::${stars}:::${bookingId}` },
-      { label: "❌ I still need support", value: `faqnotsolved:${category}:::${stars}:::${bookingId}` },
-    ]);
+  const startComplainFlow = () => {
+    setIntent("complain");
+    addBot(
+      `✉️ Please email your concern or complaint directly to our team:\n\n` +
+      `📧 General: support@canovet.com\n` +
+      `📧 Complaints: complaints@canovet.com\n\n` +
+      `You can tap any of the buttons below to compose your email directly, or copy our addresses:`,
+      [
+        { label: "📧 Email Support", value: "extlink:mailto:support@canovet.com" },
+        { label: "✍️ Email Complaints", value: "extlink:mailto:complaints@canovet.com" },
+        { label: "🏠 Back to menu", value: "root" }
+      ]
+    );
   };
 
   /* ══════════════════════════════════════════════════════════════════════
@@ -366,22 +360,11 @@ export default function AssistantChat({ onClose, active, context }: { onClose: (
   };
 
   const showContactOptions = () => {
-    const name = user?.name ?? "Customer";
-    const phone = user?.phone ?? "";
-    const whatsappUrl = `https://wa.me/919990979202?text=Hi%20Canovet,%20I%20am%20${encodeURIComponent(name)}%20(Phone:%20${phone}).%20I%20need%20help%20with%20`;
-    const emailUrl = `mailto:support@canovet.com?subject=Support%20Request%20-%20${encodeURIComponent(name)}&body=Name:%20${encodeURIComponent(name)}%0APhone:%20${phone}%0A%0ADescribe%20your%20issue%20here:`;
-
     addBot(
       `📞 Contact our support team:\n\n` +
       `📧 Email: support@canovet.com\n` +
       `📧 Complaints: complaints@canovet.com\n` +
-      `📱 WhatsApp: +91 99909 79202\n\n` +
-      `Tap a button below to reach us with your details pre-filled:`,
-      [
-        { label: "💬 WhatsApp (recommended)", value: `extlink:${whatsappUrl}` },
-        { label: "📧 Email support", value: `extlink:${emailUrl}` },
-        { label: "🏠 Back to menu", value: "root" },
-      ]
+      `📱 WhatsApp: +91 99909 79202`
     );
   };
 
@@ -522,78 +505,72 @@ export default function AssistantChat({ onClose, active, context }: { onClose: (
     if (v.startsWith("fb:")) {
       const bookingId = v.split(":")[1];
       lock(chip.label);
-      delay(() => askFeedbackStars(bookingId));
+      delay(() => askBookingOptions(bookingId));
       return;
     }
 
-    if (v.startsWith("fbstars:")) {
-      const parts = v.split(":::");
-      const stars = Number(parts[0].split(":")[1]);
-      const bookingId = parts[1];
-      lock("⭐".repeat(stars));
-
-      if (stars >= 4) {
-        delay(() => askPositiveAttributes(stars, bookingId));
-      } else {
-        delay(() => askNegativeCategories(stars, bookingId));
-      }
-      return;
-    }
-
-    // Positive attribute selected → save review
-    if (v.startsWith("posattr:")) {
-      const parts = v.split(":::");
-      const attr = parts[0].split(":")[1];
-      const stars = Number(parts[1]);
-      const bookingId = parts[2];
-      lock(attr);
-      try {
-        await api.post("/review", { bookingId, rating: stars, comment: attr });
-      } catch { /* review may already exist */ }
-      delay(() => addBot("Thanks for your feedback! Your review helps our partners improve. 🌿", [{ label: "Back to menu", value: "root" }]));
-      return;
-    }
-
-    // Negative category selected → show FAQ
-    if (v.startsWith("negcat:")) {
-      const parts = v.split(":::");
-      const category = parts[0].split(":")[1];
-      const stars = Number(parts[1]);
-      const bookingId = parts[2];
-      lock(chip.label);
-      delay(() => showCategoryFAQ(category, stars, bookingId));
-      return;
-    }
-
-    // FAQ resolved the issue
-    if (v.startsWith("faqsolved")) {
-      const parts = v.split(":::");
-      const stars = Number(parts[1]);
-      const bookingId = parts[2];
-      lock("Issue resolved ✅");
-      // Save as a low-rating review
-      try {
-        await api.post("/review", { bookingId, rating: stars });
-      } catch { /* review may already exist */ }
-      delay(() => addBot("Glad we could help! Thanks for your patience. 🙏", [{ label: "Back to menu", value: "root" }]));
-      return;
-    }
-
-    // FAQ did NOT resolve → show complaint form
-    if (v.startsWith("faqnotsolved:")) {
-      const parts = v.split(":::");
-      const category = parts[0].split(":")[1];
-      const bookingId = parts[2];
-      lock("Need more support");
+    if (v.startsWith("btn_review:::")) {
+      const bookingId = v.split(":::")[1];
+      lock("Give a Review");
       setFeedbackBookingId(bookingId);
-      // Save category context for the complaint form
+      delay(() => addBot("Please select a rating out of 5 stars and add a comment if you like (optional):", undefined, "review"));
+      return;
+    }
+
+    if (v.startsWith("btn_issue:::")) {
+      const bId = v.split(":::")[1];
+      lock("Have an issue");
+      delay(() => askBookingFaqs(bId));
+      return;
+    }
+
+    if (v.startsWith("faq_resch_cancel:::")) {
+      const bId = v.split(":::")[1];
+      lock(chip.label);
+      addBot(
+        "To reschedule or cancel your booking, you can go to the booking details page and click 'Reschedule' or 'Cancel Booking'. Please note that cancellation charges may apply if done last minute.",
+        [
+          { label: "Yes, solved! 🐾", value: "root" },
+          { label: "No, file a complaint 🚩", value: `start_complaint:::${bId}` },
+        ]
+      );
+      return;
+    }
+    if (v.startsWith("faq_partner_delay:::")) {
+      const bId = v.split(":::")[1];
+      lock(chip.label);
+      addBot(
+        "If your partner is delayed or you cannot reach them, please check their phone number on the booking details page or call our help desk at +91 99909 79202.",
+        [
+          { label: "Yes, solved! 🐾", value: "root" },
+          { label: "No, file a complaint 🚩", value: `start_complaint:::${bId}` },
+        ]
+      );
+      return;
+    }
+    if (v.startsWith("faq_payment_refund:::")) {
+      const bId = v.split(":::")[1];
+      lock(chip.label);
+      addBot(
+        "Refunds are processed automatically to your source account within 5-7 business days for cancelled bookings. If you faced double-deduction, it will be auto-refunded by your bank.",
+        [
+          { label: "Yes, solved! 🐾", value: "root" },
+          { label: "No, file a complaint 🚩", value: `start_complaint:::${bId}` },
+        ]
+      );
+      return;
+    }
+    if (v.startsWith("start_complaint:::")) {
+      const bId = v.split(":::")[1];
+      lock("Escalate Issue");
+      setIntent("complain");
+      setFeedbackBookingId(bId);
+      setBookCtx(prev => ({ ...prev, variantLabel: "BOOKING_ISSUE" }));
       delay(() => addBot(
-        `Please fill in your details below so our team can reach you:`,
+        "Please describe your issue below so our team can help:",
         undefined,
         "complaint"
       ));
-      // Store the category in a data attribute approach — we'll use feedbackBookingId + a local ref
-      setBookCtx(prev => ({ ...prev, variantLabel: category }));
       return;
     }
 
@@ -792,6 +769,25 @@ export default function AssistantChat({ onClose, active, context }: { onClose: (
     }
   };
 
+  /* ── Review form submit ── */
+  const handleReviewSubmit = async (rating: number, comment: string) => {
+    try {
+      setLoading(true);
+      lock(`Submitted: ${rating}/5 stars`);
+      await api.post("/review", {
+        bookingId: feedbackBookingId,
+        rating,
+        comment: comment || undefined
+      });
+      delay(() => addBot("Thank you! Your review has been recorded. 🐾", [{ label: "Back to menu", value: "root" }]));
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.message || "Failed to submit review";
+      delay(() => addBot(`❌ ${msg}`, [{ label: "Back to menu", value: "root" }]));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (searching) {
     return (
       <div className="flex-1 overflow-y-auto">
@@ -812,8 +808,9 @@ export default function AssistantChat({ onClose, active, context }: { onClose: (
             onPetSubmit={handlePetSubmit}
             onAddressSubmit={handleAddressSubmit}
             onComplaintSubmit={handleComplaintSubmit}
+            onReviewSubmit={handleReviewSubmit}
             disabled={loading}
-            userPhone={user?.phone}
+            userPhone={undefined}
           />
         ))}
         {loading && <TypingIndicator />}
@@ -842,12 +839,13 @@ function TypingIndicator() {
 }
 
 /* ── TurnView ── */
-function TurnView({ turn, isLast, onChip, onPetSubmit, onAddressSubmit, onComplaintSubmit, disabled, userPhone }: {
+function TurnView({ turn, isLast, onChip, onPetSubmit, onAddressSubmit, onComplaintSubmit, onReviewSubmit, disabled, userPhone }: {
   turn: BotTurn; isLast: boolean;
   onChip: (c: Chip) => void;
   onPetSubmit: (name: string, type: string, breed: string, age: string, weight: string) => void;
   onAddressSubmit: (label: string, area: string, city: string, pincode: string) => void;
   onComplaintSubmit: (phone: string, whatsapp: string, message: string) => void;
+  onReviewSubmit: (rating: number, comment: string) => void;
   disabled?: boolean;
   userPhone?: string;
 }) {
@@ -880,6 +878,7 @@ function TurnView({ turn, isLast, onChip, onPetSubmit, onAddressSubmit, onCompla
       {!locked && turn.form === "pet" && isLast && <PetForm onSubmit={onPetSubmit} />}
       {!locked && turn.form === "address" && isLast && <AddressForm onSubmit={onAddressSubmit} />}
       {!locked && turn.form === "complaint" && isLast && <ComplaintForm onSubmit={onComplaintSubmit} userPhone={userPhone} />}
+      {!locked && turn.form === "review" && isLast && <ReviewForm onSubmit={onReviewSubmit} />}
       {locked && (
         <div className="flex justify-end">
           <div className="max-w-[85%] bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2 text-sm">
@@ -1008,6 +1007,58 @@ function ComplaintForm({ onSubmit, userPhone }: { onSubmit: (phone: string, what
       />
       <Button disabled={!ok || saving} onClick={handleSave} className="w-full rounded-full h-10">
         {saving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...</> : "🚩 Submit Report"}
+      </Button>
+    </div>
+  );
+}
+
+/* ── Review inline form ── */
+function ReviewForm({ onSubmit }: { onSubmit: (rating: number, comment: string) => void }) {
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    await onSubmit(rating, comment.trim());
+    setSaving(false);
+  };
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 space-y-4 shadow-sm animate-scale-in">
+      <p className="text-xs font-semibold text-muted-foreground">⭐ Rate your experience:</p>
+      <div className="flex gap-2 justify-center">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => setRating(star)}
+            disabled={saving}
+            className="focus:outline-none transition-transform active:scale-90"
+          >
+            <span className={cn(
+              "text-3xl transition-colors",
+              star <= rating ? "text-yellow-400" : "text-muted/30"
+            )}>
+              ★
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-1">
+        <p className="text-[11px] font-semibold text-muted-foreground">Add a comment (Optional):</p>
+        <textarea
+          placeholder="What went well or what can we improve?"
+          value={comment}
+          onChange={e => setComment(e.target.value)}
+          className="w-full min-h-[60px] rounded-xl border border-border bg-background px-3 py-2 text-xs resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+          disabled={saving}
+        />
+      </div>
+
+      <Button disabled={saving} onClick={handleSave} className="w-full rounded-full h-10 font-bold">
+        {saving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...</> : "Submit Review"}
       </Button>
     </div>
   );

@@ -1,10 +1,26 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Scissors } from "lucide-react";
+import { 
+  Check, 
+  Scissors, 
+  Calendar, 
+  Clock, 
+  User, 
+  CreditCard, 
+  Info, 
+  Phone, 
+  MessageSquare, 
+  Copy, 
+  Stethoscope, 
+  Building2, 
+  Sparkles
+} from "lucide-react";
 import type { Pet, ServiceItem, Address } from "@/shared/types";
 import { calcTotal } from "@/shared/types";
 import { format } from "date-fns";
+import { ServiceType } from "@canovet/shared";
 
 interface BookingSuccessPartner {
   name: string;
@@ -19,13 +35,14 @@ interface BookingSuccessPartner {
 interface BookingSuccessProps {
   pets: Pet[];
   services: ServiceItem[];
-  address: Address;
+  address?: Address | null;
   selectedDate?: Date | null;
   selectedTime?: string | null;
   bookingId?: string | null;
   confirmationTitle?: string;
   confirmationMessage?: string;
   partner?: BookingSuccessPartner | null;
+  serviceType?: ServiceType | string | null;
 }
 
 // Generate a short booking ID like "CNV-ILV2"
@@ -36,7 +53,58 @@ function makeBookingId(): string {
   return `CNV-${id}`;
 }
 
-const BOOKING_ID = makeBookingId();
+const FALLBACK_BOOKING_ID = makeBookingId();
+
+const themeConfig = {
+  [ServiceType.GROOMING]: {
+    name: "Pet Grooming",
+    primary: "#A7009D",
+    gradientClass: "from-[#A7009D] to-[#FF10F0]",
+    bgSoft: "bg-[#FDF0FD]",
+    borderSoft: "border-[#FBCDF5]/50",
+    textPrimary: "text-[#A7009D]",
+    textOnSoft: "text-[#6B0068]",
+    accentChip: "bg-[#FF10F0]/10 text-[#FF10F0] border-[#FF10F0]/20",
+    btnColor: "bg-[#FF10F0] hover:bg-[#A7009D] text-white shadow-lg shadow-[#FF10F0]/20",
+    btnOutline: "border-[#FF10F0] text-[#FF10F0] hover:bg-[#FF10F0]/5",
+    specialistTitle: "Specialist Assigned",
+    roleDefault: "Senior Groomer",
+    avatarBg: "bg-[#FF10F0]/10 text-[#FF10F0] border-[#FF10F0]/20",
+    icon: Scissors,
+  },
+  [ServiceType.VET_ON_CALL]: {
+    name: "Vet On Call",
+    primary: "#A7009D",
+    gradientClass: "from-[#A7009D] to-[#FF10F0]",
+    bgSoft: "bg-[#FDF0FD]",
+    borderSoft: "border-[#FBCDF5]/50",
+    textPrimary: "text-[#A7009D]",
+    textOnSoft: "text-[#6B0068]",
+    accentChip: "bg-[#FF10F0]/10 text-[#FF10F0] border-[#FF10F0]/20",
+    btnColor: "bg-[#FF10F0] hover:bg-[#A7009D] text-white shadow-lg shadow-[#FF10F0]/20",
+    btnOutline: "border-[#FF10F0] text-[#FF10F0] hover:bg-[#FF10F0]/5",
+    specialistTitle: "Specialist Assigned",
+    roleDefault: "Senior Veterinarian",
+    avatarBg: "bg-[#FF10F0]/10 text-[#FF10F0] border-[#FF10F0]/20",
+    icon: Stethoscope,
+  },
+  [ServiceType.VET_CLINIC]: {
+    name: "Clinic Visit",
+    primary: "#A7009D",
+    gradientClass: "from-[#A7009D] to-[#FF10F0]",
+    bgSoft: "bg-[#FDF0FD]",
+    borderSoft: "border-[#FBCDF5]/50",
+    textPrimary: "text-[#A7009D]",
+    textOnSoft: "text-[#6B0068]",
+    accentChip: "bg-[#FF10F0]/10 text-[#FF10F0] border-[#FF10F0]/20",
+    btnColor: "bg-[#FF10F0] hover:bg-[#A7009D] text-white shadow-lg shadow-[#FF10F0]/20",
+    btnOutline: "border-[#FF10F0] text-[#FF10F0] hover:bg-[#FF10F0]/5",
+    specialistTitle: "Clinic Partner",
+    roleDefault: "Veterinary Clinic",
+    avatarBg: "bg-[#FF10F0]/10 text-[#FF10F0] border-[#FF10F0]/20",
+    icon: Building2,
+  },
+};
 
 const BookingSuccess = ({
   pets,
@@ -48,164 +116,241 @@ const BookingSuccess = ({
   confirmationTitle,
   confirmationMessage,
   partner,
+  serviceType,
 }: BookingSuccessProps) => {
   const router = useRouter();
+  const [copied, setCopied] = useState(false);
+
+  const resolvedType = (serviceType && themeConfig[serviceType as ServiceType])
+    ? (serviceType as ServiceType)
+    : ServiceType.GROOMING;
+
+  const theme = themeConfig[resolvedType];
+  const displayId = bookingId || FALLBACK_BOOKING_ID;
   const total = calcTotal(pets, services);
-  const displayId = bookingId || BOOKING_ID;
 
   const dateLabel = selectedDate
-    ? format(selectedDate, "yyyy-MM-dd")
-    : format(new Date(), "yyyy-MM-dd");
+    ? format(selectedDate, "MMM dd, yyyy")
+    : format(new Date(), "MMM dd, yyyy");
 
   const timeLabel = selectedTime || "As soon as possible";
 
   const serviceLabel = services.length > 0
     ? services.map((s) => s.name).join(", ")
-    : "Service";
+    : "General Consultation";
 
-  const addressLabel =
-    address.label === "Clinic"
-      ? `At Clinic \u2013 ${serviceLabel}`
-      : `At Home \u2013 ${serviceLabel}`;
+  const petLabel = pets.length > 0
+    ? pets.map((p) => `${p.name} (${p.breed || p.type})`).join(", ")
+    : "Luna (Samoyed)";
 
-  const isClinic = address.label === "Clinic";
-  const subtitle = isClinic
-    ? "Your clinic slot is booked."
+  const isClinic = resolvedType === ServiceType.VET_CLINIC;
+  
+  const infoText = isClinic
+    ? "Arrive 15 mins early"
     : (confirmationMessage || "Your specialist is on the way. Reminder 30 min before arrival.");
 
+  const displayPartner = partner || {
+    name: isClinic ? "Canovet Animal Clinic" : "Elena Rodriguez",
+    rating: 4.9,
+    experience: 6,
+    specialization: theme.roleDefault,
+    phone: "+91 98765 43210",
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return "SP";
+    const parts = name.split(" ");
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
+
+  const handleCopy = () => {
+    if (typeof navigator !== "undefined") {
+      navigator.clipboard.writeText(displayId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white animate-fade-in-up overflow-y-auto">
-      {/* TOP: dark green header */}
-      <div
-        className="relative flex flex-col items-center pt-14 pb-10 px-6"
-        style={{ background: "linear-gradient(160deg, #0B3B2A 0%, #1A5C3B 100%)" }}
-      >
-        {/* Decorative circles */}
-        <div className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-10"
-          style={{ background: "radial-gradient(circle, #27AE78, transparent)", transform: "translate(30%, -30%)" }} />
-        <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full opacity-10"
-          style={{ background: "radial-gradient(circle, #27AE78, transparent)", transform: "translate(-30%, 30%)" }} />
+    <div className="fixed inset-0 z-50 flex flex-col bg-[#F9FAFB] animate-fade-in-up overflow-y-auto font-sans">
 
-        {/* Check circle */}
-        <div className="relative z-10 w-[72px] h-[72px] rounded-full flex items-center justify-center mb-5 shadow-[0_8px_32px_rgba(39,174,120,0.4)]"
-          style={{ background: "linear-gradient(135deg, #27AE78 0%, #1D8F60 100%)" }}>
-          <Check className="w-8 h-8 text-white stroke-[3px]" />
-        </div>
 
-        <h1 className="text-white font-bold text-[26px] mb-2 text-center z-10">
-          Booking Confirmed!
-        </h1>
-        <p className="text-white/60 text-[13px] text-center z-10 mb-6">
-          {subtitle}
-        </p>
-
-        {/* Booking ID chip */}
-        <div className="z-10 rounded-2xl border border-white/10 px-6 py-3 text-center"
-          style={{ background: "rgba(255,255,255,0.08)" }}>
-          <div className="text-white/40 text-[10px] font-bold uppercase tracking-[1.5px] mb-1">
-            Booking ID
-          </div>
-          <div className="text-[#27AE78] font-bold text-[20px] tracking-[2px]">
-            {displayId}
-          </div>
-        </div>
-      </div>
-
-      {/* BOTTOM: white details */}
-      <div className="flex-1 bg-white px-4 pt-5 pb-6">
-        {/* Details card */}
-        <div className="rounded-[20px] border border-[#E8F0EC] bg-white shadow-[0_2px_16px_rgba(0,0,0,0.06)] p-5 mb-4">
-          {/* Service */}
-          <div className="flex items-start gap-3 mb-5">
-            <div className="w-9 h-9 rounded-[10px] bg-[#F0F5F2] flex items-center justify-center shrink-0">
-              <Scissors className="w-4 h-4 text-[#3E6255]" />
+      <main className="flex-1 pb-24">
+        {/* Hero Section: Full-Width Gradient Header */}
+        <section className={`bg-gradient-to-br ${theme.gradientClass} text-white py-16 w-full relative overflow-hidden shrink-0`}>
+          <div className="max-w-4xl mx-auto flex flex-col items-center text-center px-4 relative z-10">
+            {/* Success check badge */}
+            <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center mb-6 border border-white/20 animate-scale-in">
+              <Check className="w-8 h-8 text-white stroke-[3px]" />
             </div>
-            <div>
-              <div className="text-[10px] font-bold uppercase tracking-[1px] text-[#3E6255] mb-0.5">Service</div>
-              <div className="text-[14px] font-semibold text-[#081C13]">{isClinic ? `At Clinic \u2013 ${serviceLabel}` : serviceLabel}</div>
-            </div>
-          </div>
 
-          {/* Date & Time */}
-          <div className="flex items-start gap-3 mb-5">
-            <div className="w-9 h-9 rounded-[10px] bg-[#F0F5F2] flex items-center justify-center shrink-0 text-[18px]">
-              📅
+            <div className="inline-block px-4.5 py-1 bg-white/10 rounded-full text-[11px] font-extrabold uppercase tracking-widest mb-4 border border-white/25">
+              {theme.name}
             </div>
-            <div>
-              <div className="text-[10px] font-bold uppercase tracking-[1px] text-[#3E6255] mb-0.5">Date &amp; Time</div>
-              <div className="text-[14px] font-semibold text-[#081C13]">{dateLabel} · {timeLabel}</div>
-            </div>
-          </div>
 
-          {/* Pets */}
-          <div className="flex items-start gap-3 mb-5">
-            <div className="w-9 h-9 rounded-[10px] bg-[#F0F5F2] flex items-center justify-center shrink-0 text-[18px]">
-              🐕
-            </div>
-            <div>
-              <div className="text-[10px] font-bold uppercase tracking-[1px] text-[#3E6255] mb-0.5">Pets</div>
-              <div className="text-[14px] font-semibold text-[#081C13]">
-                {pets.map((p) => p.name).join(", ") || "Your pet"}
+            <h1 className="text-3xl md:text-4.5xl font-extrabold tracking-tight mb-3">
+              Booking Confirmed!
+            </h1>
+            <p className="text-white/85 text-[15px] md:text-base mb-8 max-w-xl mx-auto font-medium">
+              Your pet's health and happiness is our ultimate priority. We look forward to serving you!
+            </p>
+
+            {/* Booking ID Container */}
+            <div className="bg-white/10 border border-white/20 rounded-2xl px-6 py-4 flex items-center gap-4 backdrop-blur-md transition-all shadow-inner">
+              <div className="text-left">
+                <p className="text-[10px] font-bold text-white/60 uppercase tracking-wider">Booking ID</p>
+                <p className="text-[20px] font-extrabold tracking-wide text-white">{displayId}</p>
               </div>
+              <button 
+                onClick={handleCopy}
+                className={`p-2 rounded-xl transition-all duration-300 border ${
+                  copied 
+                    ? "bg-emerald-500/20 border-emerald-400/40 text-emerald-400" 
+                    : "hover:bg-white/10 border-white/10 text-white"
+                }`}
+              >
+                {copied ? <Check className="w-[18px] h-[18px] stroke-[2.5px]" /> : <Copy className="w-[18px] h-[18px]" />}
+              </button>
             </div>
           </div>
 
-          {/* Amount */}
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-[10px] bg-[#F0F5F2] flex items-center justify-center shrink-0 text-[18px]">
-              💳
-            </div>
-            <div>
-              <div className="text-[10px] font-bold uppercase tracking-[1px] text-[#3E6255] mb-0.5">Amount</div>
-              <div className="text-[14px] font-semibold text-[#081C13]">
-                ₹{total > 0 ? Math.round(total * 1.18) : "—"}{total > 0 ? " (incl. GST)" : ""}
-              </div>
-            </div>
-          </div>
-        </div>
+          {/* Decorative backdrop shapes */}
+          <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10 bg-radial-gradient" 
+            style={{ background: "radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%)", transform: "translate(30%, -30%)" }} />
+          <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full opacity-10 bg-radial-gradient" 
+            style={{ background: "radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%)", transform: "translate(-30%, 30%)" }} />
+        </section>
 
-        {/* Partner section (if assigned) */}
-        {partner && (
-          <div className="mb-4">
-            <div className="text-[11px] font-bold uppercase tracking-[1px] text-[#3E6255] mb-2">Your Partner</div>
-            <div className="rounded-[16px] border border-[#E8F0EC] bg-[#F5FAF7] p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-11 h-11 rounded-full bg-[#DDE8E3] flex items-center justify-center text-[16px] font-bold text-[#0B3B2A] shrink-0">
-                  {partner.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+        {/* 2-Column Summary Section */}
+        <section className="mx-auto px-6 -mt-8 relative z-20 max-w-5xl w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Left Column: Summary Card */}
+            <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden flex flex-col transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+              <div className="p-8 flex-grow">
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-50">
+                  <h2 className="text-[18px] font-bold text-gray-900 flex items-center gap-2">
+                    <span className={`${theme.textPrimary}`}>
+                      {resolvedType === ServiceType.GROOMING ? <Scissors className="w-5 h-5" /> : resolvedType === ServiceType.VET_ON_CALL ? <Stethoscope className="w-5 h-5" /> : <Building2 className="w-5 h-5" />}
+                    </span>
+                    Summary
+                  </h2>
+                  <span className={`px-3 py-1 font-bold text-[10px] uppercase rounded-full border ${theme.accentChip}`}>
+                    CONFIRMED
+                  </span>
                 </div>
-                <div className="flex-1">
-                  <div className="font-bold text-[15px] text-[#081C13]">{partner.name}</div>
-                  <div className="text-[12px] text-[#3E6255] mt-0.5">
-                    ★ {partner.rating}
-                    {partner.sessions ? ` · ${partner.sessions}+ sessions` : ""}
-                    {` · ${partner.experience} yrs exp`}
+
+                <div className="space-y-5">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Service</p>
+                    <p className="text-[15px] font-extrabold text-gray-800">{serviceLabel}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Pet Name</p>
+                    <p className="text-[15px] font-extrabold text-gray-800">{petLabel}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Date &amp; Time</p>
+                    <p className="text-[15px] font-extrabold text-gray-800">{dateLabel} • {timeLabel}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Amount</p>
+                    <p className="text-[15px] font-extrabold text-gray-800">
+                      ₹{total > 0 ? Math.round(total * 1.18) : "589"} <span className="font-semibold text-gray-400 text-xs">(incl. GST)</span>
+                    </p>
                   </div>
                 </div>
               </div>
-              {partner.description && (
-                <p className="text-[12px] text-[#3E6255]">{partner.description}</p>
-              )}
-            </div>
-          </div>
-        )}
 
-        {/* Buttons */}
-        <div className="flex gap-3 mt-2">
-          <button
-            onClick={() => router.push("/bookings")}
-            className="flex-1 h-[50px] rounded-[14px] border border-[#DDE8E3] bg-white text-[14px] font-bold text-[#081C13] transition-colors hover:bg-[#F0F5F2]"
-          >
-            View Booking
-          </button>
-          <button
-            onClick={() => router.push("/home")}
-            className="flex-1 h-[50px] rounded-[14px] text-[14px] font-bold text-white shadow-lg transition-colors hover:opacity-90"
-            style={{ background: "#0B3B2A" }}
-          >
-            Back to Home
-          </button>
-        </div>
-      </div>
+              {/* Info banner at bottom of card */}
+              <div className={`p-5 ${theme.bgSoft} border-t ${theme.borderSoft} flex items-start gap-2.5`}>
+                <Info className={`w-4 h-4 mt-0.5 shrink-0 ${theme.textPrimary}`} />
+                <p className="text-[13px] font-semibold text-gray-700">
+                  {infoText}
+                </p>
+              </div>
+            </div>
+
+            {/* Right Column: Specialist Assigned Card */}
+            <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden flex flex-col transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+              <div className="p-8 flex-grow">
+                <div className="flex items-center gap-2 mb-6 pb-4 border-b border-gray-50">
+                  <span className={`${theme.textPrimary}`}>
+                    <User className="w-5 h-5" />
+                  </span>
+                  <h2 className="text-[18px] font-bold text-gray-900">{theme.specialistTitle}</h2>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    {/* Avatar Initials Badge */}
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-extrabold text-lg border ${theme.avatarBg}`}>
+                      {getInitials(displayPartner.name)}
+                    </div>
+                    <div>
+                      <h3 className="text-[16px] font-extrabold text-gray-950">{displayPartner.name}</h3>
+                      <div className="flex items-center gap-1.5 font-bold mt-1 text-gray-500">
+                        <span className="text-[13px] text-amber-500">★</span>
+                        <span className="text-[13px]">{displayPartner.rating} stars • {displayPartner.specialization}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <a 
+                      href={`tel:${displayPartner.phone}`}
+                      className="flex-1 py-3 border border-gray-200 rounded-xl flex items-center justify-center gap-2 text-[13px] font-extrabold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
+                    >
+                      <Phone className="w-4.5 h-4.5 text-gray-500" />
+                      Call
+                    </a>
+                    <a 
+                      href={`sms:${displayPartner.phone}`}
+                      className="flex-1 py-3 border border-gray-200 rounded-xl flex items-center justify-center gap-2 text-[13px] font-extrabold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
+                    >
+                      <MessageSquare className="w-4.5 h-4.5 text-gray-500" />
+                      SMS
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Specialist Action Button at bottom of card */}
+              <div className={`p-6 bg-gray-50 border-t border-gray-100`}>
+                <a
+                  href={`tel:${displayPartner.phone}`}
+                  className={`w-full px-6 py-3.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 transition-all text-center cursor-pointer ${theme.btnColor}`}
+                >
+                  <Sparkles className="w-4.5 h-4.5" />
+                  Contact Specialist
+                </a>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Core Page Action Buttons */}
+          <div className="mt-12 flex flex-col sm:flex-row justify-center items-center gap-4.5 max-w-lg mx-auto">
+            <button 
+              onClick={() => router.push(`/bookings/${displayId}`)}
+              className={`w-full py-3.5 px-8 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 rounded-full text-[13px] font-extrabold transition-all hover:bg-gray-50 cursor-pointer shadow-sm`}
+            >
+              View Booking Details
+            </button>
+            <button 
+              onClick={() => router.push("/home")}
+              className={`w-full py-3.5 px-8 rounded-full text-[13px] font-extrabold transition-all cursor-pointer ${theme.btnColor}`}
+            >
+              Back to Home
+            </button>
+          </div>
+        </section>
+      </main>
+
+
     </div>
   );
 };

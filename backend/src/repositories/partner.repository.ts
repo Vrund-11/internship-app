@@ -95,8 +95,49 @@ export const partnerRepository = {
     });
   },
 
+  async ensureClinicAddress(partnerId: string, name: string, latitude: number, longitude: number) {
+    const existing = await prisma.clinicAddress.findFirst({
+      where: { partnerId },
+      select: { id: true },
+    });
+
+    if (existing) {
+      return prisma.clinicAddress.update({
+        where: { id: existing.id },
+        data: {
+          name,
+          text: `${name} Address`,
+          latitude,
+          longitude,
+        },
+      });
+    }
+
+    return prisma.clinicAddress.create({
+      data: {
+        partnerId,
+        name,
+        text: `${name} Address`,
+        latitude,
+        longitude,
+        city: "Ahmedabad",
+        state: "Gujarat",
+      },
+    });
+  },
+
   async deleteByPhones(phones: string[]) {
     await prisma.partnerService.deleteMany({
+      where: {
+        partner: {
+          phone: {
+            in: phones,
+          },
+        },
+      },
+    });
+
+    await prisma.clinicAddress.deleteMany({
       where: {
         partner: {
           phone: {

@@ -54,6 +54,7 @@ export const partnerController = {
           rating: true,
           totalCompleted: true,
           cityId: true,
+          clinicAddresses: true,
         },
         take: 20,
       });

@@ -55,12 +55,25 @@ export const matchingService = {
   async assignPartner(booking: BookingForMatching, preferredPartnerId?: string) {
     console.log("AUTO_MATCH_START:", booking.id);
 
-    const address = await prisma.address.findUnique({
-      where: { id: booking.addressId },
-      select: { latitude: true, longitude: true },
-    });
+    let lat = 23.0225;
+    let lng = 72.5714;
+    let addressFound = false;
 
-    if (!address) {
+    if (booking.addressId) {
+      const address = await prisma.address.findUnique({
+        where: { id: booking.addressId },
+        select: { latitude: true, longitude: true },
+      });
+      if (address) {
+        lat = address.latitude;
+        lng = address.longitude;
+        addressFound = true;
+      }
+    }
+
+    const isGrooming = booking.serviceType === "GROOMING";
+
+    if (!addressFound && isGrooming) {
       console.log("ADDRESS_NOT_FOUND");
 
       await prisma.booking.update({
@@ -83,13 +96,12 @@ export const matchingService = {
         );
 
         const distance = getDistanceKm(
-          address.latitude,
-          address.longitude,
+          lat,
+          lng,
           preferred.latitude,
           preferred.longitude
         );
 
-        const isGrooming = booking.serviceType === "GROOMING";
         const isEligible =
           preferred.isOnline &&
           preferred.isVerified &&
@@ -151,30 +163,38 @@ export const matchingService = {
 
     // ── 2. Filter by time availability ──
 
-    const availablePartners = [];
+    const partnerIds = eligible.map((p) => p.id);
+    const conflicts = partnerIds.length > 0
+      ? await prisma.booking.findMany({
+          where: {
+            partnerId: { in: partnerIds },
+            status: {
+              in: [BookingStatus.CONFIRMED, BookingStatus.AWAITING_PAYMENT],
+            },
+            slotStart: {
+              lt: booking.slotEnd,
+            },
+            slotEnd: {
+              gt: booking.slotStart,
+            },
+          },
+          select: { partnerId: true },
+        })
+      : [];
 
-    for (const partner of eligible) {
-      const conflict = await hasScheduleConflict(
-        partner.id,
-        booking.slotStart,
-        booking.slotEnd
-      );
-
-      if (!conflict) {
-        availablePartners.push(partner);
-      }
-    }
+    const conflictingPartnerIds = new Set(conflicts.map((c) => c.partnerId));
+    const availablePartners = eligible.filter(
+      (partner) => !conflictingPartnerIds.has(partner.id)
+    );
 
     console.log(`  available (time-free): ${availablePartners.length}`);
 
     // ── 3. Filter by distance radius (Only for GROOMING) ──
 
-    const isGrooming = booking.serviceType === "GROOMING";
-
     const nearby = availablePartners.filter((partner) => {
       const distance = getDistanceKm(
-        address.latitude,
-        address.longitude,
+        lat,
+        lng,
         partner.latitude,
         partner.longitude
       );
@@ -201,8 +221,8 @@ export const matchingService = {
 
     const scored = nearby.map((partner) => {
       const distance = getDistanceKm(
-        address.latitude,
-        address.longitude,
+        lat,
+        lng,
         partner.latitude,
         partner.longitude
       );

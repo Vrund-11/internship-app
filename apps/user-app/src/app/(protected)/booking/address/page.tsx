@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useBooking } from "@/context/BookingContext";
-import { ServiceType } from "@canovet/shared";
 import AddressPicker from "@/features/booking/components/AddressPicker";
 import StepProgress from "@/features/booking/components/StepProgress";
 import type { Address } from "@/shared/types";
@@ -46,10 +45,8 @@ export default function AddressPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const isClinicService = booking.service === ServiceType.VET_CLINIC;
-  const visibleAddresses = addresses.filter((address) =>
-    isClinicService ? address.label === "Clinic" : address.label !== "Clinic"
-  );
+  // Only show user home/office addresses (clinic bookings use ClinicSearchPicker)
+  const visibleAddresses = addresses.filter((address) => address.label !== "Clinic");
 
   const handleAddAddress = async (address: Address) => {
     try {
@@ -84,7 +81,7 @@ export default function AddressPage() {
             Back
           </button>
           <h1 className="text-base font-semibold text-foreground">
-            {isClinicService ? "Select Clinic" : "Select Address"}
+            Select Address
           </h1>
         </div>
         <StepProgress currentStep={2} totalSteps={3} labels={["Pets", "Address", "Schedule"]} />

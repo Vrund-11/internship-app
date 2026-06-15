@@ -25,7 +25,9 @@ export default function SelectCityPage() {
   useEffect(() => {
     api
       .get("/cities")
-      .then((res) => setCities(res.data as City[]))
+      .then((res) => {
+        setCities(res.data as City[]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -58,7 +60,7 @@ export default function SelectCityPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
           Setup
         </p>
-        <h1 className="mt-3 font-serif text-3xl text-foreground">Select Your City</h1>
+        <h1 className="mt-3 font-bold text-3xl text-foreground">Select Your City</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Pick your state and city. If we are not available yet, you will see
           “Coming soon.”

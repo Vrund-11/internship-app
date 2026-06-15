@@ -12,7 +12,7 @@ import { logger } from "@/lib/logger";
 
 type User = {
   id: string;
-  phone: string;
+  email: string;
   name?: string | null;
 };
 
@@ -21,7 +21,8 @@ type AuthContextType = {
   accessToken: string | null;
   loading: boolean;
   setUser: (user: User | null) => void;
-  login: (phone: string, otp: string) => Promise<User>;
+  login: (email: string, pass: string) => Promise<User>;
+  loginWithGoogle: (code: string, redirectUri?: string, platform?: string) => Promise<any>;
   logout: () => Promise<void>;
 };
 
@@ -41,11 +42,14 @@ export const AuthProvider = ({
     setApiToken(token);
   };
 
-  const login = async (phone: string, otp: string) => {
+  const login = async (email: string, pass: string) => {
     try {
-      const res = await api.post("/auth/verify-otp", {
-        phone,
-        otp,
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("dev_logged_out");
+      }
+      const res = await api.post("/auth/login-signup", {
+        email,
+        password: pass,
       });
 
       const { accessToken, user } = res.data;
@@ -59,8 +63,33 @@ export const AuthProvider = ({
     }
   };
 
+  const loginWithGoogle = async (code: string, redirectUri?: string, platform?: string) => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("dev_logged_out");
+      }
+      const res = await api.post("/auth/google", {
+        code,
+        redirectUri,
+        platform,
+      });
+
+      const { accessToken, user } = res.data;
+
+      updateAccessToken(accessToken);
+      setUser(user);
+      return res.data;
+    } catch (err) {
+      console.error("Google login failed");
+      throw err;
+    }
+  };
+
   const logout = async () => {
     try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("dev_logged_out", "true");
+      }
       await api.post("/auth/logout");
     } catch {}
 
@@ -99,12 +128,15 @@ export const AuthProvider = ({
   };
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("dev_logged_out");
+    }
     hydrateUser();
   }, []);
 
   return (
     <AuthContext.Provider
-      value={{ user, accessToken, loading, setUser, login, logout }}
+      value={{ user, accessToken, loading, setUser, login, loginWithGoogle, logout }}
     >
       {children}
     </AuthContext.Provider>
