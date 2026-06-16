@@ -1,5 +1,6 @@
 "use client";
 
+import { validateHouse, validateArea, validatePincode } from "@canovet/shared";
 import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -23,14 +24,14 @@ interface AddressPickerProps {
 
 const labelIcons: Record<string, React.ReactNode> = {
   Home: <Home className="w-5 h-5 text-[#2E7BD4]" />,
-  Office: <Briefcase className="w-5 h-5 text-[#F5922A]" />,
-  Other: <MapPin className="w-5 h-5 text-[#27AE78]" />,
+  Office: <Briefcase className="w-5 h-5 text-[#b45309]" />,
+  Other: <MapPin className="w-5 h-5 text-[#A7009D]" />,
 };
 
 const labelColors: Record<string, string> = {
   Home: "#E8F3FF",
-  Office: "#FEF1E4",
-  Other: "#E3F6EE",
+  Office: "#FEF3C7",
+  Other: "#F5D6F5",
 };
 
 const serviceableCities = new Set(["Ahmedabad", "Mumbai"]);
@@ -49,12 +50,40 @@ const AddressPicker = ({
   const [showForm, setShowForm] = useState(false);
   const [formState, setFormState] = useState("");
   const [formCity, setFormCity] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({ label: "Home", house: "", area: "", pincode: "" });
 
   const stateCities = formState ? cities[formState] || [] : [];
 
   const handleAdd = () => {
-    if (!form.house || !form.area || !form.pincode || !formCity) return;
+    setError(null);
+    if (!formState) {
+      setError("Please select a state");
+      return;
+    }
+    if (!formCity) {
+      setError("Please select a city");
+      return;
+    }
+    
+    const houseError = validateHouse(form.house);
+    if (houseError) {
+      setError(houseError);
+      return;
+    }
+
+    const areaError = validateArea(form.area);
+    if (areaError) {
+      setError(areaError);
+      return;
+    }
+
+    const pincodeError = validatePincode(form.pincode);
+    if (pincodeError) {
+      setError(pincodeError);
+      return;
+    }
+
     const address: Address = {
       id: generateId(),
       label: form.label,
@@ -84,8 +113,8 @@ const AddressPicker = ({
   };
 
   return (
-    <div className="px-4 py-5 animate-fade-in-up">
-      <div className="text-[12px] text-[#3E6255] font-bold uppercase tracking-[0.8px] mb-3">Delivery Address</div>
+    <div className="px-4 py-5 animate-fade-in-up lg:px-0">
+      <div className="text-[12px] text-[#5C3A58] font-bold uppercase tracking-[0.8px] mb-3">Delivery Address</div>
 
       <div className="space-y-3.5 mb-4">
         {addresses.map((addr) => {
@@ -100,22 +129,22 @@ const AddressPicker = ({
                 !isServiceable && "opacity-50 cursor-not-allowed"
               )}
               style={{
-                border: `${isSelected ? 2 : 1}px solid ${isSelected ? "#27AE78" : "#DDE8E3"}`,
+                border: `${isSelected ? 2 : 1}px solid ${isSelected ? "#A7009D" : "#EDE4EB"}`,
                 background: isSelected ? "rgba(39,174,120,0.08)" : "#FFFFFF",
               }}
             >
               <div 
                 className="w-[44px] h-[44px] rounded-[14px] flex items-center justify-center shrink-0 mt-0.5"
-                style={{ background: labelColors[addr.label] || "#F0F5F2" }}
+                style={{ background: labelColors[addr.label] || "#F3EEF1" }}
               >
-                {labelIcons[addr.label] || <MapPin className="w-5 h-5 text-[#6E8F83]" />}
+                {labelIcons[addr.label] || <MapPin className="w-5 h-5 text-[#8A6888]" />}
               </div>
               <div className="flex-1">
-                <div className="text-[14px] font-bold text-[#081C13]">{addr.label}</div>
-                <div className="text-[12px] text-[#3E6255] mt-0.5 leading-[1.3]">
+                <div className="text-[14px] font-bold text-[#1a0a18]">{addr.label}</div>
+                <div className="text-[12px] text-[#5C3A58] mt-0.5 leading-[1.3]">
                   {addr.house}, {addr.area}
                 </div>
-                <div className="text-[12px] text-[#3E6255] leading-[1.3]">
+                <div className="text-[12px] text-[#5C3A58] leading-[1.3]">
                   {addr.city}, {addr.state} - {addr.pincode}
                 </div>
                 {!isServiceable && (
@@ -126,10 +155,10 @@ const AddressPicker = ({
               </div>
               <div 
                 className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-2"
-                style={{ border: `2px solid ${isSelected ? "#27AE78" : "#B8CEC5"}` }}
+                style={{ border: `2px solid ${isSelected ? "#A7009D" : "#D4B8D0"}` }}
               >
                 {isSelected && (
-                  <div className="w-2 h-2 rounded-full bg-[#27AE78]" />
+                  <div className="w-2 h-2 rounded-full bg-[#A7009D]" />
                 )}
               </div>
             </button>
@@ -140,13 +169,13 @@ const AddressPicker = ({
       {!showForm ? (
         <button
           onClick={() => setShowForm(true)}
-          className="w-full flex items-center justify-center gap-2 p-4 rounded-[18px] border border-dashed border-[#B8CEC5] text-[#1D8F60] hover:bg-[#E3F6EE]/50 transition-colors bg-transparent"
+          className="w-full flex items-center justify-center gap-2 p-4 rounded-[18px] border border-dashed border-[#D4B8D0] text-[#A7009D] hover:bg-[#F5D6F5]/50 transition-colors bg-transparent"
         >
           <Plus className="w-4 h-4" />
           <span className="text-[13px] font-bold">Add New Address</span>
         </button>
       ) : (
-        <div className="bg-white rounded-[18px] border border-[#DDE8E3] p-4 space-y-4 animate-scale-in">
+        <div className="bg-white rounded-[18px] border border-[#EDE4EB] p-4 space-y-4 animate-scale-in">
           <div className="flex gap-2">
             {["Home", "Office", "Other"].map((label) => (
               <button
@@ -154,9 +183,9 @@ const AddressPicker = ({
                 onClick={() => setForm((prev) => ({ ...prev, label }))}
                 className="flex-1 py-2 rounded-xl text-[12px] font-bold transition-colors border"
                 style={{
-                  background: form.label === label ? "#0B3B2A" : "#FFFFFF",
-                  color: form.label === label ? "#FFFFFF" : "#3E6255",
-                  borderColor: form.label === label ? "#0B3B2A" : "#DDE8E3",
+                  background: form.label === label ? "#A7009D" : "#FFFFFF",
+                  color: form.label === label ? "#FFFFFF" : "#5C3A58",
+                  borderColor: form.label === label ? "#A7009D" : "#EDE4EB",
                 }}
               >
                 {label}
@@ -165,7 +194,7 @@ const AddressPicker = ({
           </div>
 
           <div>
-            <label className="text-[12px] font-bold text-[#081C13] mb-2 block">State</label>
+            <label className="text-[12px] font-bold text-[#1a0a18] mb-2 block">State</label>
             <div className="grid grid-cols-2 gap-2">
               {states.map((state) => (
                 <button
@@ -180,13 +209,13 @@ const AddressPicker = ({
                   style={{
                     opacity: state.active ? 1 : 0.5,
                     background: formState === state.name ? "rgba(39,174,120,0.08)" : "#FFFFFF",
-                    borderColor: formState === state.name ? "#27AE78" : "#DDE8E3",
-                    color: formState === state.name ? "#081C13" : "#3E6255",
+                    borderColor: formState === state.name ? "#A7009D" : "#EDE4EB",
+                    color: formState === state.name ? "#1a0a18" : "#5C3A58",
                   }}
                 >
                   {state.name}
                   {!state.active && (
-                    <span className="absolute top-1 right-1.5 text-[9px] font-bold text-[#C8731A] uppercase">Soon</span>
+                    <span className="absolute top-1 right-1.5 text-[9px] font-bold text-[#b45309] uppercase">Soon</span>
                   )}
                 </button>
               ))}
@@ -195,7 +224,7 @@ const AddressPicker = ({
 
           {formState && (
             <div className="animate-fade-in-up">
-              <label className="text-[12px] font-bold text-[#081C13] mb-2 block">City</label>
+              <label className="text-[12px] font-bold text-[#1a0a18] mb-2 block">City</label>
               <div className="grid grid-cols-2 gap-2">
                 {stateCities.map((city) => (
                   <button
@@ -205,13 +234,13 @@ const AddressPicker = ({
                     style={{
                       opacity: city.active ? 1 : 0.5,
                       background: formCity === city.name ? "rgba(39,174,120,0.08)" : "#FFFFFF",
-                      borderColor: formCity === city.name ? "#27AE78" : "#DDE8E3",
-                      color: formCity === city.name ? "#081C13" : "#3E6255",
+                      borderColor: formCity === city.name ? "#A7009D" : "#EDE4EB",
+                      color: formCity === city.name ? "#1a0a18" : "#5C3A58",
                     }}
                   >
                     {city.name}
                     {!city.active && (
-                      <span className="absolute top-1 right-1.5 text-[9px] font-bold text-[#C8731A] uppercase">Soon</span>
+                      <span className="absolute top-1 right-1.5 text-[9px] font-bold text-[#b45309] uppercase">Soon</span>
                     )}
                   </button>
                 ))}
@@ -248,17 +277,18 @@ const AddressPicker = ({
                 onChange={(event) => setForm((prev) => ({ ...prev, pincode: event.target.value }))}
                 className="rounded-xl h-[44px] text-[14px]"
               />
+              {error && <div className="text-[12px] text-red-500 font-semibold px-1">⚠️ {error}</div>}
               <div className="flex gap-2.5 pt-2">
                 <Button
                   variant="outline"
                   onClick={() => setShowForm(false)}
-                  className="flex-1 rounded-xl h-[44px] text-[13px] border-[#DDE8E3] text-[#3E6255]"
+                  className="flex-1 rounded-xl h-[44px] text-[13px] border-[#EDE4EB] text-[#5C3A58]"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleAdd}
-                  className="flex-1 rounded-xl h-[44px] text-[13px] bg-[#0B3B2A] text-white"
+                  className="flex-1 rounded-xl h-[44px] text-[13px] bg-[#A7009D] text-white"
                   disabled={!form.house || !form.area || !form.pincode || !formCity}
                 >
                   Save Address
@@ -272,7 +302,7 @@ const AddressPicker = ({
       {(showBackButton || showContinueButton) && (
         <div className="flex gap-3 mt-6">
           {showBackButton && onBack && (
-            <Button variant="outline" onClick={onBack} className="flex-1 rounded-2xl h-12 border-[#DDE8E3]">
+            <Button variant="outline" onClick={onBack} className="flex-1 rounded-2xl h-12 border-[#EDE4EB]">
               Back
             </Button>
           )}
@@ -280,7 +310,7 @@ const AddressPicker = ({
             <Button
               onClick={onNext}
               disabled={!selectedAddress}
-              className="flex-1 rounded-2xl h-[48px] bg-[#0B3B2A] hover:bg-[#155E41] text-white text-[14px] font-bold shadow-elevated"
+              className="flex-1 rounded-2xl h-[48px] bg-[#A7009D] hover:bg-[#6B0068] text-white text-[14px] font-bold shadow-elevated"
             >
               {continueLabel}
             </Button>

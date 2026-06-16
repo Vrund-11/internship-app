@@ -7,7 +7,6 @@ import { useBooking } from "@/context/BookingContext";
 import { useCity } from "@/context/CityContext";
 import { api } from "@/lib/api";
 import DateTimePicker from "@/features/booking/components/DateTimePicker";
-import AssignedPartnerCard from "@/features/booking/components/AssignedPartnerCard";
 import BookingSuccess from "@/features/booking/components/BookingSuccess";
 import SearchingPartner from "@/features/booking/components/SearchingPartner";
 import StepProgress from "@/features/booking/components/StepProgress";
@@ -17,6 +16,7 @@ import { getServiceCategoryName, groomingServices, vetOnCallServices, atClinicSe
 type SlotWindow = {
   slotStart: string;
   slotEnd: string;
+  available?: boolean;
 };
 
 const SLOT_RANGES: Array<[number, number]> = [
@@ -127,13 +127,11 @@ export default function ConfirmPage() {
     totalCompleted: number;
   } | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [noPartnersNearby, setNoPartnersNearby] = useState(false);
 
   const minDate = useMemo(
-    () =>
-      booking.service === ServiceType.GROOMING
-        ? addDays(new Date(), 1)
-        : new Date(),
-    [booking.service]
+    () => new Date(),
+    []
   );
 
   useEffect(() => {
@@ -165,8 +163,30 @@ export default function ConfirmPage() {
     }
   }, [booking.service, minDate, selectedDate, setSlot]);
 
+  const isClinicBooking = booking.service === ServiceType.VET_CLINIC;
+
+  const dateTimeSlots = useMemo(() => {
+    return slots.map((slot) => {
+      const label = `${formatTime(slot.slotStart)} - ${formatTime(slot.slotEnd)}`;
+      return {
+        label,
+        available: slot.available !== false,
+      };
+    });
+  }, [slots]);
+
   const fetchSlots = useCallback(async () => {
-    if (!booking.service || !booking.addressId || !city || !selectedDate) {
+    if (!booking.service || !city || !selectedDate) {
+      setSlots([]);
+      return;
+    }
+
+    // For clinic bookings, use clinicId; for others, use addressId
+    if (isClinicBooking && !booking.clinicId) {
+      setSlots([]);
+      return;
+    }
+    if (!isClinicBooking && !booking.addressId) {
       setSlots([]);
       return;
     }
@@ -180,8 +200,9 @@ export default function ConfirmPage() {
       const hasOnline = partners.some((partner) => partner.isOnline);
 
       if (!hasOnline) {
+        setNoPartnersNearby(true);
         const fallback = getDefaultSlotWindows(selectedDate);
-        setSlots(filterPastSlotWindows(fallback, selectedDate));
+        setSlots(filterPastSlotWindows(fallback, selectedDate).map(s => ({ ...s, available: false })));
         return;
       }
 
@@ -190,18 +211,23 @@ export default function ConfirmPage() {
           date: toDateOnly(selectedDate),
           serviceType: booking.service,
           cityId: city.id,
-          addressId: booking.addressId,
+          ...(isClinicBooking
+            ? { clinicId: booking.clinicId }
+            : { addressId: booking.addressId }),
         },
       });
 
       const nextSlots = (res.data.slots ?? []) as SlotWindow[];
+      const isNoPartners = Boolean(res.data.noPartnersNearby);
+      setNoPartnersNearby(isNoPartners);
+
       const fallback = getDefaultSlotWindows(selectedDate);
       const next = nextSlots.length > 0 ? nextSlots : fallback;
       setSlots(filterPastSlotWindows(next, selectedDate));
 
       if (selectedTime && !nextSlots.some((slot) => {
         const label = `${formatTime(slot.slotStart)} - ${formatTime(slot.slotEnd)}`;
-        return label === selectedTime;
+        return label === selectedTime && slot.available !== false;
       })) {
         setSelectedTime(null);
         setSlot(null);
@@ -212,19 +238,20 @@ export default function ConfirmPage() {
       setSelectedTime(null);
       setSlot(null);
       setError(err instanceof Error ? err.message : "Failed to load slots");
+      setNoPartnersNearby(false);
     } finally {
       setLoadingSlots(false);
     }
-  }, [booking.addressId, booking.service, city, selectedDate, selectedTime, setSlot]);
+  }, [booking.addressId, booking.clinicId, booking.service, city, isClinicBooking, selectedDate, selectedTime, setSlot]);
 
   useEffect(() => {
     fetchSlots();
   }, [fetchSlots]);
 
   const handleSelectTime = (label: string) => {
-    setSelectedTime(label);
     const slot = slotMap[label];
-    if (slot) {
+    if (slot && slot.available !== false) {
+      setSelectedTime(label);
       setSlot(slot);
     }
   };
@@ -264,9 +291,13 @@ export default function ConfirmPage() {
   }, [booking.service]);
 
   const createBooking = async () => {
-    if (!booking.service || !booking.petId || !booking.addressId || !city) {
+    if (!booking.service || !booking.petId || !city) {
       return;
     }
+
+    // For clinic bookings, clinicId is required; for others, addressId is required
+    if (isClinicBooking && !booking.clinicId) return;
+    if (!isClinicBooking && !booking.addressId) return;
 
     const slot = booking.slotStart && booking.slotEnd
       ? { slotStart: booking.slotStart, slotEnd: booking.slotEnd }
@@ -281,7 +312,8 @@ export default function ConfirmPage() {
       const res = await api.post("/booking", {
         serviceType: booking.service,
         petId: booking.petId,
-        addressId: booking.addressId,
+        addressId: isClinicBooking ? null : booking.addressId,
+        clinicId: isClinicBooking ? booking.clinicId : null,
         cityId: city.id,
         slotStart: slot.slotStart,
         slotEnd: slot.slotEnd,
@@ -314,7 +346,8 @@ export default function ConfirmPage() {
     setIsSuccess(true);
   };
 
-  if (!selectedPet || !selectedAddress) {
+  // For clinic bookings, we don't need an address — just a pet
+  if (!selectedPet || (!isClinicBooking && !selectedAddress)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center text-sm text-muted-foreground">
         Missing booking details. Please restart the flow.
@@ -326,25 +359,33 @@ export default function ConfirmPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <div className="max-w-lg mx-auto w-full">
-          <SearchingPartner onFound={() => setSearching(false)} />
+          <SearchingPartner
+            onFound={() => {
+              setSearching(false);
+              setIsSuccess(true);
+            }}
+          />
         </div>
       </div>
     );
   }
 
-  if (isSuccess) {
+  if (isSuccess || assignedPartner) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="max-w-lg mx-auto">
-          <BookingSuccess
-            pets={[selectedPet]}
-            services={selectedServices}
-            address={selectedAddress}
-            selectedDate={selectedDate}
-            selectedTime={selectedTime ?? undefined}
-          />
-        </div>
-      </div>
+      <BookingSuccess
+        pets={[selectedPet]}
+        services={selectedServices}
+        address={selectedAddress}
+        selectedDate={selectedDate}
+        selectedTime={selectedTime ?? undefined}
+        bookingId={booking.bookingId}
+        partner={assignedPartner ? {
+          name: assignedPartner.name,
+          rating: assignedPartner.rating,
+          experience: Math.max(1, Math.round(assignedPartner.totalCompleted / 20)),
+          specialization: "Certified Pet Care Specialist",
+        } : null}
+      />
     );
   }
 
@@ -363,37 +404,23 @@ export default function ConfirmPage() {
       </div>
 
       <div className="max-w-lg mx-auto pb-10">
-        {!assignedPartner ? (
-          <DateTimePicker
-            selectedDate={selectedDate}
-            selectedTime={selectedTime}
-            timeSlots={loadingSlots ? [] : timeSlots}
-            onSelectDate={(date) => {
-              setSelectedDate(date);
-              setSelectedTime(null);
-              setSlot(null);
-            }}
-            onSelectTime={handleSelectTime}
-            onNext={createBooking}
-            showBackButton={false}
-            continueLabel={submitting ? "Creating..." : "Create booking"}
-            minDate={minDate}
-            allowFallback={false}
-          />
-        ) : (
-          <AssignedPartnerCard
-            partner={{
-              name: assignedPartner.name,
-              specialization: "Certified Pet Care Specialist",
-              experience: Math.max(1, Math.round(assignedPartner.totalCompleted / 20)),
-              rating: assignedPartner.rating,
-              avatar: "🐾",
-              phone: null,
-              eta: "25-35 mins",
-            }}
-            onContinue={handleConfirm}
-          />
-        )}
+        <DateTimePicker
+          selectedDate={selectedDate}
+          selectedTime={selectedTime}
+          timeSlots={loadingSlots ? [] : dateTimeSlots}
+          onSelectDate={(date) => {
+            setSelectedDate(date);
+            setSelectedTime(null);
+            setSlot(null);
+          }}
+          onSelectTime={handleSelectTime}
+          onNext={createBooking}
+          showBackButton={false}
+          continueLabel={submitting ? "Creating..." : "Create booking"}
+          minDate={minDate}
+          allowFallback={false}
+          noPartnersNearby={noPartnersNearby}
+        />
 
         {!loadingSlots && slots.length === 0 && !assignedPartner ? (
           <p className="px-4 text-xs text-muted-foreground">
@@ -403,7 +430,7 @@ export default function ConfirmPage() {
 
         {booking.service === ServiceType.GROOMING ? (
           <p className="px-4 text-xs text-muted-foreground">
-            Grooming requires at least 1 day advance scheduling.
+            Grooming slots are subject to partner availability.
           </p>
         ) : null}
 

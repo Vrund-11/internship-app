@@ -2,74 +2,8 @@ import { prisma } from "../utils/prisma";
 import { BookingStatus, ServiceType } from "@canovet/shared";
 import { getDistanceKm } from "../utils/geo";
 import { generateSlots, SlotWindow } from "../utils/slots";
+
 const MAX_DISTANCE_KM = 10;
-
-/**
- * Checks whether at least ONE online, verified, nearby partner
- * is free at the given slot time for the requested service + city.
- */
-async function isSlotAvailable(
-  slot: SlotWindow,
-  cityId: string,
-  serviceType: string,
-  addressId: string
-): Promise<boolean> {
-  const partners = await prisma.partner.findMany({
-    where: {
-      isOnline: true,
-      isVerified: true,
-      cityId,
-    },
-    include: { services: true },
-  });
-
-  const eligible = partners.filter((p) =>
-    p.services.some((s) => s.serviceType === serviceType)
-  );
-
-  if (eligible.length === 0) return false;
-
-  // Get address coordinates for distance check
-  const address = await prisma.address.findUnique({
-    where: { id: addressId },
-    select: { latitude: true, longitude: true },
-  });
-
-  if (!address) return false;
-
-  for (const partner of eligible) {
-    // Distance check
-    const distance = getDistanceKm(
-      address.latitude,
-      address.longitude,
-      partner.latitude,
-      partner.longitude
-    );
-
-    if (distance > MAX_DISTANCE_KM) continue;
-
-    // Time conflict check — windows overlap when start < otherEnd and end > otherStart
-    const conflict = await prisma.booking.findFirst({
-      where: {
-        partnerId: partner.id,
-        status: {
-          in: [BookingStatus.CONFIRMED, BookingStatus.AWAITING_PAYMENT],
-        },
-        slotStart: {
-          lt: slot.slotEnd,
-        },
-        slotEnd: {
-          gt: slot.slotStart,
-        },
-      },
-      select: { id: true },
-    });
-
-    if (!conflict) return true; // At least one partner is free
-  }
-
-  return false;
-}
 
 export const slotService = {
   /**
@@ -79,40 +13,157 @@ export const slotService = {
     date: Date,
     cityId: string,
     serviceType: string,
-    addressId: string
-  ): Promise<SlotWindow[]> {
-    if (serviceType === ServiceType.GROOMING) {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const selected = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate()
-      );
-
-      if (selected.getTime() <= today.getTime()) {
-        return [];
-      }
-    }
-
+    addressId: string | null,
+    clinicId: string | null
+  ): Promise<{ slots: Array<SlotWindow & { available: boolean }>; noPartnersNearby: boolean }> {
     const allSlots = generateSlots(date);
-
-    // Filter out past slots (if the date is today)
     const now = new Date();
-    const futureSlots = allSlots.filter(
-      (slot) => slot.slotStart.getTime() > now.getTime()
-    );
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
 
-    if (futureSlots.length === 0) return [];
+    let noPartnersNearby = false;
 
-    const available: SlotWindow[] = [];
+    if (serviceType === ServiceType.VET_CLINIC) {
+      if (!clinicId) return { slots: [], noPartnersNearby: false };
 
-    for (const slot of futureSlots) {
-      const ok = await isSlotAvailable(slot, cityId, serviceType, addressId);
+      const clinic = await prisma.partner.findUnique({
+        where: { id: clinicId },
+        include: { services: true },
+      });
 
-      if (ok) available.push(slot);
+      if (!clinic || !clinic.isVerified || !clinic.isOnline) {
+        noPartnersNearby = true;
+      } else if (clinic.cityId !== cityId) {
+        noPartnersNearby = true;
+      } else {
+        const hasClinicService = clinic.services.some(
+          (service) => service.serviceType === ServiceType.VET_CLINIC
+        );
+        if (!hasClinicService) {
+          noPartnersNearby = true;
+        }
+      }
+
+      if (noPartnersNearby || !clinic) {
+        return {
+          slots: allSlots.map((slot) => ({ ...slot, available: false })),
+          noPartnersNearby: true,
+        };
+      }
+
+      // Pre-fetch clinic bookings for the day to check conflicts in-memory
+      const clinicBookings = await prisma.booking.findMany({
+        where: {
+          partnerId: clinic.id,
+          status: {
+            in: [BookingStatus.CONFIRMED, BookingStatus.AWAITING_PAYMENT],
+          },
+          slotStart: { gte: startOfDay },
+          slotEnd: { lte: endOfDay },
+        },
+        select: { slotStart: true, slotEnd: true },
+      });
+
+      const slots = allSlots.map((slot) => {
+        const isFuture = slot.slotStart.getTime() > now.getTime();
+        if (!isFuture) {
+          return { ...slot, available: false };
+        }
+
+        const conflictCount = clinicBookings.filter(
+          (b) => slot.slotStart < b.slotEnd && slot.slotEnd > b.slotStart
+        ).length;
+        return { ...slot, available: conflictCount < 5 };
+      });
+
+      return { slots, noPartnersNearby: false };
+    } else {
+      const isGrooming = serviceType === ServiceType.GROOMING;
+
+      if (isGrooming && !addressId) return { slots: [], noPartnersNearby: false };
+
+      // Fetch address coords if grooming
+      let lat = 23.0225;
+      let lng = 72.5714;
+      if (isGrooming && addressId) {
+        const address = await prisma.address.findUnique({
+          where: { id: addressId },
+          select: { latitude: true, longitude: true },
+        });
+        if (!address) return { slots: [], noPartnersNearby: false };
+        lat = address.latitude;
+        lng = address.longitude;
+      }
+
+      // Fetch eligible partners
+      const partners = await prisma.partner.findMany({
+        where: {
+          isOnline: true,
+          isVerified: true,
+          cityId,
+          services: {
+            some: { serviceType },
+          },
+        },
+      });
+
+      if (partners.length === 0) {
+        noPartnersNearby = true;
+      } else {
+        // Distance check in-memory (Only for GROOMING)
+        const nearbyPartners = isGrooming
+          ? partners.filter((p) => {
+              const distance = getDistanceKm(lat, lng, p.latitude, p.longitude);
+              return distance <= MAX_DISTANCE_KM;
+            })
+          : partners;
+
+        if (nearbyPartners.length === 0) {
+          noPartnersNearby = true;
+        } else {
+          const nearbyPartnerIds = nearbyPartners.map((p) => p.id);
+
+          // Pre-fetch bookings for all nearby partners on that day
+          const dayBookings = await prisma.booking.findMany({
+            where: {
+              partnerId: { in: nearbyPartnerIds },
+              status: {
+                in: [BookingStatus.CONFIRMED, BookingStatus.AWAITING_PAYMENT],
+              },
+              slotStart: { gte: startOfDay },
+              slotEnd: { lte: endOfDay },
+            },
+            select: { partnerId: true, slotStart: true, slotEnd: true },
+          });
+
+          const slots = allSlots.map((slot) => {
+            const isFuture = slot.slotStart.getTime() > now.getTime();
+            if (!isFuture) {
+              return { ...slot, available: false };
+            }
+
+            // A slot is available if there is AT LEAST ONE nearby partner without conflict
+            const hasFreePartner = nearbyPartners.some((partner) => {
+              const partnerConflicts = dayBookings.filter((b) => b.partnerId === partner.id);
+              const hasConflict = partnerConflicts.some(
+                (b) => slot.slotStart < b.slotEnd && slot.slotEnd > b.slotStart
+              );
+              return !hasConflict;
+            });
+
+            return { ...slot, available: hasFreePartner };
+          });
+
+          return { slots, noPartnersNearby: false };
+        }
+      }
+
+      return {
+        slots: allSlots.map((slot) => ({ ...slot, available: false })),
+        noPartnersNearby: true,
+      };
     }
-
-    return available;
   },
 };

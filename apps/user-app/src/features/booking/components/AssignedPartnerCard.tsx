@@ -21,30 +21,30 @@ const AssignedPartnerCard = ({ partner, onContinue }: AssignedPartnerCardProps) 
 
   return (
     <div className="px-4 py-8 animate-fade-in-up">
-      <div className="text-[12px] text-[#3E6255] font-bold uppercase tracking-[0.8px] mb-3 text-center">Partner Assigned</div>
+      <div className="text-[12px] text-[#5C3A58] font-bold uppercase tracking-[0.8px] mb-3 text-center">Partner Assigned</div>
 
-      <div className="bg-white rounded-[24px] border border-[#DDE8E3] p-5 mb-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-        <div className="flex items-start gap-4 border-b border-[#F0F5F2] pb-5 mb-5">
-          <div className="w-[60px] h-[60px] rounded-[18px] bg-[#E3F6EE] flex items-center justify-center text-[30px] shrink-0 border border-[#27AE78]/20">
+      <div className="bg-white rounded-[24px] border border-[#EDE4EB] p-5 mb-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+        <div className="flex items-start gap-4 border-b border-[#F3EEF1] pb-5 mb-5">
+          <div className="w-[60px] h-[60px] rounded-[18px] bg-[#F5D6F5] flex items-center justify-center text-[30px] shrink-0 border border-[#A7009D]/20">
             {partner.avatar}
           </div>
           <div className="flex-1 pt-1">
-            <h3 className="font-serif text-[18px] text-[#081C13] leading-tight flex items-center gap-1.5">
+            <h3 className="font-bold text-[18px] text-[#1a0a18] leading-tight flex items-center gap-1.5">
               {partner.name}
               <ShieldCheck className="w-4 h-4 text-[#2E7BD4]" />
             </h3>
-            <p className="text-[13px] text-[#3E6255] mt-0.5">{partner.specialization}</p>
+            <p className="text-[13px] text-[#5C3A58] mt-0.5">{partner.specialization}</p>
             
             <div className="flex flex-wrap gap-2 mt-2.5">
-              <span className="inline-flex items-center gap-1 bg-[#FFF4F0] px-2 py-0.5 rounded-md text-[11px] font-bold text-[#C8731A]">
-                <Star className="w-3 h-3 text-[#F5922A] fill-[#F5922A]" />
+              <span className="inline-flex items-center gap-1 bg-[#FFF4F0] px-2 py-0.5 rounded-md text-[11px] font-bold text-[#b45309]">
+                <Star className="w-3 h-3 text-[#b45309] fill-[#b45309]" />
                 {partner.rating}
               </span>
-              <span className="bg-[#F0F5F2] px-2 py-0.5 rounded-md text-[11px] font-bold text-[#3E6255]">
+              <span className="bg-[#F3EEF1] px-2 py-0.5 rounded-md text-[11px] font-bold text-[#5C3A58]">
                 {partner.experience} yrs exp
               </span>
               {partner.eta ? (
-                <span className="bg-[#E3F6EE] px-2 py-0.5 rounded-md text-[11px] font-bold text-[#1D8F60]">
+                <span className="bg-[#F5D6F5] px-2 py-0.5 rounded-md text-[11px] font-bold text-[#A7009D]">
                   ETA {partner.eta}
                 </span>
               ) : null}
@@ -54,11 +54,11 @@ const AssignedPartnerCard = ({ partner, onContinue }: AssignedPartnerCardProps) 
 
         {partner.phone ? (
           <div>
-            <div className="text-[12px] text-[#3E6255] font-semibold mb-2">Contact Partner</div>
+            <div className="text-[12px] text-[#5C3A58] font-semibold mb-2">Contact Partner</div>
             <div className="grid grid-cols-3 gap-2">
               <a
                 href={`tel:${partner.phone}`}
-                className="flex flex-col items-center justify-center gap-1.5 rounded-[16px] border border-[#DDE8E3] bg-[#F0F5F2]/50 h-[72px] text-[12px] font-bold text-[#081C13] transition-colors hover:bg-[#E3F6EE] hover:border-[#27AE78]/30"
+                className="flex flex-col items-center justify-center gap-1.5 rounded-[16px] border border-[#EDE4EB] bg-[#F3EEF1]/50 h-[72px] text-[12px] font-bold text-[#1a0a18] transition-colors hover:bg-[#F5D6F5] hover:border-[#A7009D]/30"
               >
                 <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
                   <Phone className="w-4 h-4 text-[#2E7BD4]" />
@@ -67,10 +67,10 @@ const AssignedPartnerCard = ({ partner, onContinue }: AssignedPartnerCardProps) 
               </a>
               <a
                 href={`sms:${partner.phone}`}
-                className="flex flex-col items-center justify-center gap-1.5 rounded-[16px] border border-[#DDE8E3] bg-[#F0F5F2]/50 h-[72px] text-[12px] font-bold text-[#081C13] transition-colors hover:bg-[#E3F6EE] hover:border-[#27AE78]/30"
+                className="flex flex-col items-center justify-center gap-1.5 rounded-[16px] border border-[#EDE4EB] bg-[#F3EEF1]/50 h-[72px] text-[12px] font-bold text-[#1a0a18] transition-colors hover:bg-[#F5D6F5] hover:border-[#A7009D]/30"
               >
                 <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                  <MessageSquare className="w-4 h-4 text-[#F5922A]" />
+                  <MessageSquare className="w-4 h-4 text-[#b45309]" />
                 </div>
                 SMS
               </a>
@@ -78,18 +78,18 @@ const AssignedPartnerCard = ({ partner, onContinue }: AssignedPartnerCardProps) 
                 href={`https://wa.me/${whatsappNumber}`}
                 target="_blank"
                 rel="noreferrer"
-                className="flex flex-col items-center justify-center gap-1.5 rounded-[16px] border border-[#DDE8E3] bg-[#F0F5F2]/50 h-[72px] text-[12px] font-bold text-[#081C13] transition-colors hover:bg-[#E3F6EE] hover:border-[#27AE78]/30"
+                className="flex flex-col items-center justify-center gap-1.5 rounded-[16px] border border-[#EDE4EB] bg-[#F3EEF1]/50 h-[72px] text-[12px] font-bold text-[#1a0a18] transition-colors hover:bg-[#F5D6F5] hover:border-[#A7009D]/30"
               >
                 <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                  <MessageCircle className="w-4 h-4 text-[#27AE78]" />
+                  <MessageCircle className="w-4 h-4 text-[#A7009D]" />
                 </div>
                 WhatsApp
               </a>
             </div>
           </div>
         ) : (
-          <div className="bg-[#FEF1E4] rounded-[14px] p-3 border border-[#C8731A]/20">
-            <p className="text-[12px] text-[#C8731A] font-medium text-center">
+          <div className="bg-[#FEF3C7] rounded-[14px] p-3 border border-[#b45309]/20">
+            <p className="text-[12px] text-[#b45309] font-medium text-center">
               Partner contact details will appear once the booking is fully confirmed.
             </p>
           </div>
@@ -98,7 +98,7 @@ const AssignedPartnerCard = ({ partner, onContinue }: AssignedPartnerCardProps) 
 
       <Button 
         onClick={onContinue} 
-        className="w-full rounded-[18px] h-[52px] bg-[#0B3B2A] hover:bg-[#155E41] text-white font-bold text-[15px] shadow-elevated"
+        className="w-full rounded-[18px] h-[52px] bg-[#A7009D] hover:bg-[#6B0068] text-white font-bold text-[15px] shadow-elevated"
       >
         View Booking Summary
       </Button>

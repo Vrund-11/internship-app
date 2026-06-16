@@ -9,7 +9,7 @@ import AssistantChat from "./AssistantChat";
 const HIDE_ON = ["/login", "/select-city", "/"];
 
 export type AskCanoContext = {
-  intent?: "report" | "feedback" | "help" | "reschedule";
+  intent?: "report" | "feedback" | "help" | "reschedule" | "complain";
   bookingId?: string;
   category?: string;
 };
@@ -85,7 +85,7 @@ export default function AssistantFab() {
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-serif text-lg leading-none">Ask Cano</p>
+              <p className="font-bold text-lg leading-none">Ask Cano</p>
               <p className="text-[11px] text-muted-foreground">Tap to book, no typing needed</p>
             </div>
           </div>

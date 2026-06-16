@@ -68,6 +68,20 @@ export interface Clinic {
   city: string;
 }
 
+export interface ClinicAddress {
+  id: string;
+  partnerId: string;
+  name: string;
+  text: string;
+  latitude: number;
+  longitude: number;
+  house: string;
+  area: string;
+  city: string;
+  state: string;
+  pincode: string;
+}
+
 export interface LocationOption {
   name: string;
   active: boolean;
@@ -90,6 +104,7 @@ export interface Booking {
   pets: Pet[];
   services: ServiceItem[];
   address: Address;
+  clinicAddress?: ClinicAddress | null;
   date: string;
   time: string;
   status: "upcoming" | "in-progress" | "completed" | "cancelled";

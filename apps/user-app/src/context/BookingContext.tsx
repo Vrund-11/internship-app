@@ -7,6 +7,7 @@ type BookingState = {
   service: ServiceType | null;
   petId: string | null;
   addressId: string | null;
+  clinicId: string | null;
   slotStart: string | null;
   slotEnd: string | null;
   bookingId: string | null;
@@ -20,6 +21,7 @@ type BookingContextType = {
   setService: (service: ServiceType) => void;
   setPet: (id: string) => void;
   setAddress: (id: string) => void;
+  setClinic: (id: string) => void;
   setSlot: (slot: { slotStart: string; slotEnd: string } | null) => void;
   setBookingId: (id: string | null) => void;
   setAssignment: (input: {
@@ -44,6 +46,7 @@ export const BookingProvider = ({
     service: null,
     petId: null,
     addressId: null,
+    clinicId: null,
     slotStart: null,
     slotEnd: null,
     bookingId: null,
@@ -60,6 +63,9 @@ export const BookingProvider = ({
 
   const setAddress = (addressId: string) =>
     setBooking((prev) => ({ ...prev, addressId }));
+
+  const setClinic = (clinicId: string) =>
+    setBooking((prev) => ({ ...prev, clinicId, addressId: null }));
 
   const setSlot = (slot: { slotStart: string; slotEnd: string } | null) =>
     setBooking((prev) => ({
@@ -101,6 +107,7 @@ export const BookingProvider = ({
       service: null,
       petId: null,
       addressId: null,
+      clinicId: null,
       slotStart: null,
       slotEnd: null,
       bookingId: null,
@@ -116,6 +123,7 @@ export const BookingProvider = ({
         setService,
         setPet,
         setAddress,
+        setClinic,
         setSlot,
         setBookingId,
         setAssignment,

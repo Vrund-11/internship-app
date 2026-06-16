@@ -34,13 +34,22 @@ export default function ProtectedLayout({
 
     const validateAndHydrateCity = async () => {
       try {
-        const [addressRes, cityRes] = await Promise.all([
-          api.get("/booking/addresses"),
-          api.get("/cities"),
-        ]);
+        // 1. Fetch cities (load from localStorage cache if available and < 1 hour old)
+        let cities: { id: string; name: string; state: string }[] = [];
+        const cachedCities = localStorage.getItem("active_cities");
+        const cacheTime = localStorage.getItem("active_cities_time");
+        const now = Date.now();
 
-        const cities = (cityRes.data ?? []) as { id: string; name: string; state: string }[];
+        if (cachedCities && cacheTime && now - parseInt(cacheTime) < 3600000) {
+          cities = JSON.parse(cachedCities);
+        } else {
+          const cityRes = await api.get("/cities");
+          cities = (cityRes.data ?? []) as { id: string; name: string; state: string }[];
+          localStorage.setItem("active_cities", JSON.stringify(cities));
+          localStorage.setItem("active_cities_time", now.toString());
+        }
 
+        // 2. Hydrate city (only query addresses if city is not set)
         if (city) {
           // Check if current city.id exists in the active cities list
           const exists = cities.some((c) => c.id === city.id);
@@ -58,6 +67,7 @@ export default function ProtectedLayout({
           }
         } else {
           // No city selected yet, try to hydrate from user addresses
+          const addressRes = await api.get("/booking/addresses");
           const addresses = (addressRes.data?.addresses ?? []) as { city?: string }[];
           const cityName = addresses[0]?.city?.trim();
 
@@ -91,7 +101,7 @@ export default function ProtectedLayout({
   if (loading || cityLoading || cityHydrating) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="h-10 w-10 rounded-full border-2 border-[#DDE8E3] border-t-[#0B3B2A] animate-spin" />
+        <div className="h-10 w-10 rounded-full border-2 border-[#EDE4EB] border-t-[#A7009D] animate-spin" />
       </div>
     );
   }

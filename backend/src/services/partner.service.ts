@@ -106,6 +106,15 @@ export const partnerService = {
         await partnerRepository.ensureService(partner.id, serviceType);
       }
 
+      if (row.services.includes("VET_CLINIC")) {
+        await partnerRepository.ensureClinicAddress(
+          partner.id,
+          row.name,
+          row.latitude,
+          row.longitude
+        );
+      }
+
       partners.push(partner);
     }
 

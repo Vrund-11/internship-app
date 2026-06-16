@@ -22,6 +22,7 @@ type BookingItem = BookingForFollowUp & {
   review?: { id: string; rating: number; comment?: string | null } | null;
   complaints?: { id: string; message: string; status: string }[];
   amount?: number;
+  rescheduleLogs?: { id: string; createdAt: string }[];
 };
 
 const statusColors: Record<string, string> = {
@@ -46,6 +47,31 @@ const serviceEmoji: Record<string, string> = {
   GROOMING: "Grooming",
   VET_ON_CALL: "Vet",
   VET_CLINIC: "Clinic",
+};
+
+// Desktop: service-specific colors
+const serviceDesktopColors: Record<string, { border: string; badge: string; badgeText: string; icon: string; bgTint: string }> = {
+  GROOMING: {
+    border: "border-[#FF10F0]/20",
+    badge: "bg-[#FF10F0]/10 border-[#FF10F0]/30",
+    badgeText: "text-[#FF10F0]",
+    icon: "text-[#FF10F0]",
+    bgTint: "bg-[#FF10F0]/10",
+  },
+  VET_ON_CALL: {
+    border: "border-[#0047AB]/20",
+    badge: "bg-[#0047AB]/10 border-[#0047AB]/30",
+    badgeText: "text-[#0047AB]",
+    icon: "text-[#0047AB]",
+    bgTint: "bg-[#0047AB]/10",
+  },
+  VET_CLINIC: {
+    border: "border-[#FF8C00]/20",
+    badge: "bg-[#FF8C00]/10 border-[#FF8C00]/30",
+    badgeText: "text-[#FF8C00]",
+    icon: "text-[#FF8C00]",
+    bgTint: "bg-[#FF8C00]/10",
+  },
 };
 
 type TabKey = "upcoming" | "past" | "followups";
@@ -124,7 +150,8 @@ export default function BookingsPage() {
     }
   };
 
-  const renderBookingCard = (booking: BookingItem, index: number, showRebook: boolean) => (
+  /* ===== MOBILE CARD (unchanged) ===== */
+  const renderMobileBookingCard = (booking: BookingItem, index: number, showRebook: boolean) => (
     <div
       key={booking.id}
       className="bg-card rounded-3xl border border-border p-4 shadow-card animate-fade-in-up"
@@ -142,10 +169,18 @@ export default function BookingsPage() {
         <span
           className={cn(
             "rounded-full px-2.5 py-1 text-[10px] font-medium capitalize",
-            statusColors[booking.status] ?? "bg-muted text-muted-foreground"
+            booking.status === "CANCELLED"
+              ? "bg-destructive/10 text-destructive"
+              : (booking.status === "COMPLETED" && booking.rescheduleLogs && booking.rescheduleLogs.length > 0)
+              ? "bg-purple-100 text-purple-700 border border-purple-200/50"
+              : (statusColors[booking.status] ?? "bg-muted text-muted-foreground")
           )}
         >
-          {statusLabels[booking.status] ?? booking.status}
+          {booking.status === "CANCELLED"
+            ? "Cancelled"
+            : (booking.status === "COMPLETED" && booking.rescheduleLogs && booking.rescheduleLogs.length > 0)
+            ? "Rescheduled"
+            : (statusLabels[booking.status] ?? booking.status)}
         </span>
       </div>
 
@@ -215,8 +250,121 @@ export default function BookingsPage() {
           </Button>
         ) : null}
       </div>
+      <div className="mt-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => {
+            window.dispatchEvent(
+              new CustomEvent("open-ask-cano", {
+                detail: { intent: "feedback", bookingId: booking.id },
+              })
+            );
+          }}
+          className="w-full rounded-full text-xs bg-[rgba(167,0,157,0.06)] text-primary hover:bg-[rgba(167,0,157,0.1)] border border-primary/10"
+        >
+          Review or Complain?
+        </Button>
+      </div>
     </div>
   );
+
+  /* ===== DESKTOP CARD (new design md) ===== */
+  const renderDesktopBookingCard = (booking: BookingItem, index: number, isPast: boolean) => {
+    const colors = serviceDesktopColors[booking.serviceType] ?? serviceDesktopColors.GROOMING;
+    const serviceLabel = booking.serviceType === "VET_ON_CALL" ? "Vet on Call" : booking.serviceType === "VET_CLINIC" ? "At Clinic" : "Grooming";
+
+    return (
+      <div
+        key={booking.id}
+        className={cn(
+          "bg-white rounded-xl custom-shadow hover-shadow transition-all duration-300 overflow-hidden flex flex-col h-full border-2",
+          colors.border,
+          isPast && "opacity-80"
+        )}
+        style={{ animationDelay: `${index * 80}ms` }}
+      >
+        <div className="p-4 flex flex-col gap-4 flex-1">
+          {/* Badge + Icon */}
+          <div className="flex justify-between items-start">
+            <span className={cn("px-3 py-1 font-label-sm rounded-full uppercase tracking-wider border", colors.badge, colors.badgeText)}>
+              {serviceLabel}
+            </span>
+            {isPast && (
+              <>
+                {booking.status === "CANCELLED" ? (
+                  <span className="px-2 py-0.5 bg-rose-500/10 text-rose-600 font-label-sm rounded-full uppercase tracking-wider border border-rose-300/30">
+                    Cancelled
+                  </span>
+                ) : booking.status === "FAILED" ? (
+                  <span className="px-2 py-0.5 bg-rose-500/10 text-rose-600 font-label-sm rounded-full uppercase tracking-wider border border-rose-300/30">
+                    Failed
+                  </span>
+                ) : (booking.rescheduleLogs && booking.rescheduleLogs.length > 0) ? (
+                  <span className="px-2 py-0.5 bg-purple-500/10 text-purple-600 font-label-sm rounded-full uppercase tracking-wider border border-purple-300/30">
+                    Rescheduled
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 bg-[#22c55e]/10 text-[#22c55e] font-label-sm rounded-full uppercase tracking-wider border border-[#22c55e]/30">
+                    Completed
+                  </span>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Details */}
+          <div>
+            <h3 className="font-headline-sm text-[#151c27] mb-1">
+              {booking.serviceType.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())}
+            </h3>
+            <p className="font-body-md text-[#54414d]">
+              {booking.partner?.name || "Partner pending"}
+            </p>
+          </div>
+
+          {/* Date + Time */}
+          <div className="flex flex-col gap-2 pt-2">
+            <div className="flex items-center gap-2 text-[#54414d]">
+              <Calendar className="w-4 h-4" />
+              <span className="font-body-md">{format(new Date(booking.slotStart), "MMMM d, yyyy")}</span>
+            </div>
+            <div className="flex items-center gap-2 text-[#54414d]">
+              <Clock className="w-4 h-4" />
+              <span className="font-body-md">{formatSlotTime(booking.slotStart, booking.slotEnd)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className={cn("mt-auto p-4 border-t border-[#d9c0ce] flex justify-between items-center gap-2", colors.bgTint)}>
+          <span className="font-label-md text-[#54414d] shrink-0">
+            {booking.amount ? `₹${booking.amount}` : "-"}
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                window.dispatchEvent(
+                  new CustomEvent("open-ask-cano", {
+                    detail: { intent: "feedback", bookingId: booking.id },
+                  })
+                );
+              }}
+              className="pill-button border border-[#6c005f] text-[#6c005f] hover:bg-[#6c005f]/5 px-3 py-2 font-label-md flex items-center gap-2 active:scale-95 transition-all bg-transparent"
+            >
+              Review or Complain
+            </button>
+            <button
+              onClick={() => router.push(`/bookings/${booking.id}`)}
+              className="pill-button bg-[#6c005f] text-white px-4 py-2 font-label-md flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all"
+            >
+              View Details
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const renderEmpty = (text: string) => (
     <div className="py-12 text-center">
@@ -228,10 +376,17 @@ export default function BookingsPage() {
     </div>
   );
 
+  const desktopTabs: { key: TabKey; label: string; count: number }[] = [
+    { key: "upcoming", label: "Upcoming", count: upcoming.length },
+    { key: "past", label: "Past", count: past.length },
+    { key: "followups", label: "For You", count: followUps.length },
+  ];
+
   return (
     <AppShell>
-      <div className="mx-auto max-w-3xl px-4 py-6">
-        <h1 className="mb-1 font-serif text-xl text-foreground lg:text-2xl">My Bookings</h1>
+      {/* ===== MOBILE VIEW (unchanged) ===== */}
+      <div className="md:hidden mx-auto max-w-3xl px-4 py-6">
+        <h1 className="mb-1 font-bold text-xl text-foreground lg:text-2xl">My Bookings</h1>
         <p className="mb-5 text-sm text-muted-foreground">
           Track your pet care appointments.
         </p>
@@ -251,42 +406,27 @@ export default function BookingsPage() {
         {!loading && !error ? (
           <>
             <div className="mb-4 grid grid-cols-3 rounded-full bg-muted p-1">
-              <button
-                onClick={() => setActiveTab("upcoming")}
-                className={cn(
-                  "rounded-full px-3 py-2 text-xs font-medium transition-colors",
-                  activeTab === "upcoming"
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground"
-                )}
-              >
-                Upcoming ({upcoming.length})
-              </button>
-              <button
-                onClick={() => setActiveTab("past")}
-                className={cn(
-                  "rounded-full px-3 py-2 text-xs font-medium transition-colors",
-                  activeTab === "past"
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground"
-                )}
-              >
-                Past ({past.length})
-              </button>
-              <button
-                onClick={() => setActiveTab("followups")}
-                className={cn(
-                  "rounded-full px-3 py-2 text-xs font-medium transition-colors",
-                  activeTab === "followups"
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground"
-                )}
-              >
-                <span className="inline-flex items-center gap-1">
-                  <Bell className="h-3 w-3" />
-                  For You ({followUps.length})
-                </span>
-              </button>
+              {desktopTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={cn(
+                    "rounded-full px-3 py-2 text-xs font-medium transition-colors",
+                    activeTab === tab.key
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  {tab.key === "followups" ? (
+                    <span className="inline-flex items-center gap-1">
+                      <Bell className="h-3 w-3" />
+                      For You ({tab.count})
+                    </span>
+                  ) : (
+                    `${tab.label} (${tab.count})`
+                  )}
+                </button>
+              ))}
             </div>
 
             {activeTab === "upcoming" ? (
@@ -295,7 +435,7 @@ export default function BookingsPage() {
               ) : (
                 <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
                   {upcoming.map((booking, index) =>
-                    renderBookingCard(booking, index, false)
+                    renderMobileBookingCard(booking, index, false)
                   )}
                 </div>
               )
@@ -307,7 +447,7 @@ export default function BookingsPage() {
               ) : (
                 <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
                   {past.map((booking, index) =>
-                    renderBookingCard(booking, index, true)
+                    renderMobileBookingCard(booking, index, true)
                   )}
                 </div>
               )
@@ -373,6 +513,144 @@ export default function BookingsPage() {
             ) : null}
           </>
         ) : null}
+      </div>
+
+      {/* ===== DESKTOP VIEW (design md) ===== */}
+      <div className="hidden md:block" style={{ background: "#F9FAFB" }}>
+        <main className="max-w-[1280px] mx-auto px-10 py-8">
+          {/* Page Header */}
+          <div className="mb-8">
+            <h1 className="font-headline-lg text-[#151c27] mb-1">My Bookings</h1>
+            <p className="font-body-lg text-[#54414d]">Manage your pet&apos;s healthcare journey and upcoming appointments.</p>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex border-b border-[#d9c0ce] mb-8 overflow-x-auto no-scrollbar">
+            {desktopTabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={cn(
+                  "px-6 py-4 font-label-md whitespace-nowrap transition-colors",
+                  activeTab === tab.key
+                    ? "border-b-2 border-[#6c005f] text-[#6c005f]"
+                    : "text-[#54414d] hover:text-[#6c005f]"
+                )}
+              >
+                {tab.label} ({tab.count})
+              </button>
+            ))}
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center py-16">
+              <Loader2 className="h-6 w-6 animate-spin text-[#6c005f]" />
+            </div>
+          ) : error ? (
+            <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+              {error}
+            </div>
+          ) : (
+            <>
+              {/* Bookings Grid */}
+              {activeTab === "upcoming" ? (
+                upcoming.length === 0 ? (
+                  <div className="py-16 text-center">
+                    <span className="mb-4 block text-5xl">📭</span>
+                    <p className="font-headline-sm text-[#151c27]">No upcoming bookings yet.</p>
+                    <p className="mt-1 font-body-md text-[#54414d]">Book a service for your pet to get started.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    {upcoming.map((booking, index) => (
+                      <div key={booking.id} className="md:col-span-12 lg:col-span-4">
+                        {renderDesktopBookingCard(booking, index, false)}
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : null}
+
+              {activeTab === "past" ? (
+                past.length === 0 ? (
+                  <div className="py-16 text-center">
+                    <span className="mb-4 block text-5xl">📭</span>
+                    <p className="font-headline-sm text-[#151c27]">No past bookings yet.</p>
+                    <p className="mt-1 font-body-md text-[#54414d]">Your completed bookings will appear here.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    {past.map((booking, index) => (
+                      <div key={booking.id} className="md:col-span-12 lg:col-span-4">
+                        {renderDesktopBookingCard(booking, index, true)}
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : null}
+
+              {activeTab === "followups" ? (
+                followUps.length === 0 ? (
+                  <div className="py-16 text-center">
+                    <span className="mb-4 block text-5xl">📭</span>
+                    <p className="font-headline-sm text-[#151c27]">No reminders right now.</p>
+                    <p className="mt-1 font-body-md text-[#54414d]">We&apos;ll notify you when follow-ups are due.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    {followUps.map((followUp, index) => (
+                      <div key={followUp.id} className="md:col-span-12 lg:col-span-4">
+                        <div className="bg-white rounded-xl custom-shadow hover-shadow transition-all duration-300 overflow-hidden p-6 border border-[#d9c0ce]/30">
+                          <div className="flex items-start gap-3 mb-4">
+                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[#ffd7f0] text-lg">
+                              {followUp.emoji}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-headline-sm text-[#151c27]">{followUp.title}</p>
+                              <p className="mt-0.5 font-body-md text-[#54414d]">{followUp.body}</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => router.push(`/bookings/${followUp.bookingId}`)}
+                            className="w-full pill-button bg-[#6c005f] text-white py-2.5 font-label-md hover:opacity-90 active:scale-95 transition-all"
+                          >
+                            {followUp.ctaLabel}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : null}
+
+              {hasMore && (
+                <div className="mt-8 flex justify-center">
+                  <button
+                    onClick={() => {
+                      setLoadingMore(true);
+                      loadBookings(page + 1, true);
+                    }}
+                    disabled={loadingMore}
+                    className="pill-button border-2 border-[#6c005f] text-[#6c005f] px-8 py-3 font-label-md hover:bg-[#6c005f] hover:text-white transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    {loadingMore ? "Loading..." : "Load More"}
+                  </button>
+                </div>
+              )}
+
+              {/* Support Section */}
+              <div className="mt-8 p-8 bg-[#f0f3ff] rounded-xl flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="text-center md:text-left">
+                  <h4 className="font-headline-sm text-[#151c27]">Need help with a booking?</h4>
+                  <p className="font-body-md text-[#54414d]">Our support team is available 24/7 for urgent care inquiries.</p>
+                </div>
+                <button className="pill-button border-2 border-[#6c005f] text-[#6c005f] px-8 py-3 font-label-md hover:bg-[#6c005f] hover:text-white transition-all active:scale-95">
+                  Contact Support
+                </button>
+              </div>
+            </>
+          )}
+        </main>
       </div>
     </AppShell>
   );

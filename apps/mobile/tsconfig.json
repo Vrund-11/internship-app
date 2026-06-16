@@ -1,0 +1,21 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/*": ["./*"],
+      "@canovet/core": ["../../packages/core/index.ts"],
+      "@canovet/core/*": ["../../packages/core/*"],
+      "@canovet/shared": ["../../packages/shared/src/index.ts"],
+      "@canovet/shared/*": ["../../packages/shared/src/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "../../packages/core/**/*.ts",
+    "../../packages/shared/src/**/*.ts"
+  ]
+}

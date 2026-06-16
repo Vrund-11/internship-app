@@ -7,10 +7,11 @@ datasource db {
 }
 
 model User {
-  id        String        @id @default(cuid())
-  phone     String        @unique
-  name      String?
-  createdAt DateTime      @default(now())
+  id           String        @id @default(cuid())
+  email        String        @unique
+  passwordHash String?
+  name         String?
+  createdAt    DateTime      @default(now())
 
   sessions   UserSession[]
   pets       Pet[]
@@ -49,28 +50,37 @@ model City {
 }
 
 model Booking {
-  id          String   @id @default(cuid())
-  userId      String
-  cityId      String
-  partnerId   String?
-  slotStart   DateTime
-  slotEnd     DateTime
-  serviceType String
-  petId       String
-  addressId   String
-  status      String   @default("SEARCHING_PARTNER")
+  id              String   @id @default(cuid())
+  userId          String
+  cityId          String
+  partnerId       String?
+  clinicId        String?
+  clinicAddressId String?
+  slotStart       DateTime
+  slotEnd         DateTime
+  serviceType     String
+  petId           String
+  addressId       String?
+  status          String   @default("SEARCHING_PARTNER")
   verificationOtp String?
-  createdAt   DateTime @default(now())
+  createdAt       DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
-  city      City     @relation(fields: [cityId], references: [id])
-  partner   Partner? @relation(fields: [partnerId], references: [id])
-  pet       Pet      @relation(fields: [petId], references: [id])
-  address   Address  @relation(fields: [addressId], references: [id])
-  payments  Payment[]
-  review    Review?
-  complaints Complaint[]
+  user           User           @relation(fields: [userId], references: [id])
+  city           City           @relation(fields: [cityId], references: [id])
+  partner        Partner?       @relation("PartnerAssignment", fields: [partnerId], references: [id])
+  clinic         Partner?       @relation("ClinicBooking", fields: [clinicId], references: [id])
+  clinicAddress  ClinicAddress? @relation(fields: [clinicAddressId], references: [id])
+  pet            Pet            @relation(fields: [petId], references: [id])
+  address        Address?       @relation(fields: [addressId], references: [id])
+  payments       Payment[]
+  review         Review?
+  complaints     Complaint[]
   rescheduleLogs RescheduleLog[]
+
+  @@index([userId])
+  @@index([partnerId, slotStart, slotEnd])
+  @@index([cityId])
+  @@index([createdAt])
 }
 
 model Pet {
@@ -84,6 +94,8 @@ model Pet {
 
   user     User      @relation(fields: [userId], references: [id])
   bookings Booking[]
+
+  @@index([userId])
 }
 
 model Address {
@@ -101,6 +113,8 @@ model Address {
 
   user     User      @relation(fields: [userId], references: [id])
   bookings Booking[]
+
+  @@index([userId])
 }
 
 model Partner {
@@ -119,10 +133,33 @@ model Partner {
   totalCompleted         Int      @default(0)
   createdAt              DateTime @default(now())
 
-  city     City             @relation(fields: [cityId], references: [id])
+  city            City              @relation(fields: [cityId], references: [id])
+  bookings        Booking[]         @relation("PartnerAssignment")
+  clinicBookings  Booking[]         @relation("ClinicBooking")
+  clinicAddresses ClinicAddress[]
+  services        PartnerService[]
+  reviews         Review[]
+
+  @@index([cityId])
+}
+
+model ClinicAddress {
+  id        String @id @default(cuid())
+  partnerId String
+  name      String
+  text      String
+  latitude  Float  @default(0)
+  longitude Float  @default(0)
+  house     String @default("")
+  area      String @default("")
+  city      String @default("")
+  state     String @default("")
+  pincode   String @default("")
+
+  partner  Partner   @relation(fields: [partnerId], references: [id])
   bookings Booking[]
-  services PartnerService[]
-  reviews  Review[]
+
+  @@index([partnerId])
 }
 
 model PartnerService {
@@ -131,6 +168,8 @@ model PartnerService {
   serviceType String
 
   partner Partner @relation(fields: [partnerId], references: [id])
+
+  @@index([partnerId])
 }
 
 model Payment {
@@ -141,6 +180,8 @@ model Payment {
   createdAt DateTime @default(now())
 
   booking Booking @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId])
 }
 
 model Review {
@@ -157,6 +198,9 @@ model Review {
   user     User    @relation(fields: [userId], references: [id])
   partner  Partner @relation(fields: [partnerId], references: [id])
   booking  Booking @relation(fields: [bookingId], references: [id])
+
+  @@index([userId])
+  @@index([partnerId])
 }
 
 model Complaint {
@@ -177,6 +221,9 @@ model Complaint {
 
   user     User     @relation(fields: [userId], references: [id])
   booking  Booking? @relation(fields: [bookingId], references: [id])
+
+  @@index([userId])
+  @@index([bookingId])
 }
 
 model PromoCode {
@@ -200,6 +247,8 @@ model PromoUsage {
   promoCode PromoCode @relation(fields: [promoCodeId], references: [id])
 
   @@unique([userId, promoCodeId, createdAt])
+  @@index([userId])
+  @@index([promoCodeId])
 }
 
 model RescheduleLog {
@@ -210,5 +259,19 @@ model RescheduleLog {
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([bookingId])
 }
+
+model Waitlist {
+  id          String   @id @default(cuid())
+  phone       String
+  serviceType String
+  wantsFaster Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@unique([phone, serviceType])
+}
+
 

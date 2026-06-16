@@ -35,6 +35,7 @@ export const bookingController = {
         serviceType,
         petId,
         addressId,
+        clinicId,
         cityId,
         slotStart,
         slotEnd,
@@ -66,6 +67,7 @@ export const bookingController = {
         serviceType,
         petId,
         addressId,
+        clinicId,
         cityId,
         slotStart: parsedSlotStart,
         slotEnd: parsedSlotEnd,
@@ -217,11 +219,23 @@ export const bookingController = {
 
   async getAvailableSlots(req: Request, res: Response) {
     try {
-      const { date, serviceType, cityId, addressId } = req.query;
+      const { date, serviceType, cityId, addressId, clinicId } = req.query;
 
-      if (!date || !serviceType || !cityId || !addressId) {
+      if (!date || !serviceType || !cityId) {
         return res.status(400).json({
-          error: "Missing required query params: date, serviceType, cityId, addressId",
+          error: "Missing required query params: date, serviceType, cityId",
+        });
+      }
+
+      if (serviceType === "VET_CLINIC" && !clinicId) {
+        return res.status(400).json({
+          error: "Missing required query params: clinicId",
+        });
+      }
+
+      if (serviceType === "GROOMING" && !addressId) {
+        return res.status(400).json({
+          error: "Missing required query params: addressId",
         });
       }
 
@@ -231,14 +245,15 @@ export const bookingController = {
         return res.status(400).json({ error: "Invalid date" });
       }
 
-      const slots = await slotService.getAvailableSlots(
+      const result = await slotService.getAvailableSlots(
         parsedDate,
         cityId as string,
         serviceType as string,
-        addressId as string
+        (addressId as string) ?? null,
+        (clinicId as string) ?? null
       );
 
-      return res.json({ slots });
+      return res.json(result);
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Failed to fetch slots";

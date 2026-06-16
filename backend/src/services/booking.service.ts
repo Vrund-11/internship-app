@@ -9,7 +9,9 @@ type CreateBookingInput = {
   cityId: string;
   serviceType: string;
   petId: string;
-  addressId: string;
+  addressId?: string | null;
+  clinicId?: string | null;
+  clinicAddressId?: string | null;
   slotStart: Date;
   slotEnd: Date;
   preferredPartnerId?: string;
@@ -19,12 +21,26 @@ export const bookingService = {
   async createBooking(data: CreateBookingInput) {
     const { preferredPartnerId, ...bookingData } = data;
 
-    // Validate address and pet ownership
-    const address = await prisma.address.findUnique({
-      where: { id: bookingData.addressId },
-    });
-    if (!address || address.userId !== bookingData.userId) {
-      throw new Error("Invalid address selected");
+    const isClinicBooking = bookingData.serviceType === ServiceType.VET_CLINIC;
+
+    const requiresAddress = bookingData.serviceType === ServiceType.GROOMING;
+    let address = null as null | { city: string; userId: string; latitude: number; longitude: number };
+    if (requiresAddress) {
+      if (!bookingData.addressId) {
+        throw new Error("Invalid address selected");
+      }
+      address = await prisma.address.findUnique({
+        where: { id: bookingData.addressId },
+        select: { city: true, userId: true, latitude: true, longitude: true },
+      });
+      if (!address || address.userId !== bookingData.userId) {
+        throw new Error("Invalid address selected");
+      }
+    } else if (bookingData.addressId) {
+      address = await prisma.address.findUnique({
+        where: { id: bookingData.addressId },
+        select: { city: true, userId: true, latitude: true, longitude: true },
+      });
     }
 
     const pet = await prisma.pet.findUnique({
@@ -34,17 +50,80 @@ export const bookingService = {
       throw new Error("Invalid pet selected");
     }
 
-    // Resolve cityId: check if the provided cityId exists
     let city = bookingData.cityId
       ? await prisma.city.findUnique({ where: { id: bookingData.cityId } })
       : null;
 
+    if (isClinicBooking) {
+      if (!bookingData.clinicId) {
+        throw new Error("Clinic selection is required");
+      }
+      const clinic = await prisma.partner.findUnique({
+        where: { id: bookingData.clinicId },
+        include: { services: true },
+      });
+      if (!clinic) {
+        throw new Error("Invalid clinic selected");
+      }
+      const hasClinicService = clinic.services.some(
+        (service) => service.serviceType === ServiceType.VET_CLINIC
+      );
+      if (!hasClinicService || !clinic.isVerified) {
+        throw new Error("Selected clinic is unavailable");
+      }
+
+      bookingData.cityId = clinic.cityId;
+      bookingData.addressId = null;
+      bookingData.clinicId = clinic.id;
+
+      // Resolve clinic address
+      const clinicAddr = await prisma.clinicAddress.findFirst({
+        where: { partnerId: clinic.id },
+      });
+      if (clinicAddr) {
+        bookingData.clinicAddressId = clinicAddr.id;
+      }
+
+      const bookingsCount = await prisma.booking.count({
+        where: {
+          partnerId: clinic.id,
+          status: {
+            in: [BookingStatus.CONFIRMED, BookingStatus.AWAITING_PAYMENT],
+          },
+          slotStart: {
+            lt: bookingData.slotEnd,
+          },
+          slotEnd: {
+            gt: bookingData.slotStart,
+          },
+        },
+      });
+
+      if (bookingsCount >= 5) {
+        throw new Error("Selected clinic slot is not available");
+      }
+
+      const verificationOtp = Math.floor(1000 + Math.random() * 9000).toString();
+      const clinicBooking = await bookingRepository.create({
+        ...bookingData,
+        partnerId: clinic.id,
+        status: BookingStatus.AWAITING_PAYMENT,
+        verificationOtp,
+      });
+
+      await prisma.partner.update({
+        where: { id: clinic.id },
+        data: { activeBookings: { increment: 1 } },
+      });
+
+      return bookingRepository.findById(clinicBooking.id);
+    }
+
     if (!city) {
-      // Try resolving by address city name
       city = await prisma.city.findFirst({
         where: {
           name: {
-            equals: address.city,
+            equals: address?.city ?? "",
             mode: "insensitive",
           },
           isActive: true,
@@ -53,7 +132,6 @@ export const bookingService = {
     }
 
     if (!city) {
-      // Fallback to the first active city in the database
       city = await prisma.city.findFirst({
         where: { isActive: true },
         orderBy: { id: "asc" },
@@ -89,7 +167,13 @@ export const bookingService = {
     });
 
     console.log("BOOKING_CREATED:", booking.id);
-    await matchingService.assignPartner(booking, preferredPartnerId);
+    await matchingService.assignPartner(
+      {
+        ...booking,
+        addressId: booking.addressId!,
+      },
+      preferredPartnerId
+    );
 
     return bookingRepository.findById(booking.id);
   },
@@ -104,33 +188,8 @@ export const bookingService = {
     }
 
     const seedAddresses = [
-      { text: "Home: Satellite, Ahmedabad", latitude: 23.03096, longitude: 72.51857 },
-      { text: "Home: Prahlad Nagar, Ahmedabad", latitude: 23.01191, longitude: 72.50456 },
-      {
-        text: "Clinic: CanoVet Satellite, Satellite Road, Ahmedabad",
-        latitude: 23.03096,
-        longitude: 72.51857,
-      },
-      {
-        text: "Clinic: CanoVet Prahlad Nagar, Anandnagar Road, Ahmedabad",
-        latitude: 23.01191,
-        longitude: 72.50456,
-      },
-      {
-        text: "Clinic: CanoVet Bodakdev, Judges Bungalow Road, Ahmedabad",
-        latitude: 23.0445,
-        longitude: 72.5273,
-      },
-      {
-        text: "Clinic: CanoVet Navrangpura, CG Road, Ahmedabad",
-        latitude: 23.037,
-        longitude: 72.566,
-      },
-      {
-        text: "Clinic: CanoVet Maninagar, Maninagar East, Ahmedabad",
-        latitude: 22.9972,
-        longitude: 72.6021,
-      },
+      { text: "Home: Satellite, Ahmedabad", latitude: 23.03096, longitude: 72.51857, label: "Home" },
+      { text: "Home: Prahlad Nagar, Ahmedabad", latitude: 23.01191, longitude: 72.50456, label: "Home" },
     ];
 
     for (const item of seedAddresses) {
@@ -145,7 +204,7 @@ export const bookingService = {
           item.text,
           item.latitude,
           item.longitude,
-          item.text.startsWith("Clinic:") ? "Clinic" : "Home",
+          item.label,
           item.text,
           "",
           "Ahmedabad",
@@ -276,7 +335,7 @@ export const bookingService = {
 
     let penaltyAmount = 0;
     let refundAmount = 0;
-    let isFreeCancellation = true;
+    let isFreeCancellation = hoursToStart >= 8;
 
     const payment = await prisma.payment.findFirst({
       where: { bookingId },
@@ -284,12 +343,17 @@ export const bookingService = {
     // Refund/penalty applies only if the booking has already been PAID online
     const totalAmount = payment && payment.status === "PAID" ? payment.amount : 0;
 
-    // Rule D: Cancellation Timing: Cancellation is completely blocked within 8 hours of slot start.
-    if (hoursToStart < 8) {
-      throw new Error("Cannot cancel booking within 8 hours of scheduled start. Please contact support at complaints@canovet.com to request manual cancellation.");
+    // Rule D: Cancellation Timing: Cancellation is completely blocked within 4 hours of slot start.
+    if (hoursToStart < 4) {
+      throw new Error("Cannot cancel booking within 4 hours of scheduled start. Please contact support at complaints@canovet.com to request manual cancellation.");
     }
 
-    refundAmount = totalAmount;
+    if (isFreeCancellation) {
+      refundAmount = totalAmount;
+    } else {
+      penaltyAmount = Math.round(totalAmount * 0.2);
+      refundAmount = totalAmount - penaltyAmount;
+    }
 
     // Update booking status to CANCELLED
     const updatedBooking = await prisma.booking.update({
@@ -331,20 +395,9 @@ export const bookingService = {
   },
 
   validateServiceWindow(serviceType: string, slotStart: Date) {
-    if (serviceType !== ServiceType.GROOMING) {
-      return;
-    }
-
     const now = new Date();
-    const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const slotDate = new Date(
-      slotStart.getFullYear(),
-      slotStart.getMonth(),
-      slotStart.getDate()
-    );
-
-    if (slotDate.getTime() <= nowDate.getTime()) {
-      throw new Error("GROOMING bookings must be scheduled at least next day");
+    if (slotStart.getTime() <= now.getTime()) {
+      throw new Error("Bookings must be scheduled in the future");
     }
   },
 
@@ -397,6 +450,50 @@ export const bookingService = {
 
     if (todayRescheduleCount >= 2) {
       throw new Error("Daily rescheduling limit reached (2). Try again tomorrow.");
+    }
+
+    if (booking.serviceType === ServiceType.VET_CLINIC) {
+      const clinicId = booking.partnerId ?? booking.clinicId;
+      if (!clinicId) {
+        throw new Error("Clinic booking is missing clinic information");
+      }
+
+      const conflict = await prisma.booking.findFirst({
+        where: {
+          partnerId: clinicId,
+          id: { not: booking.id },
+          status: {
+            in: [BookingStatus.CONFIRMED, BookingStatus.AWAITING_PAYMENT],
+          },
+          slotStart: {
+            lt: slotEnd,
+          },
+          slotEnd: {
+            gt: slotStart,
+          },
+        },
+        select: { id: true },
+      });
+
+      if (conflict) {
+        throw new Error("Selected clinic slot is not available");
+      }
+
+      const updatedClinicBooking = await prisma.booking.update({
+        where: { id: booking.id },
+        data: {
+          slotStart,
+          slotEnd,
+          partnerId: clinicId,
+          clinicId: booking.clinicId ?? clinicId,
+        },
+      });
+
+      return updatedClinicBooking;
+    }
+
+    if (!booking.addressId) {
+      throw new Error("Booking address not found");
     }
 
     const address = await prisma.address.findUnique({

@@ -4,6 +4,16 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
+const PawSvg = ({ color = "#fff", size = 48, className = "" }: { color?: string; size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 44 44" className={className}>
+    <ellipse cx="12" cy="16" rx="4.2" ry="5.4" fill={color} />
+    <ellipse cx="22" cy="11" rx="3.8" ry="4.8" fill={color} />
+    <ellipse cx="32" cy="16" rx="4.2" ry="5.4" fill={color} />
+    <ellipse cx="22" cy="6" rx="2.8" ry="3.4" fill={color} />
+    <ellipse cx="22" cy="29" rx="9.5" ry="8.2" fill={color} />
+  </svg>
+);
+
 export default function SplashPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
@@ -26,57 +36,98 @@ export default function SplashPage() {
   }, [show, loading, user, router]);
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
       style={{
-        background: "radial-gradient(circle at 65% 38%, #1D6B47 0%, #0B3B2A 65%)",
+        background: "linear-gradient(160deg, #390035 0%, #A7009D 45%, #CC00BE 80%, #E040D0 100%)",
       }}
     >
-      {/* Decorative rings */}
-      <div className="absolute -top-[100px] -right-[100px] w-[320px] h-[320px] rounded-full border border-[rgba(39,174,120,0.18)]" />
-      <div className="absolute -top-[50px] -right-[50px] w-[200px] h-[200px] rounded-full border border-[rgba(39,174,120,0.12)]" />
-      <div className="absolute -bottom-[40px] -left-[80px] w-[260px] h-[260px] rounded-full border border-[rgba(39,174,120,0.10)]" />
-      <div className="absolute bottom-[120px] -left-[20px] w-[140px] h-[140px] rounded-full border border-[rgba(245,146,42,0.15)]" />
+      {/* Decorative circles - enhanced for desktop */}
+      <div className="absolute -top-[80px] -right-[80px] w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full bg-white/5" />
+      <div className="absolute w-[200px] h-[200px] md:w-[400px] md:h-[400px] rounded-full bg-white/[0.04]" style={{ bottom: 30, left: -60 }} />
+      <div className="absolute right-0 bottom-[50px] opacity-[0.06] md:opacity-[0.04]">
+        <PawSvg color="#fff" size={180} />
+      </div>
+
+      {/* Desktop-only floating paw prints */}
+      <div className="hidden md:block">
+        <div className="absolute top-[10%] left-[8%] opacity-[0.05]" style={{ animation: "particle-float 14s ease-in-out infinite" }}>
+          <PawSvg color="#fff" size={60} />
+        </div>
+        <div className="absolute top-[20%] right-[12%] opacity-[0.04]" style={{ animation: "particle-float 18s ease-in-out infinite 3s" }}>
+          <PawSvg color="#fff" size={90} />
+        </div>
+        <div className="absolute bottom-[20%] left-[15%] opacity-[0.06]" style={{ animation: "particle-float 12s ease-in-out infinite 1s" }}>
+          <PawSvg color="#fff" size={45} />
+        </div>
+        <div className="absolute bottom-[30%] right-[8%] opacity-[0.03]" style={{ animation: "particle-float 20s ease-in-out infinite 5s" }}>
+          <PawSvg color="#fff" size={120} />
+        </div>
+        {/* Decorative grid dots */}
+        <div className="absolute inset-0" style={{
+          backgroundImage: "radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+        }} />
+        {/* Extra orbs for desktop */}
+        <div className="absolute w-[600px] h-[600px] rounded-full animate-float-subtle" style={{
+          top: "-20%",
+          right: "20%",
+          background: "radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%)",
+        }} />
+        <div className="absolute w-[400px] h-[400px] rounded-full" style={{
+          bottom: "10%",
+          left: "30%",
+          background: "radial-gradient(circle, rgba(167,255,215,0.04) 0%, transparent 70%)",
+          animation: "float-subtle 8s ease-in-out infinite reverse",
+        }} />
+      </div>
 
       {/* Center content */}
-      <div className="text-center animate-fade-in-up">
-        {/* Logo mark */}
+      <div className="text-center animate-fade-in-up relative z-10">
+        {/* Logo badge - larger on desktop */}
         <div
-          className="w-[88px] h-[88px] rounded-[28px] flex items-center justify-center mx-auto mb-7"
+          className="rounded-[28px] md:rounded-[36px] px-[38px] py-5 md:px-[56px] md:py-7 mx-auto mb-5 md:mb-8 inline-block animate-pop"
           style={{
-            background: "linear-gradient(145deg, #27AE78 0%, #1D8F60 100%)",
-            boxShadow: "0 24px 48px rgba(39,174,120,0.35), 0 0 0 1px rgba(255,255,255,0.1)",
+            background: "#fff",
+            boxShadow: "0 24px 60px rgba(0,0,0,0.22), 0 0 0 1px rgba(255,255,255,0.4)",
           }}
         >
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-            <ellipse cx="24" cy="32" rx="10" ry="9" fill="white" opacity="0.95"/>
-            <ellipse cx="13" cy="22" rx="5" ry="6.5" fill="white" opacity="0.8"/>
-            <ellipse cx="35" cy="22" rx="5" ry="6.5" fill="white" opacity="0.8"/>
-            <ellipse cx="18" cy="15" rx="4" ry="5" fill="white" opacity="0.7"/>
-            <ellipse cx="30" cy="15" rx="4" ry="5" fill="white" opacity="0.7"/>
-            <ellipse cx="24" cy="10" rx="3.5" ry="4.5" fill="white" opacity="0.6"/>
-          </svg>
+          <div className="flex items-center">
+            <span className="text-[24px] md:text-[36px] font-extrabold text-[#1a0a18] tracking-[-0.4px]">cano</span>
+            <PawSvg color="#1a0a18" size={27} className="md:hidden" />
+            <PawSvg color="#1a0a18" size={40} className="hidden md:block" />
+            <span className="text-[24px] md:text-[36px] font-extrabold text-[#1a0a18] tracking-[-0.4px]">et</span>
+          </div>
         </div>
 
-        <div className="font-serif text-[40px] text-white tracking-tight leading-none">
-          Canovet
+        {/* Tagline */}
+        <div className="flex items-center justify-center gap-1.5 bg-white/[0.12] rounded-full px-3.5 py-1.5 md:px-5 md:py-2 mx-auto w-fit mb-2 md:mb-4 backdrop-blur-sm">
+          <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#A7FFD7] animate-blink" />
+          <span className="text-[11px] md:text-[13px] font-bold text-white/90 tracking-[0.1em] uppercase">
+            Premium Pet Care
+          </span>
         </div>
-        <div className="text-[13px] text-white/40 mt-2 tracking-[2.5px] uppercase font-medium">
-          Premium Pet Care
+
+        <div className="text-sm md:text-lg text-white/50 italic mt-1 md:mt-3">
+          Because they deserve the best 🐾
         </div>
-        <div className="mt-1.5 text-[14px] text-white/55 italic font-serif">
-          Because they deserve the best
+
+        {/* Desktop-only tagline */}
+        <div className="hidden md:block mt-6 text-[15px] text-white/30 max-w-sm mx-auto leading-relaxed">
+          Grooming · Veterinary Care · Premium Food · Accessories
         </div>
       </div>
 
       {/* Loading dots */}
-      <div className="absolute bottom-16 flex gap-1.5">
+      <div className="absolute bottom-[52px] md:bottom-[60px] flex gap-2">
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="h-1.5 rounded-full animate-pulse-soft"
+            className="rounded-full animate-blink"
             style={{
-              width: i === 0 ? 24 : 6,
-              background: i === 0 ? "#27AE78" : "rgba(255,255,255,0.2)",
+              width: i === 0 ? 28 : 7,
+              height: 7,
+              background: i === 0 ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.2)",
               animationDelay: `${i * 200}ms`,
             }}
           />
@@ -84,8 +135,8 @@ export default function SplashPage() {
       </div>
 
       {/* Version badge */}
-      <div className="absolute bottom-6 text-[11px] text-white/25 tracking-wider">
-        v1.0 · Canovet
+      <div className="absolute bottom-5 text-[11px] md:text-[12px] text-white/[0.22] font-medium tracking-[0.08em]">
+        CANOVET v2.0 · AHMEDABAD
       </div>
     </div>
   );

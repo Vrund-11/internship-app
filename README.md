@@ -1,158 +1,158 @@
 # 🐾 Canovet - Pet-Care Platform
 
-Welcome to **Canovet**, a modern pet-care booking platform built using a monorepo architecture. This project consists of a Next.js user-facing mobile/web application, an Express.js backend API with Prisma ORM, and a partner simulator app for service providers.
-
----
-
-## 🚀 Getting Started
-
-Follow these step-by-step instructions to download, extract, set up, and run the Canovet platform on your local machine.
-
-### 📥 1. Download & Extract the Code
-
-If you received this project as a ZIP archive:
-1. **Download the ZIP file** to a directory of your choice on your computer.
-2. **Extract the ZIP file**:
-   - **Windows**: Right-click the ZIP file and select **Extract All...**, then choose the destination folder.
-   - **macOS/Linux**: Double-click the ZIP file or run `unzip canovet.zip` in your terminal.
-3. Open your terminal or code editor (e.g., **VS Code**) in the extracted root directory (`canovet`).
-
----
-
-### 📋 2. Prerequisites
-
-Ensure you have the following installed on your machine:
-*   **Node.js** (LTS version, v18+ recommended) — [Download Node.js](https://nodejs.org/)
-*   **npm** (comes bundled with Node.js)
-*   **PostgreSQL Database** — [Download PostgreSQL](https://www.postgresql.org/) (or use a hosted database from [Neon.tech](https://neon.tech/) or [Supabase](https://supabase.com/))
-
----
-
-### ⚙️ 3. Environment Setup
-
-The application reads configuration from environment variables. You need to create two environment files.
-
-#### A. Root Environment File
-Create a new file named `.env` in the root folder of the project (`canovet/.env`) and add the following variables (replacing the values with your local Database and payment credentials):
-
-```env
-# PostgreSQL connection string
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DBNAME?sslmode=require"
-
-# JSON Web Token Secret (can be any long random string)
-JWT_SECRET="your-jwt-secret-key-change-this-in-production"
-
-# Razorpay credentials (for payment integration)
-RAZORPAY_KEY_ID="your-razorpay-key-id"
-RAZORPAY_KEY_SECRET="your-razorpay-key-secret"
-
-# Backend Server Port (defaults to 5000)
-PORT=5000
-```
-
-#### B. User App Environment File
-Create a new file named `.env.local` inside the user app directory (`canovet/apps/user-app/.env.local`):
-
-```env
-NEXT_PUBLIC_API_URL="http://localhost:5000"
-```
-
----
-
-### 📦 4. Installation & Database Setup
-
-From the root directory of the project, execute the following commands in your terminal:
-
-1. **Install dependencies** for all workspaces (root, frontend, backend, packages):
-   ```bash
-   npm install
-   ```
-
-2. **Generate the Prisma client**:
-   ```bash
-   npx prisma generate
-   ```
-
-3. **Run database migrations** to create tables in your PostgreSQL database:
-   ```bash
-   npx prisma migrate dev
-   ```
-
-4. **Seed test/mock data** (creates cities, test promo codes, and mock service partners):
-   ```bash
-   # Seed partners (run from root)
-   npx ts-node backend/src/scripts/seed-partners.ts
-
-   # Seed promo codes (run from root)
-   npx ts-node backend/src/scripts/seed-promo.ts
-   ```
-
----
-
-### 🏃‍♂️ 5. Running the Application
-
-You can run individual parts of the platform or start the main apps concurrently.
-
-#### Start Both Main Apps Concurrently (Recommended)
-Runs both the Next.js **User App** and the Express **Backend** at the same time:
-```bash
-npm run dev
-```
-
-#### Start Services Individually
-*   **Backend Server only** (runs on [http://localhost:5000](http://localhost:5000)):
-    ```bash
-    npm run dev:backend
-    ```
-*   **User Web App only** (runs on [http://localhost:3000](http://localhost:3000)):
-    ```bash
-    npm run dev:user
-    ```
-*   **Partner Simulator only** (runs on [http://localhost:3002](http://localhost:3002)):
-    ```bash
-    npm run dev -w apps/partner-sim
-    ```
-
----
-
-## 🎮 How to Interact with the App
-
-Once all services are running:
-
-1. **Access the User App**: Open your browser and navigate to `http://localhost:3000`.
-   - Start by registering or logging in.
-   - Set your city (Ahmedabad is seeded by default).
-   - Explore and book services (Grooming, Vet on Call, Vet Clinic).
-2. **Access the Partner Simulator**: Open `http://localhost:3002` to see incoming bookings and accept/reject/simulate requests as a partner.
-3. **Backend API**: The backend is running at `http://localhost:5000` with endpoints like `/auth`, `/booking`, `/payment`, `/promo`, etc.
+Welcome to **Canovet**, a modern pet-care booking platform built using a monorepo architecture. This project consists of a Next.js user web app, an Expo React Native mobile app, an Express.js backend API with Prisma ORM, and shared library packages.
 
 ---
 
 ## 📁 Repository Structure
 
+The project is structured as an npm workspaces monorepo:
+
 ```tree
 canovet/
 ├── apps/
-│   ├── user-app/       # Next.js user frontend application
-│   └── partner-sim/    # Next.js partner simulation/demo dashboard
-├── backend/            # Express.js REST API server
-├── packages/           # Shared TypeScript packages & utilities
-├── prisma/             # Prisma schema, migrations, and config
-├── .env                # Root environment configuration (credentials)
-├── package.json        # Workspace definition & global scripts
-└── README.md           # This instructions manual
+│   ├── user-app/       # Next.js user-facing web application (Next.js 15, React 19)
+│   └── mobile/         # Expo / React Native mobile application (Expo 54, React Native 0.81)
+├── backend/            # Express.js REST API server (TypeScript)
+├── packages/
+│   ├── shared/         # Common TypeScript interfaces, Zod validation schemas, and constants
+│   └── core/           # Core API client adapters and shared hooks/utilities
+├── prisma/             # Prisma schema definition, migrations, and global configuration
+├── .env.example        # Reference environment variables for the root backend
+├── package.json        # Workspace configuration and global scripts
+└── README.md           # This setup and instruction guide
 ```
 
 ---
 
-## 🛠️ Common Commands Reference
+## ⚙️ Prerequisites
+
+Ensure you have the following installed on your local machine:
+* **Node.js** (v18.0.0 or higher, LTS recommended) — [Download Node.js](https://nodejs.org/)
+* **npm** (comes bundled with Node.js)
+* **PostgreSQL Database** — [Download PostgreSQL](https://www.postgresql.org/) (or use a hosted instance from [Neon.tech](https://neon.tech/) or [Supabase](https://supabase.com/))
+* **Redis Server** (Optional, fallback to in-memory caching is supported, but recommended for production and session features) — [Redis Setup](https://redis.io/download/)
+
+---
+
+## 🚀 Step-by-Step Setup Guide
+
+### 1. Clone & Install Dependencies
+First, clone the repository or extract the ZIP archive, and navigate to the project root:
+```bash
+cd canovet
+npm install
+```
+*Note: Running `npm install` at the root automatically installs dependencies for all workspaces and symlinks the shared library packages.*
+
+---
+
+### 2. Environment Variables Configuration
+The platform requires a few environment files to run. We have provided template files to make configuration simple:
+
+#### A. Root / Backend Environment File
+Create a `.env` file in the root folder (`canovet/.env`):
+```bash
+cp .env.example .env
+```
+Open `.env` and fill in your PostgreSQL connection string, JWT secret, and optional payment credentials:
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DBNAME?sslmode=require"
+JWT_SECRET="your-jwt-secret-key-change-this-in-production"
+PORT=5000
+REDIS_URL="redis://localhost:6379"
+```
+
+#### B. User Web App Environment File
+Create a `.env.local` file inside the user web application directory (`apps/user-app/`):
+```bash
+cp apps/user-app/.env.local.example apps/user-app/.env.local
+```
+Fill in the backend API URL:
+```env
+NEXT_PUBLIC_API_URL="http://localhost:5000"
+```
+
+#### C. Mobile App Environment File
+Create a `.env` file inside the mobile application directory (`apps/mobile/`):
+```bash
+cp apps/mobile/.env.example apps/mobile/.env
+```
+Set the API URL for Expo:
+```env
+# If using a physical device, replace localhost with your local machine's IP (e.g., http://192.168.1.100:5000)
+EXPO_PUBLIC_API_URL="http://localhost:5000"
+```
+
+---
+
+### 3. Database Migration and Seeding
+Initialize your database, run migrations, and seed mock/testing data using the following root commands:
+
+1. **Generate Prisma Client:**
+   ```bash
+   npm run db:generate
+   ```
+2. **Apply Migrations to PostgreSQL:**
+   ```bash
+   npm run db:migrate
+   ```
+3. **Seed Database:**
+   Seeds the database with a default city (Ahmedabad), service areas, mock partners (groomers, vets, clinics), test users, promo codes, waitlists, and historical bookings.
+   ```bash
+   npm run db:seed
+   ```
+
+---
+
+## 🏃‍♂️ Running the Applications
+
+### Start the Core Services (Web App + Backend API)
+Run the following command in the root folder to start both the Express backend API and Next.js web application concurrently:
+```bash
+npm run dev
+```
+* The **User Web App** will run at [http://localhost:3000](http://localhost:3000)
+* The **Backend API** will run at [http://localhost:5000](http://localhost:5000)
+
+### Start the Mobile Application (Expo Router)
+Start the Expo Metro Bundler for React Native:
+```bash
+npm run dev:mobile
+```
+* Press `w` to run the mobile app on the web browser.
+* Press `a` to run on an Android emulator.
+* Press `i` to run on an iOS simulator.
+* To run on a **physical device**, install the **Expo Go** app from your app store, ensure your mobile device and computer are on the same Wi-Fi network, update `EXPO_PUBLIC_API_URL` to your computer's local IP address, and scan the QR code printed in the terminal.
+
+---
+
+## 🛠️ Common Monorepo Commands Reference
+
+These commands are run from the project root:
 
 | Command | Description |
 | :--- | :--- |
-| `npm run dev` | Starts user app + backend concurrently |
-| `npm run dev:user` | Starts user frontend only |
-| `npm run dev:backend` | Starts Express backend only |
-| `npm run dev -w apps/partner-sim` | Starts partner simulator only |
-| `npx prisma generate` | Generates Prisma client |
-| `npx prisma migrate dev` | Applies new migrations to DB |
-| `npx prisma studio` | Opens Prisma's database GUI tool |
+| `npm run dev` | Runs the user web app and backend API concurrently |
+| `npm run dev:mobile` | Starts the Expo mobile application Metro bundler |
+| `npm run dev:user` | Starts the user web app only |
+| `npm run dev:backend` | Starts the backend Express server only |
+| `npm run db:generate` | Generates the Prisma client library |
+| `npm run db:migrate` | Applies new migrations to the PostgreSQL database |
+| `npm run db:seed` | Runs the database seeding script |
+| `npx prisma studio` | Opens the Prisma database viewer GUI |
+
+---
+
+## 🧪 Test Credentials
+
+Once seeded, you can log in to the apps using these pre-configured user credentials:
+
+* **Email:** `user1@example.com`
+* **Password:** `CanovetPass123!`
+
+---
+
+## 📦 Shared Packages
+* **`@canovet/shared`**: Houses shared interfaces, TypeScript types, and validation schemas (e.g. Zod validators). This ensures absolute type safety between the client applications and the backend API.
+* **`@canovet/core`**: Implements global HTTP client adapters, API call structures, constants, and custom hooks/context helpers used by both React applications.

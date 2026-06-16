@@ -5,9 +5,13 @@ type CreateBookingInput = {
   cityId: string;
   serviceType: string;
   petId: string;
-  addressId: string;
+  addressId?: string | null;
+  clinicId?: string | null;
+  clinicAddressId?: string | null;
+  partnerId?: string | null;
   slotStart: Date;
   slotEnd: Date;
+  status?: string;
   verificationOtp?: string;
 };
 
@@ -47,10 +51,21 @@ export const bookingRepository = {
             totalCompleted: true,
           },
         },
+        clinic: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            rating: true,
+            totalCompleted: true,
+          },
+        },
+        clinicAddress: true,
         pet: true,
         address: true,
         review: true,
         complaints: true,
+        rescheduleLogs: true,
       },
     });
   },
@@ -133,10 +148,21 @@ export const bookingRepository = {
             totalCompleted: true,
           },
         },
+        clinic: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            rating: true,
+            totalCompleted: true,
+          },
+        },
+        clinicAddress: true,
         pet: true,
         address: true,
         review: true,
         complaints: true,
+        rescheduleLogs: true,
       },
     });
   },

@@ -12,6 +12,7 @@ import webhookRoutes from "./routes/webhook.routes";
 import reviewRoutes from "./routes/review.routes";
 import complaintRoutes from "./routes/complaint.routes";
 import promoRoutes from "./routes/promo.routes";
+import waitlistRoutes from "./routes/waitlist.routes";
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use("/webhook", webhookRoutes);
 app.use("/review", reviewRoutes);
 app.use("/complaint", complaintRoutes);
 app.use("/promo", promoRoutes);
+app.use("/waitlist", waitlistRoutes);
 
 export default app;
 

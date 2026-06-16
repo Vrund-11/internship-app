@@ -32,13 +32,13 @@ const SearchingPartner = ({ onFound }: SearchingPartnerProps) => {
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col items-center justify-center"
-      style={{ background: "#0B3B2A" }}
+      style={{ background: "#A7009D" }}
     >
       {/* Ripple rings */}
       <div className="relative flex items-center justify-center w-44 h-44 mb-10">
         <div
           className="absolute inset-0 rounded-full opacity-10 animate-ping"
-          style={{ background: "#27AE78", animationDuration: "2s" }}
+          style={{ background: "#A7009D", animationDuration: "2s" }}
         />
         <div
           className="absolute inset-4 rounded-full opacity-15"
@@ -47,7 +47,7 @@ const SearchingPartner = ({ onFound }: SearchingPartnerProps) => {
         {/* Icon circle */}
         <div
           className="relative z-10 w-20 h-20 rounded-full flex items-center justify-center"
-          style={{ background: "linear-gradient(135deg, #27AE78 0%, #1D8F60 100%)" }}
+          style={{ background: "linear-gradient(135deg, #A7009D 0%, #A7009D 100%)" }}
         >
           <span className="text-[36px] select-none">🐾</span>
         </div>
@@ -66,7 +66,7 @@ const SearchingPartner = ({ onFound }: SearchingPartnerProps) => {
           <div
             key={i}
             className="w-2 h-2 rounded-full transition-all duration-300"
-            style={{ background: dotIndex === i ? "#27AE78" : "rgba(255,255,255,0.25)" }}
+            style={{ background: dotIndex === i ? "#A7009D" : "rgba(255,255,255,0.25)" }}
           />
         ))}
       </div>
