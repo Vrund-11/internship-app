@@ -1,10 +1,10 @@
 "use client";
 
+import axios from "axios";
 import {
   createContext,
   useContext,
   useEffect,
-  useEffectEvent,
   useState,
 } from "react";
 import { api, setAccessToken as setApiToken } from "@/lib/api";
@@ -12,7 +12,8 @@ import { logger } from "@/lib/logger";
 
 type User = {
   id: string;
-  phone: string;
+  email: string;
+  name?: string | null;
 };
 
 type AuthContextType = {
@@ -20,7 +21,8 @@ type AuthContextType = {
   accessToken: string | null;
   loading: boolean;
   setUser: (user: User | null) => void;
-  login: (phone: string, otp: string) => Promise<void>;
+  login: (email: string, pass: string) => Promise<User>;
+  loginWithGoogle: (code: string, redirectUri?: string, platform?: string) => Promise<any>;
   logout: () => Promise<void>;
 };
 
@@ -40,25 +42,54 @@ export const AuthProvider = ({
     setApiToken(token);
   };
 
-  const login = async (phone: string, otp: string) => {
+  const login = async (email: string, pass: string) => {
     try {
-      const res = await api.post("/auth/verify-otp", {
-        phone,
-        otp,
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("dev_logged_out");
+      }
+      const res = await api.post("/auth/login-signup", {
+        email,
+        password: pass,
       });
 
       const { accessToken, user } = res.data;
 
       updateAccessToken(accessToken);
       setUser(user);
+      return user as User;
     } catch (err) {
       console.error("Login failed");
       throw err;
     }
   };
 
+  const loginWithGoogle = async (code: string, redirectUri?: string, platform?: string) => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("dev_logged_out");
+      }
+      const res = await api.post("/auth/google", {
+        code,
+        redirectUri,
+        platform,
+      });
+
+      const { accessToken, user } = res.data;
+
+      updateAccessToken(accessToken);
+      setUser(user);
+      return res.data;
+    } catch (err) {
+      console.error("Google login failed");
+      throw err;
+    }
+  };
+
   const logout = async () => {
     try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("dev_logged_out", "true");
+      }
       await api.post("/auth/logout");
     } catch {}
 
@@ -66,7 +97,7 @@ export const AuthProvider = ({
     updateAccessToken(null);
   };
 
-  const hydrateUser = useEffectEvent(async () => {
+  const hydrateUser = async () => {
     try {
       logger.info("AUTH_HYDRATE_START");
 
@@ -83,21 +114,29 @@ export const AuthProvider = ({
       setUser(meRes.data);
       logger.info("AUTH_HYDRATE_SUCCESS");
     } catch (err) {
-      logger.error("AUTH_HYDRATE_FAILED", err);
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
+        logger.info("AUTH_HYDRATE_NO_SESSION");
+      } else {
+        logger.error("AUTH_HYDRATE_FAILED", err);
+      }
+
       setUser(null);
       updateAccessToken(null);
     } finally {
       setLoading(false);
     }
-  });
+  };
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("dev_logged_out");
+    }
     hydrateUser();
   }, []);
 
   return (
     <AuthContext.Provider
-      value={{ user, accessToken, loading, setUser, login, logout }}
+      value={{ user, accessToken, loading, setUser, login, loginWithGoogle, logout }}
     >
       {children}
     </AuthContext.Provider>
