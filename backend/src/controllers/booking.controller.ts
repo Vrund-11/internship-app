@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware";
 import { bookingService } from "../services/booking.service";
 import { slotService } from "../services/slot.service";
+import { redisClient } from "../utils/redis";
 
 export const bookingController = {
   async getTestData(req: Request, res: Response) {
@@ -40,6 +41,8 @@ export const bookingController = {
         slotStart,
         slotEnd,
         preferredPartnerId,
+        amount,
+        paymentMethod,
       } = req.body;
       const parsedSlotStart = new Date(slotStart);
       const parsedSlotEnd = new Date(slotEnd);
@@ -72,6 +75,8 @@ export const bookingController = {
         slotStart: parsedSlotStart,
         slotEnd: parsedSlotEnd,
         preferredPartnerId,
+        amount: amount ? Number(amount) : undefined,
+        paymentMethod,
       });
 
       return res.json(booking);
@@ -91,7 +96,33 @@ export const bookingController = {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
+      // Add Cache-Control header so browser caches the list for 15s to prevent successive API calls
+      res.setHeader("Cache-Control", "private, max-age=15");
+
+      const cacheKey = `cache:user:${userId}:pets`;
+      if (redisClient.isOpen) {
+        try {
+          const cached = await redisClient.get(cacheKey);
+          if (cached) {
+            console.log(`[REDIS_CACHE] Hit pets list for user: ${userId}`);
+            return res.json({ pets: JSON.parse(cached) });
+          }
+        } catch (cacheErr) {
+          console.error("[REDIS_CACHE] Error reading user pets cache:", cacheErr);
+        }
+      }
+
       const pets = await bookingService.listPets(userId);
+
+      if (redisClient.isOpen) {
+        try {
+          await redisClient.setEx(cacheKey, 60, JSON.stringify(pets));
+          console.log(`[REDIS_CACHE] Miss pets list. Cached for user: ${userId}`);
+        } catch (cacheErr) {
+          console.error("[REDIS_CACHE] Error writing user pets cache:", cacheErr);
+        }
+      }
+
       return res.json({ pets });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to load pets";
@@ -121,6 +152,16 @@ export const bookingController = {
         weight: Number(weight) || 5,
       });
 
+      // Invalidate pets cache for this user
+      if (redisClient.isOpen) {
+        try {
+          await redisClient.del(`cache:user:${userId}:pets`);
+          console.log(`[REDIS_CACHE] Invalidated pets cache for user: ${userId}`);
+        } catch (cacheErr) {
+          console.error("[REDIS_CACHE] Error invalidating user pets cache:", cacheErr);
+        }
+      }
+
       return res.json(pet);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to create pet";
@@ -136,7 +177,33 @@ export const bookingController = {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
+      // Add Cache-Control header so browser caches the list for 15s to prevent successive API calls
+      res.setHeader("Cache-Control", "private, max-age=15");
+
+      const cacheKey = `cache:user:${userId}:addresses`;
+      if (redisClient.isOpen) {
+        try {
+          const cached = await redisClient.get(cacheKey);
+          if (cached) {
+            console.log(`[REDIS_CACHE] Hit addresses list for user: ${userId}`);
+            return res.json({ addresses: JSON.parse(cached) });
+          }
+        } catch (cacheErr) {
+          console.error("[REDIS_CACHE] Error reading user addresses cache:", cacheErr);
+        }
+      }
+
       const addresses = await bookingService.listAddresses(userId);
+
+      if (redisClient.isOpen) {
+        try {
+          await redisClient.setEx(cacheKey, 60, JSON.stringify(addresses));
+          console.log(`[REDIS_CACHE] Miss addresses list. Cached for user: ${userId}`);
+        } catch (cacheErr) {
+          console.error("[REDIS_CACHE] Error writing user addresses cache:", cacheErr);
+        }
+      }
+
       return res.json({ addresses });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to load addresses";
@@ -169,6 +236,16 @@ export const bookingController = {
         longitude: longitude !== undefined ? Number(longitude) : undefined,
       });
 
+      // Invalidate addresses cache for this user
+      if (redisClient.isOpen) {
+        try {
+          await redisClient.del(`cache:user:${userId}:addresses`);
+          console.log(`[REDIS_CACHE] Invalidated addresses cache for user: ${userId}`);
+        } catch (cacheErr) {
+          console.error("[REDIS_CACHE] Error invalidating user addresses cache:", cacheErr);
+        }
+      }
+
       return res.json(address);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to create address";
@@ -186,8 +263,9 @@ export const bookingController = {
 
       const page = Number(req.query.page ?? 1);
       const limit = Number(req.query.limit ?? 10);
+      const status = req.query.status as string | undefined;
 
-      const result = await bookingService.listBookings(userId, page, limit);
+      const result = await bookingService.listBookings(userId, page, limit, status);
       return res.json({
         bookings: result.bookings,
         page: Number.isFinite(page) && page > 0 ? page : 1,
@@ -219,6 +297,7 @@ export const bookingController = {
 
   async getAvailableSlots(req: Request, res: Response) {
     try {
+      res.setHeader("Cache-Control", "public, max-age=15");
       const { date, serviceType, cityId, addressId, clinicId } = req.query;
 
       if (!date || !serviceType || !cityId) {
@@ -350,6 +429,18 @@ export const bookingController = {
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Failed to check in booking";
+      return res.status(400).json({ error: message });
+    }
+  },
+
+  async getAutocompleteSuggestions(req: Request, res: Response) {
+    try {
+      const query = typeof req.query.query === "string" ? req.query.query : "";
+      const suggestions = await bookingService.getAutocompleteSuggestions(query);
+      return res.json({ success: true, suggestions });
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to fetch autocomplete suggestions";
       return res.status(400).json({ error: message });
     }
   },

@@ -202,7 +202,7 @@ const BookingSuccess = ({
             <div className="bg-white/10 border border-white/20 rounded-2xl px-6 py-4 flex items-center gap-4 backdrop-blur-md transition-all shadow-inner">
               <div className="text-left">
                 <p className="text-[10px] font-bold text-white/60 uppercase tracking-wider">Booking ID</p>
-                <p className="text-[20px] font-extrabold tracking-wide text-white">{displayId}</p>
+                <p className="text-[13px] font-bold tracking-wide text-white font-mono truncate max-w-[200px]">{displayId}</p>
               </div>
               <button 
                 onClick={handleCopy}
@@ -333,16 +333,16 @@ const BookingSuccess = ({
           </div>
 
           {/* Core Page Action Buttons */}
-          <div className="mt-12 flex flex-col sm:flex-row justify-center items-center gap-4.5 max-w-lg mx-auto">
+          <div className="mt-12 flex flex-col sm:flex-row justify-center items-center gap-4.5 max-w-lg mx-auto px-4">
             <button 
               onClick={() => router.push(`/bookings/${displayId}`)}
-              className={`w-full py-3.5 px-8 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 rounded-full text-[13px] font-extrabold transition-all hover:bg-gray-50 cursor-pointer shadow-sm`}
+              className="w-full py-4 px-8 bg-[#FF10F0] hover:bg-[#FF10F0]/90 text-white rounded-full text-[14px] font-extrabold transition-all border-none cursor-pointer shadow-md active:scale-[0.98]"
             >
-              View Booking Details
+              View Booking Summary
             </button>
             <button 
               onClick={() => router.push("/home")}
-              className={`w-full py-3.5 px-8 rounded-full text-[13px] font-extrabold transition-all cursor-pointer ${theme.btnColor}`}
+              className="w-full py-4 px-8 border border-[#FF10F0] text-[#FF10F0] bg-transparent hover:bg-[#FFF0FC] rounded-full text-[14px] font-extrabold transition-all cursor-pointer active:scale-[0.98]"
             >
               Back to Home
             </button>

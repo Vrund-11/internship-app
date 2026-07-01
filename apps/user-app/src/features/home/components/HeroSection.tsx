@@ -224,49 +224,49 @@ const HeroSection = () => {
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
-  const activePet = pets[activePetIndex] ?? null;
+  const activePet = pets[activePetIndex];
 
   return (
-    <section className="px-4 pt-5 pb-3">
-      {/* ===== MOBILE LAYOUT (unchanged) ===== */}
+    <section className="px-6 pt-5 pb-3">
+      {/* ===== MOBILE LAYOUT ===== */}
       <div className="md:hidden">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           {/* Pet card */}
           {!petsLoaded ? (
             <div className="bg-white rounded-[20px] border border-[#EDE4EB] p-4 flex items-center gap-3.5 animate-pulse">
-              <div className="w-14 h-14 rounded-[18px] bg-[#F5D6F5] shrink-0" />
+              <div className="w-14 h-14 rounded-full bg-[#FFF0FC] shrink-0" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 bg-[#F5D6F5] rounded w-24" />
-                <div className="h-3 bg-[#FBF0FB] rounded w-40" />
+                <div className="h-4 bg-[#FFF0FC] rounded w-24" />
+                <div className="h-3 bg-[#FFF0FC] rounded w-40" />
               </div>
             </div>
           ) : pets.length === 0 ? (
             <button
               onClick={() => setShowAddPet(true)}
-              className="bg-white rounded-[20px] border border-dashed border-[#A7009D] p-4 flex items-center gap-3.5 w-full text-left transition-colors hover:bg-[#FBF0FB]"
+              className="bg-white rounded-[20px] border border-dashed border-[#FF10F0]/30 p-4 flex items-center gap-3.5 w-full text-left transition-all hover:bg-[#FFF0FC] active:scale-[0.99]"
             >
-              <div className="w-14 h-14 rounded-[18px] bg-[#F5D6F5] flex items-center justify-center shrink-0">
-                <Plus className="w-6 h-6 text-[#A7009D]" />
+              <div className="w-14 h-14 rounded-full bg-[#FFF0FC] flex items-center justify-center shrink-0">
+                <Plus className="w-6 h-6 text-[#FF10F0]" />
               </div>
               <div>
-                <div className="font-bold text-[15px] text-[#1a0a18]">Add Your Pet</div>
-                <div className="text-[12px] text-[#5C3A58] mt-0.5">Tap to register your fur baby</div>
+                <div className="font-bold text-[15px] text-[#121212]">Add Your Pet</div>
+                <div className="text-[12px] text-[#4A4A4A] mt-0.5">Register your pet for custom scheduling</div>
               </div>
             </button>
           ) : (
-            <div className="bg-white rounded-[20px] border border-[#EDE4EB] p-4 flex items-center gap-3.5">
-              <div className="w-14 h-14 rounded-[18px] bg-[#F5D6F5] flex items-center justify-center text-[28px] shrink-0">
+            <div className="bg-white rounded-[20px] border border-[#EDE4EB] p-4 flex items-center gap-3.5 shadow-card">
+              <div className="w-14 h-14 rounded-full bg-[#FFF0FC] flex items-center justify-center text-[28px] shrink-0">
                 {PET_EMOJIS[activePet?.type ?? "dog"]}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[17px] font-bold text-[#1a0a18] truncate">{activePet?.name ?? "Your Pet"}</div>
-                <div className="text-[12px] text-[#5C3A58] mt-0.5 truncate">
+                <div className="text-[17px] font-extrabold text-[#121212] truncate">{activePet?.name ?? "Your Pet"}</div>
+                <div className="text-[12px] text-[#4A4A4A] mt-0.5 truncate">
                   {[activePet?.breed, activePet?.age ? `${activePet.age} yrs` : null, activePet?.weight ? `${activePet.weight} kg` : null]
                     .filter(Boolean).join(" · ")}
                 </div>
                 <div className="flex gap-1.5 mt-2 flex-wrap">
-                  <span className="bg-[#D1FAE5] text-[#065F46] text-[10px] font-bold px-2.5 py-0.5 rounded-full tracking-[0.6px] uppercase flex items-center gap-1">
-                    <Check className="w-2.5 h-2.5" /> Vaccinated
+                  <span className="bg-[#E6F9F0] text-[#10B981] text-[10px] font-bold px-2.5 py-0.5 rounded-full tracking-[0.6px] uppercase flex items-center gap-1">
+                    ✓ Vaccinated
                   </span>
                   {pets.length > 1 && (
                     <span className="bg-[#FEF3C7] text-[#78350F] text-[10px] font-bold px-2.5 py-0.5 rounded-full tracking-[0.6px] uppercase">
@@ -277,13 +277,13 @@ const HeroSection = () => {
               </div>
               <button
                 onClick={() => setShowAddPet(true)}
-                className="w-8 h-8 rounded-[10px] bg-[#FBF0FB] border-none flex items-center justify-center shrink-0"
+                className="w-8 h-8 rounded-full bg-[#FFF0FC] border-none flex items-center justify-center shrink-0 active:scale-90 transition-transform"
               >
-                <Plus className="w-3.5 h-3.5 text-[#A7009D]" />
+                <Plus className="w-4 h-4 text-[#FF10F0]" />
               </button>
             </div>
           )}
-
+ 
           {/* Pet switcher dots */}
           {pets.length > 1 && (
             <div className="flex gap-1.5 justify-center">
@@ -295,60 +295,60 @@ const HeroSection = () => {
                   style={{
                     width: i === activePetIndex ? 20 : 8,
                     height: 8,
-                    background: i === activePetIndex ? "#A7009D" : "#EDE4EB",
+                    background: i === activePetIndex ? "#FF10F0" : "#EDE4EB",
                   }}
                 />
               ))}
             </div>
           )}
-
+ 
           {/* Hero promo banner */}
-          <div className="rounded-[24px] p-5 relative overflow-hidden" style={{ background: "linear-gradient(125deg, #390035 0%, #A7009D 55%, #CC00BE 100%)" }}>
-            <div className="absolute -top-[20px] -right-[20px] w-[130px] h-[130px] rounded-full bg-white/[0.07]" />
-            <div className="absolute right-3.5 top-3.5 w-[70px] h-[70px] rounded-full bg-white/[0.05]" />
+          <div className="rounded-[24px] p-5 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #390035 0%, #A7009D 50%, #FF10F0 100%)" }}>
+            <div className="absolute -top-[30px] -right-[30px] w-[140px] h-[140px] rounded-full bg-white/[0.08]" />
+            <div className="absolute right-6 top-8 w-[80px] h-[80px] rounded-full bg-white/[0.04]" />
             <div className="absolute right-2.5 -bottom-[18px] opacity-[0.12]">
               <PawSvg color="#fff" size={84} />
             </div>
-
-            <div className="flex items-center gap-1.5 mb-2.5">
-              <div className="w-[7px] h-[7px] rounded-full bg-[#A7FFD7] animate-blink" />
-              <span className="text-[11px] text-white/85 font-bold tracking-[0.08em] uppercase">Instant Booking Available</span>
+ 
+            <div className="inline-flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-full backdrop-blur-md mb-3">
+              <div className="w-[6px] h-[6px] rounded-full bg-[#10B981] animate-blink" />
+              <span className="text-[10px] text-white font-extrabold tracking-[0.08em] uppercase">INSTANT BOOKING</span>
             </div>
-
-            <div className="text-[21px] font-extrabold text-white leading-[1.28] mb-1.5">
+ 
+            <div className="text-[23px] font-extrabold text-white leading-[1.2] mb-1.5">
               Need a pet service<br />right now?
             </div>
-            <div className="text-[12px] text-white/60 mb-[18px] leading-[1.6]">
-              Grooming, vet & food — booked in under 60 seconds
+            <div className="text-[12px] text-white/80 mb-5 leading-normal">
+              Grooming, vet & food — book in under 30 seconds
             </div>
-
+ 
             <button
               onClick={openAskCano}
-              className="w-full py-3.5 px-[18px] border-none rounded-full bg-white text-[#A7009D] text-[15px] font-bold cursor-pointer flex items-center justify-center gap-2.5"
+              className="w-full py-3.5 px-6 border-none rounded-full bg-white text-[#FF10F0] text-[15px] font-extrabold cursor-pointer flex items-center justify-center gap-2 shadow-sm transition-transform active:scale-[0.98]"
             >
-              <PawSvg color="#A7009D" size={18} /> Book Now — Instantly
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#A7009D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <PawSvg color="#FF10F0" size={16} /> Book Now — Instantly
+              <ArrowRight className="w-4 h-4 text-[#FF10F0]" />
             </button>
           </div>
-
+ 
           {/* Promo strip */}
-          <div className="bg-[#1a0a18] rounded-[20px] px-5 py-4 flex items-center gap-3.5">
-            <div className="flex-1">
-              <div className="text-[15px] font-bold text-white leading-[1.3]">First booking 20% off!</div>
+          <div className="bg-[#121212] rounded-[20px] px-5 py-4 flex items-center justify-between border border-white/5 shadow-card">
+            <div className="flex-1 min-w-0">
+              <div className="text-[15px] font-extrabold text-white leading-normal">First booking 20% off!</div>
               <div className="text-[12px] text-white/50 mt-0.5">
-                Use code <strong className="text-[#F5D6F5] tracking-[0.04em]">PAWS20</strong> at checkout
+                Use code <strong className="text-[#FF10F0] font-mono tracking-[0.04em]">PAWS20</strong> at checkout
               </div>
             </div>
             <button
               onClick={() => setShowCelebration(true)}
-              className="bg-[#A7009D] text-white border-none rounded-full px-4 py-2.5 text-[12px] font-bold cursor-pointer whitespace-nowrap"
+              className="bg-[#FF10F0] text-white border-none rounded-full px-5 py-2.5 text-[12px] font-extrabold cursor-pointer whitespace-nowrap transition-transform active:scale-95"
             >
               Claim →
             </button>
           </div>
         </div>
       </div>
-
+ 
       {/* ===== DESKTOP LAYOUT ===== */}
       <div className="hidden md:block">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter mb-stack-lg">
@@ -399,7 +399,7 @@ const HeroSection = () => {
                     <Sparkles className="w-2.5 h-2.5" /> Premium
                   </span>
                 </div>
-
+ 
                 {/* Dynamic pet selector dots */}
                 {pets.length > 1 && (
                   <div className="flex gap-1.5 justify-center mt-3 pt-3 border-t border-outline-variant/20">
@@ -419,7 +419,7 @@ const HeroSection = () => {
                 )}
               </div>
             )}
-
+ 
             {/* Promo Card */}
             <div className="rounded-xl p-6 text-white shadow-lg relative overflow-hidden group" style={{ background: "linear-gradient(135deg, #390035 0%, #A7009D 55%, #CC00BE 100%)" }}>
               <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-110 transition-transform"></div>
@@ -440,7 +440,7 @@ const HeroSection = () => {
               </div>
             </div>
           </aside>
-
+ 
           {/* Right Column: Hero Banner */}
           <div className="lg:col-span-9">
             <div className="relative w-full h-full rounded-3xl overflow-hidden bg-primary-container group min-h-[320px] flex flex-col justify-center">
@@ -482,10 +482,10 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-
+ 
       {/* Celebration Modal */}
       <CelebrationModal open={showCelebration} onClose={() => setShowCelebration(false)} />
-
+ 
       {/* Add Pet Popup */}
       {showAddPet && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-[rgba(26,10,24,0.5)] backdrop-blur-sm" onClick={() => setShowAddPet(false)}>
@@ -494,7 +494,7 @@ const HeroSection = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-extrabold text-[18px] text-[#1a0a18]">Add Your Pet</h3>
+              <h3 className="font-extrabold text-[18px] text-[#121212]">Add Your Pet</h3>
               <button
                 onClick={() => setShowAddPet(false)}
                 className="w-8 h-8 rounded-full bg-[#F3EEF1] flex items-center justify-center hover:bg-[#EDE4EB] transition-colors"
@@ -502,7 +502,7 @@ const HeroSection = () => {
                 <X className="w-4 h-4 text-[#5C3A58]" />
               </button>
             </div>
-
+ 
             <div className="flex gap-2 mb-4">
               {(["dog", "cat"] as const).map((t) => (
                 <button
@@ -510,30 +510,30 @@ const HeroSection = () => {
                   onClick={() => setForm((f) => ({ ...f, type: t }))}
                   className="flex-1 h-12 rounded-[14px] text-[14px] font-bold capitalize transition-all"
                   style={{
-                    border: form.type === t ? "2px solid #A7009D" : "1.5px solid #EDE4EB",
-                    background: form.type === t ? "#FBF0FB" : "white",
-                    color: form.type === t ? "#390035" : "#5C3A58",
+                    border: form.type === t ? "2px solid #FF10F0" : "1.5px solid #EDE4EB",
+                    background: form.type === t ? "rgba(255, 16, 240, 0.08)" : "white",
+                    color: form.type === t ? "#121212" : "#4A4A4A",
                   }}
                 >
                   {PET_EMOJIS[t]} {t.charAt(0).toUpperCase() + t.slice(1)}
                 </button>
               ))}
             </div>
-
+ 
             <div className="space-y-3 mb-5">
-              <input placeholder="Pet name *" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="w-full h-12 rounded-[14px] border border-[#DDD0DA] px-4 text-[14px] text-[#1a0a18] outline-none focus:border-[#A7009D] bg-white transition-colors" />
-              <input placeholder="Breed (e.g. Labrador)" value={form.breed} onChange={(e) => setForm((f) => ({ ...f, breed: e.target.value }))} className="w-full h-12 rounded-[14px] border border-[#DDD0DA] px-4 text-[14px] text-[#1a0a18] outline-none focus:border-[#A7009D] bg-white transition-colors" />
+              <input placeholder="Pet name *" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="w-full h-12 rounded-[14px] border border-[#DDD0DA] px-4 text-[14px] text-[#121212] outline-none focus:border-[#FF10F0] bg-white transition-colors" />
+              <input placeholder="Breed (e.g. Labrador)" value={form.breed} onChange={(e) => setForm((f) => ({ ...f, breed: e.target.value }))} className="w-full h-12 rounded-[14px] border border-[#DDD0DA] px-4 text-[14px] text-[#121212] outline-none focus:border-[#FF10F0] bg-white transition-colors" />
               <div className="flex gap-3">
-                <input placeholder="Age (yrs)" type="number" value={form.age} onChange={(e) => setForm((f) => ({ ...f, age: e.target.value }))} className="flex-1 h-12 rounded-[14px] border border-[#DDD0DA] px-4 text-[14px] text-[#1a0a18] outline-none focus:border-[#A7009D] bg-white transition-colors" />
-                <input placeholder="Weight (kg)" type="number" value={form.weight} onChange={(e) => setForm((f) => ({ ...f, weight: e.target.value }))} className="flex-1 h-12 rounded-[14px] border border-[#DDD0DA] px-4 text-[14px] text-[#1a0a18] outline-none focus:border-[#A7009D] bg-white transition-colors" />
+                <input placeholder="Age (yrs)" type="number" value={form.age} onChange={(e) => setForm((f) => ({ ...f, age: e.target.value }))} className="flex-1 h-12 rounded-[14px] border border-[#DDD0DA] px-4 text-[14px] text-[#121212] outline-none focus:border-[#FF10F0] bg-white transition-colors animate-none" />
+                <input placeholder="Weight (kg)" type="number" value={form.weight} onChange={(e) => setForm((f) => ({ ...f, weight: e.target.value }))} className="flex-1 h-12 rounded-[14px] border border-[#DDD0DA] px-4 text-[14px] text-[#121212] outline-none focus:border-[#FF10F0] bg-white transition-colors animate-none" />
               </div>
             </div>
-
+ 
             <button
               onClick={handleAddPet}
               disabled={!form.name.trim() || addingPet}
-              className="w-full h-[52px] rounded-full text-white text-[15px] font-bold transition-all disabled:opacity-40 hover:shadow-[0_8px_24px_rgba(167,0,157,0.3)] hover:scale-[1.01]"
-              style={{ background: "linear-gradient(135deg, #A7009D, #CC00BE)" }}
+              className="w-full h-[52px] rounded-full text-white text-[15px] font-bold transition-all disabled:opacity-40 hover:shadow-[0_8px_24px_rgba(255,16,240,0.3)] hover:scale-[1.01]"
+              style={{ background: "linear-gradient(135deg, #FF10F0, #A7009D)" }}
             >
               {addingPet ? "Adding..." : "Add Pet"}
             </button>

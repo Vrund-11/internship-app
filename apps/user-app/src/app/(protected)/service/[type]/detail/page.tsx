@@ -12,6 +12,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import AppShell from "@/features/layout/components/AppShell";
 
 // Indian phone: 10 digits starting with 6-9
 const PHONE_REGEX = /^[6-9]\d{9}$/;
@@ -105,10 +106,12 @@ export default function ServiceDetailPage() {
 
   if (!service) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 text-center">
-        <p className="mb-4">Service not found.</p>
-        <Button onClick={() => router.push("/home")}>Go Home</Button>
-      </div>
+      <AppShell hideMobileNav={true} fullWidth={true}>
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 text-center">
+          <p className="mb-4">Service not found.</p>
+          <Button onClick={() => router.push("/home")}>Go Home</Button>
+        </div>
+      </AppShell>
     );
   }
 
@@ -177,7 +180,7 @@ export default function ServiceDetailPage() {
     }
 
     return (
-      <>
+      <AppShell hideMobileNav={true} fullWidth={true}>
         {/* MOBILE VIEW (unchanged) */}
         <div className="md:hidden min-h-screen bg-white flex flex-col">
           <div className="flex-1 overflow-y-auto">
@@ -366,17 +369,15 @@ export default function ServiceDetailPage() {
 
         {/* DESKTOP VIEW */}
         <div className="hidden md:block min-h-screen bg-[#F9FAFB] pb-24">
-          <main className="max-w-[1280px] mx-auto px-10 pt-8">
-            {/* Header Top Bar */}
-            <div className="flex justify-between items-center mb-10">
+          <main className="max-w-[1280px] mx-auto px-10 pb-10 pt-6">
+            {/* Back Button */}
+            <div className="mb-6">
               <button
                 onClick={() => router.back()}
-                className="w-12 h-12 flex items-center justify-center rounded-xl bg-white border border-[#d9c0ce]/30 hover:bg-gray-50 transition-colors shadow-sm"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 shadow-sm transition-all hover:bg-slate-50 active:scale-95"
               >
-                <ArrowLeft className="w-5 h-5 text-[#54414d]" />
+                <ArrowLeft className="w-4 h-4" style={{ color: service.accentColor }} />
               </button>
-              <div className="text-xl font-extrabold text-[#6c005f] tracking-tight">canovet</div>
-              <div className="w-12" />
             </div>
 
             {/* Hero Section */}
@@ -514,7 +515,7 @@ export default function ServiceDetailPage() {
                               setNotifyPhone(val);
                               if (notifyError) setNotifyError("");
                             }}
-                            className="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-200 focus:border-[#6c005f] focus:ring-2 focus:ring-[#6c005f]/20 bg-white text-on-surface placeholder-slate-400 font-body-md outline-none font-bold transition-all"
+                            className="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-200 focus:border-[#FF10F0] focus:ring-2 focus:ring-[#FF10F0]/20 bg-white text-on-surface placeholder-slate-400 font-body-md outline-none font-bold transition-all"
                           />
                         </div>
                         {notifyError && (
@@ -539,7 +540,7 @@ export default function ServiceDetailPage() {
                         type="checkbox"
                         checked={wantsFaster}
                         onChange={(e) => setWantsFaster(e.target.checked)}
-                        className="w-4 h-4 rounded focus:ring-[#6c005f] border-gray-300 accent-[#6c005f]"
+                        className="w-4 h-4 rounded focus:ring-[#FF10F0] border-gray-300 accent-[#FF10F0]"
                       />
                       <span className="text-[12px] text-[#54414d] font-semibold">
                         I want this service faster (Priority Access)
@@ -570,7 +571,7 @@ export default function ServiceDetailPage() {
             </section>
           </main>
         </div>
-      </>
+      </AppShell>
     );
   }
 
@@ -580,7 +581,7 @@ export default function ServiceDetailPage() {
 
   if (isGrooming) {
     return (
-      <>
+      <AppShell hideMobileNav={true} fullWidth={true}>
         {/* MOBILE VIEW (unchanged) */}
         <div className="md:hidden min-h-screen bg-[#F8F8F8] flex flex-col pb-24">
           <div className="flex-1 overflow-y-auto">
@@ -590,7 +591,7 @@ export default function ServiceDetailPage() {
               <div className="w-full flex justify-between items-center mb-6 max-w-md">
                 <button
                   onClick={() => router.back()}
-                  className="w-10 h-10 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl flex items-center justify-center active:scale-95 transition-all"
+                  className="w-10 h-10 bg-white/20 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center active:scale-95 transition-all"
                 >
                   <ArrowLeft className="w-5 h-5 text-white" />
                 </button>
@@ -706,17 +707,15 @@ export default function ServiceDetailPage() {
 
         {/* DESKTOP VIEW */}
         <div className="hidden md:block min-h-screen bg-[#F9FAFB] pb-24">
-          <main className="max-w-[1280px] mx-auto px-10 pt-8">
-            {/* Header Top Bar */}
-            <div className="flex justify-between items-center mb-10">
+          <main className="max-w-[1280px] mx-auto px-10 pb-10 pt-6">
+            {/* Back Button */}
+            <div className="mb-6">
               <button
                 onClick={() => router.back()}
-                className="w-12 h-12 flex items-center justify-center rounded-xl bg-white border border-[#d9c0ce]/30 hover:bg-gray-50 transition-colors shadow-sm"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 shadow-sm transition-all hover:bg-slate-50 active:scale-95"
               >
-                <ArrowLeft className="w-5 h-5 text-[#54414d]" />
+                <ArrowLeft className="w-4 h-4" style={{ color: service.accentColor }} />
               </button>
-              <div className="text-xl font-extrabold text-[#6c005f] tracking-tight">canovet</div>
-              <div className="w-12" />
             </div>
 
             {/* Hero Section */}
@@ -767,12 +766,12 @@ export default function ServiceDetailPage() {
               {/* Left Side: Grooming Info & Process */}
               <div className="lg:col-span-7 space-y-8">
                 {/* Choose Your Experience - At Home Only */}
-                <div className="bg-white p-8 rounded-3xl border border-[#d9c0ce]/30 soft-shadow neon-border-active relative flex flex-col">
+                <div className="bg-white p-8 rounded-3xl border border-[#EDE4EB] soft-shadow neon-border-active relative flex flex-col">
                   <div className="absolute top-6 right-6">
                     <span className="text-[#FF10F0] text-3xl">✓</span>
                   </div>
                   <div className="w-16 h-16 bg-[#ffd7f0] rounded-2xl flex items-center justify-center mb-6">
-                    <span className="text-[#6c005f] text-2xl">🏠</span>
+                    <span className="text-[#FF10F0] text-2xl">🏠</span>
                   </div>
                   <h3 className="font-headline-md text-[#151c27] mb-3">At Home Grooming</h3>
                   <p className="font-body-md text-[#54414d] mb-6">
@@ -849,7 +848,7 @@ export default function ServiceDetailPage() {
                   </div>
 
                   {/* Summary & Button */}
-                  <div className="pt-6 border-t border-[#d9c0ce]/20 space-y-4">
+                  <div className="pt-6 border-t border-[#EDE4EB]/50 space-y-4">
                     <div className="flex justify-between items-center">
                       <div>
                         <div className="text-xs text-gray-500">{activeGroomingPlanInfo.name}</div>
@@ -860,7 +859,7 @@ export default function ServiceDetailPage() {
 
                     <button
                       onClick={() => router.push(`/service/grooming`)}
-                      className="w-full h-12 rounded-full bg-[#6c005f] hover:bg-[#6c005f]/95 text-white font-bold transition-all hover:scale-[1.02] flex items-center justify-center gap-2 shadow-sm text-sm"
+                      className="w-full h-12 rounded-full bg-[#FF10F0] hover:bg-[#FF10F0]/90 text-white font-bold transition-all hover:scale-[1.02] flex items-center justify-center gap-2 shadow-sm text-sm"
                     >
                       Book Now <ArrowLeft className="w-4 h-4 rotate-180" />
                     </button>
@@ -870,13 +869,13 @@ export default function ServiceDetailPage() {
             </div>
           </main>
         </div>
-      </>
+      </AppShell>
     );
   }
 
   if (isVetConsultation) {
     return (
-      <>
+      <AppShell hideMobileNav={true} fullWidth={true}>
         {/* MOBILE VIEW (unchanged) */}
         <div className="md:hidden min-h-screen bg-[#F8F8F8] flex flex-col pb-24">
           <div className="flex-1 overflow-y-auto">
@@ -886,7 +885,7 @@ export default function ServiceDetailPage() {
               <div className="w-full flex justify-between items-center mb-6 max-w-md">
                 <button
                   onClick={() => router.back()}
-                  className="w-10 h-10 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl flex items-center justify-center active:scale-95 transition-all"
+                  className="w-10 h-10 bg-white/20 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center active:scale-95 transition-all"
                 >
                   <ArrowLeft className="w-5 h-5 text-white" />
                 </button>
@@ -999,17 +998,15 @@ export default function ServiceDetailPage() {
 
         {/* DESKTOP VIEW */}
         <div className="hidden md:block min-h-screen bg-[#F8FAFC] pb-24">
-          <main className="max-w-[1280px] mx-auto px-10 pt-8">
-            {/* Header Top Bar */}
-            <div className="flex justify-between items-center mb-10">
+          <main className="max-w-[1280px] mx-auto px-10 pb-10 pt-6">
+            {/* Back Button */}
+            <div className="mb-6">
               <button
                 onClick={() => router.back()}
-                className="w-12 h-12 flex items-center justify-center rounded-xl bg-white border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 shadow-sm transition-all hover:bg-slate-50 active:scale-95"
               >
-                <ArrowLeft className="w-5 h-5 text-slate-600" />
+                <ArrowLeft className="w-4 h-4" style={{ color: service.accentColor }} />
               </button>
-              <div className="text-xl font-extrabold text-[#1e40af] tracking-tight">canovet</div>
-              <div className="w-12" />
             </div>
 
             {/* Hero Section */}
@@ -1159,14 +1156,15 @@ export default function ServiceDetailPage() {
             </section>
           </main>
         </div>
-      </>
+      </AppShell>
     );
   }
 
   // Fallback active service layout (legacy fallback)
   const displayPrice = service.price ?? 0;
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <AppShell hideMobileNav={true} fullWidth={true}>
+      <div className="min-h-screen bg-background flex flex-col">
       <div className="flex-1 overflow-y-auto">
         <div
           style={{ background: `linear-gradient(135deg, ${service.softColor} 0%, ${service.accentColor}18 100%)` }}
@@ -1242,6 +1240,7 @@ export default function ServiceDetailPage() {
           Book Now <ArrowLeft className="w-4 h-4 ml-1.5 rotate-180" />
         </Button>
       </div>
-    </div>
+      </div>
+    </AppShell>
   );
 }

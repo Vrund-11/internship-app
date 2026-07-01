@@ -192,7 +192,7 @@ async function seedAll() {
 
     // ─── 4. User, Pets & Addresses Seeding ───
     console.log("[SEED] Seeding default test users, pets, and addresses...");
-    
+
     // User 1: Krishna Patel (matching login default)
     const userKrishna = await prisma.user.create({
       data: {
@@ -386,7 +386,7 @@ async function seedAll() {
 
     // ─── 7. Bookings, Payments, Reviews & Complaints Seeding (Seed 15-20 Bookings) ───
     console.log("[SEED] Seeding Bookings & related records...");
-    
+
     // Find some seeded partners to attach to bookings
     const shahpurGroomerId = seededPartnersMap["Shahpur Groomer 1"];
     const dariapurVetId = seededPartnersMap["Dr. Dariapur (OnCall 1)"];
@@ -645,6 +645,7 @@ async function seedAll() {
           bookingId: createdBooking.id,
           amount: b.amount,
           status: b.status === "COMPLETED" || b.status === "CONFIRMED" || b.status === "IN_PROGRESS" ? "SUCCESS" : "PENDING",
+          method: b.serviceType === "VET_CLINIC" ? "online" : (bookingIndex % 2 === 0 ? "offline" : "online"),
         },
       });
 

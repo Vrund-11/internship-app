@@ -8,6 +8,7 @@ router.get("/test-data", authMiddleware, bookingController.getTestData);
 router.post("/pets", authMiddleware, bookingController.createPet);
 router.post("/addresses", authMiddleware, bookingController.createAddress);
 router.get("/pets", authMiddleware, bookingController.listPets);
+router.get("/addresses/autocomplete", authMiddleware, bookingController.getAutocompleteSuggestions);
 router.get("/addresses", authMiddleware, bookingController.listAddresses);
 router.get("/history", authMiddleware, bookingController.listBookings);
 router.get("/slots", authMiddleware, bookingController.getAvailableSlots);

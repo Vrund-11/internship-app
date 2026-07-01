@@ -16,8 +16,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 307 36% 7%;
 
-    /* Magenta #A7009D */
-    --primary: 303 100% 33%;
+    /* Neon Pink #FF10F0 */
+    --primary: 304 100% 53%;
     --primary-foreground: 0 0% 100%;
 
     /* Pink light #F5D6F5 */
@@ -28,8 +28,8 @@
     --muted: 310 7% 95%;
     --muted-foreground: 306 22% 29%;
 
-    /* Magenta accent #A7009D */
-    --accent: 303 100% 33%;
+    /* Neon Pink accent #FF10F0 */
+    --accent: 304 100% 53%;
     --accent-foreground: 0 0% 100%;
 
     /* Red #E05C35 */
@@ -39,7 +39,7 @@
     /* Border #EDE4EB */
     --border: 310 18% 91%;
     --input: 310 18% 91%;
-    --ring: 303 100% 33%;
+    --ring: 304 100% 53%;
 
     --radius: 1.25rem;
 
@@ -56,8 +56,8 @@
     --svc-food-soft: 40 96% 91%;
 
     /* Shadows */
-    --shadow-card: 0 6px 18px -6px hsl(303 100% 33% / 0.08);
-    --shadow-elevated: 0 24px 60px -20px hsl(303 100% 33% / 0.18);
+    --shadow-card: 0 8px 24px rgba(18, 18, 18, 0.04);
+    --shadow-elevated: 0 16px 48px rgba(18, 18, 18, 0.08);
 
     --sidebar-background: 300 14% 98%;
     --sidebar-foreground: 306 22% 28%;
@@ -70,6 +70,9 @@
 
     --safe-area-top: env(safe-area-inset-top, 0px);
     --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    
+    --mobile-primary: #FF10F0;
+    --mobile-primary-bg: rgba(255, 16, 240, 0.1);
   }
 
   .dark {
@@ -222,6 +225,9 @@
   --spacing-gutter: 24px;
   --spacing-stack-md: 16px;
   --spacing-stack-lg: 32px;
+
+  --color-mobile-primary: var(--mobile-primary);
+  --color-mobile-primary-bg: var(--mobile-primary-bg);
 }
 
 /* Custom font utilities for Stitch design system */
@@ -591,7 +597,7 @@
   }
 
   .hero-gradient-grooming {
-    background: linear-gradient(135deg, #A7009D 0%, #6c005f 100%);
+    background: linear-gradient(135deg, #121212 0%, #1e1e1e 60%, #2a2a2a 100%);
   }
 
   .hero-gradient-vet {

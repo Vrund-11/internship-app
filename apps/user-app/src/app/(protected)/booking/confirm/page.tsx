@@ -273,6 +273,22 @@ export default function ConfirmPage() {
       });
   }, []);
 
+  // Prevent back navigation on the confirm/payment step
+  useEffect(() => {
+    if (!isSuccess) {
+      window.history.pushState(null, "", window.location.href);
+
+      const handlePopState = () => {
+        window.history.pushState(null, "", window.location.href);
+      };
+
+      window.addEventListener("popstate", handlePopState);
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+      };
+    }
+  }, [isSuccess]);
+
   const selectedPet = pets.find((pet) => pet.id === booking.petId) ?? null;
   const selectedAddress = addresses.find((address) => address.id === booking.addressId) ?? null;
 
@@ -393,7 +409,10 @@ export default function ConfirmPage() {
     <div className="min-h-screen bg-background">
       <div className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border pt-safe">
         <div className="max-w-lg mx-auto flex items-center gap-3 px-4 h-14">
-          <button onClick={() => router.back()} className="text-sm font-medium text-muted-foreground">
+          <button 
+            disabled={true} 
+            className="text-sm font-medium text-muted-foreground opacity-50 cursor-not-allowed"
+          >
             Back
           </button>
           <h1 className="text-base font-semibold text-foreground">

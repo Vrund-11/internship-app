@@ -1,16 +1,16 @@
-# Graph Report - canovet  (2026-06-15)
+# Graph Report - canovet  (2026-07-01)
 
 ## Corpus Check
-- 188 files · ~126,206 words
+- 190 files · ~137,600 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 577 nodes · 657 edges · 135 communities (124 shown, 11 thin omitted)
-- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 33 edges (avg confidence: 0.8)
+- 603 nodes · 695 edges · 130 communities (119 shown, 11 thin omitted)
+- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 37 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `06fc55f0`
+- Built from commit: `a89cf269`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -22,8 +22,8 @@
 - [[_COMMUNITY_Community 4|Community 4]]
 - [[_COMMUNITY_Community 5|Community 5]]
 - [[_COMMUNITY_Community 6|Community 6]]
+- [[_COMMUNITY_Community 7|Community 7]]
 - [[_COMMUNITY_Community 8|Community 8]]
-- [[_COMMUNITY_Community 9|Community 9]]
 - [[_COMMUNITY_Community 10|Community 10]]
 - [[_COMMUNITY_Community 11|Community 11]]
 - [[_COMMUNITY_Community 12|Community 12]]
@@ -31,22 +31,24 @@
 - [[_COMMUNITY_Community 14|Community 14]]
 - [[_COMMUNITY_Community 15|Community 15]]
 - [[_COMMUNITY_Community 16|Community 16]]
-- [[_COMMUNITY_Community 22|Community 22]]
-- [[_COMMUNITY_Community 23|Community 23]]
+- [[_COMMUNITY_Community 17|Community 17]]
+- [[_COMMUNITY_Community 18|Community 18]]
+- [[_COMMUNITY_Community 20|Community 20]]
+- [[_COMMUNITY_Community 21|Community 21]]
+- [[_COMMUNITY_Community 24|Community 24]]
+- [[_COMMUNITY_Community 25|Community 25]]
 - [[_COMMUNITY_Community 26|Community 26]]
+- [[_COMMUNITY_Community 27|Community 27]]
+- [[_COMMUNITY_Community 28|Community 28]]
 - [[_COMMUNITY_Community 29|Community 29]]
 - [[_COMMUNITY_Community 30|Community 30]]
 - [[_COMMUNITY_Community 31|Community 31]]
-- [[_COMMUNITY_Community 32|Community 32]]
-- [[_COMMUNITY_Community 33|Community 33]]
-- [[_COMMUNITY_Community 34|Community 34]]
-- [[_COMMUNITY_Community 35|Community 35]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `addBot()` - 33 edges
-2. `addBot()` - 26 edges
-3. `useAuth()` - 24 edges
-4. `cn()` - 22 edges
+1. `addBot()` - 34 edges
+2. `cn()` - 28 edges
+3. `addBot()` - 26 edges
+4. `useAuth()` - 25 edges
 5. `useCity()` - 19 edges
 6. `delay()` - 8 edges
 7. `useBooking()` - 8 edges
@@ -66,15 +68,15 @@
 - `handleAddAddress()` --calls--> `validateCity()`  [INFERRED]
   apps/mobile/app/booking/address.tsx → packages/shared/src/validation.ts
 
-## Communities (135 total, 11 thin omitted)
+## Communities (130 total, 11 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
-Nodes (13): handleAddAddress(), toDisplayAddress(), RootLayout(), pad(), toDateOnly(), toDateOnly(), AppProviders(), AuthProvider() (+5 more)
+Nodes (5): Navbar(), useAuth(), useCity(), ProfilePage(), ProtectedLayout()
 
 ### Community 1 - "Community 1"
 Cohesion: 0.1
-Nodes (41): addBot(), askAddresses(), askBookingFaqs(), askBookingOptions(), askDates(), askFeedbackStars(), askNegativeCategories(), askPets() (+33 more)
+Nodes (42): addBot(), askAddresses(), askBookingFaqs(), askBookingOptions(), askDates(), askFeedbackStars(), askNegativeCategories(), askPets() (+34 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.1
@@ -82,49 +84,57 @@ Nodes (34): addBot(), askAddresses(), askBookingFaqs(), askBookingOptions(), ask
 
 ### Community 4 - "Community 4"
 Cohesion: 0.07
-Nodes (11): handlePhoneSubmit(), handleOtpSubmit(), handlePhoneSubmit(), cleanupTestBookings(), cleanupTestComplaints(), fail(), getTestBookingId(), login() (+3 more)
+Nodes (10): loadBookings(), BookingSuccess(), getServiceCategory(), getServiceCategoryName(), getServicesForType(), getServiceSlug(), resolveServiceType(), deriveFollowUps() (+2 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.1
-Nodes (17): handleNameSubmit(), handleAddAddress(), handleAddPet(), handleAdd(), BookingSuccess(), handleAddPet(), handleNameSubmit(), hasRepeatingChars() (+9 more)
+Cohesion: 0.11
+Nodes (15): handleAddAddress(), toDisplayAddress(), handleAddAddress(), handleAddPet(), handleAdd(), handleAddPet(), hasRepeatingChars(), validateArea() (+7 more)
 
 ### Community 6 - "Community 6"
+Cohesion: 0.08
+Nodes (10): handleAddAddress(), toDisplayAddress(), RootLayout(), AppProviders(), AuthProvider(), BookingProvider(), useBooking(), setAccessToken() (+2 more)
+
+### Community 7 - "Community 7"
 Cohesion: 0.1
-Nodes (7): loadBookings(), getServiceCategory(), getServiceCategoryName(), getServicesForType(), getServiceSlug(), resolveServiceType(), deriveFollowUps()
+Nodes (3): pad(), toDateOnly(), toDateOnly()
 
 ### Community 8 - "Community 8"
-Cohesion: 0.18
-Nodes (3): Navbar(), useAuth(), ProfilePage()
+Cohesion: 0.14
+Nodes (9): handleNameSubmit(), handleOtpSubmit(), cleanupTestBookings(), cleanupTestComplaints(), fail(), getTestBookingId(), login(), ok() (+1 more)
 
-### Community 9 - "Community 9"
+### Community 10 - "Community 10"
+Cohesion: 0.13
+Nodes (4): handleNameSubmit(), handlePhoneSubmit(), handlePhoneSubmit(), validatePhone()
+
+### Community 11 - "Community 11"
 Cohesion: 0.22
 Nodes (6): cleanup(), main(), makeClient(), makeClientWithCookie(), generateAccessToken(), generateRefreshToken()
 
-### Community 10 - "Community 10"
+### Community 12 - "Community 12"
 Cohesion: 0.23
 Nodes (6): ExternalLink(), MonoText(), Text(), useThemeColor(), View(), useColorScheme()
 
-### Community 11 - "Community 11"
+### Community 13 - "Community 13"
 Cohesion: 0.33
 Nodes (10): classifyComplaint(), fallbackSentiment(), getBertSentiment(), regexScan(), fail(), login(), main(), ok() (+2 more)
 
-### Community 12 - "Community 12"
+### Community 14 - "Community 14"
 Cohesion: 0.24
 Nodes (4): main(), main(), main(), connectRedis()
 
-### Community 14 - "Community 14"
-Cohesion: 0.22
+### Community 15 - "Community 15"
+Cohesion: 0.2
 Nodes (3): isSlotAvailable(), getDistanceKm(), generateSlots()
 
-### Community 16 - "Community 16"
+### Community 17 - "Community 17"
 Cohesion: 0.32
 Nodes (4): fetchBookings(), formatSlotTime(), formatTime(), onRefresh()
 
-### Community 22 - "Community 22"
+### Community 20 - "Community 20"
 Cohesion: 0.7
 Nodes (4): fail(), login(), main(), ok()
 
-### Community 23 - "Community 23"
+### Community 21 - "Community 21"
 Cohesion: 0.7
 Nodes (4): fail(), login(), main(), ok()
 
@@ -134,12 +144,12 @@ Nodes (4): fail(), login(), main(), ok()
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `useAuth()` connect `Community 8` to `Community 0`, `Community 1`, `Community 2`, `Community 4`, `Community 6`, `Community 7`, `Community 13`, `Community 17`, `Community 19`, `Community 20`, `Community 27`, `Community 28`?**
-  _High betweenness centrality (0.146) - this node is a cross-community bridge._
-- **Why does `useCity()` connect `Community 13` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 6`, `Community 7`, `Community 8`, `Community 17`, `Community 20`, `Community 24`?**
-  _High betweenness centrality (0.107) - this node is a cross-community bridge._
-- **Why does `cn()` connect `Community 3` to `Community 8`, `Community 1`, `Community 13`, `Community 6`?**
-  _High betweenness centrality (0.083) - this node is a cross-community bridge._
+- **Why does `useAuth()` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 5`, `Community 6`, `Community 8`, `Community 9`, `Community 10`?**
+  _High betweenness centrality (0.154) - this node is a cross-community bridge._
+- **Why does `useCity()` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 7`, `Community 9`, `Community 18`?**
+  _High betweenness centrality (0.110) - this node is a cross-community bridge._
+- **Why does `cn()` connect `Community 3` to `Community 0`, `Community 1`, `Community 4`, `Community 5`?**
+  _High betweenness centrality (0.102) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `useAuth()` (e.g. with `ProtectedLayout()` and `Navbar()`) actually correct?**
   _`useAuth()` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 2 inferred relationships involving `useCity()` (e.g. with `ProtectedLayout()` and `Navbar()`) actually correct?**

@@ -51,6 +51,48 @@ export default function BookingAddressScreen() {
     pincode: "",
   });
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [selectedCoords, setSelectedCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+
+  const handleSearchChange = async (val: string) => {
+    setSearchQuery(val);
+    if (val.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    setLoadingSuggestions(true);
+    try {
+      const res = await api.get("/booking/addresses/autocomplete", {
+        params: { query: val },
+      });
+      if (res.data && res.data.suggestions) {
+        setSuggestions(res.data.suggestions);
+      }
+    } catch (err) {
+      console.error("Autocomplete failed", err);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
+  const selectSuggestion = (s: any) => {
+    setSearchQuery(s.label);
+    setForm((prev) => ({
+      ...prev,
+      city: s.city,
+      state: s.state,
+      area: s.area,
+      pincode: s.pincode,
+    }));
+    setSelectedCoords({
+      latitude: s.latitude,
+      longitude: s.longitude,
+    });
+    setSuggestions([]);
+  };
+
   useEffect(() => {
     api
       .get("/booking/addresses")
@@ -100,7 +142,11 @@ export default function BookingAddressScreen() {
 
     setSaving(true);
     try {
-      const res = await api.post("/booking/addresses", form);
+      const res = await api.post("/booking/addresses", {
+        ...form,
+        latitude: selectedCoords?.latitude,
+        longitude: selectedCoords?.longitude,
+      });
       const created: Address = {
         id: res.data.id,
         ...form,
@@ -109,6 +155,8 @@ export default function BookingAddressScreen() {
       setSelectedId(created.id);
       setShowForm(false);
       setForm({ label: "Home", house: "", area: "", city: "", state: "", pincode: "" });
+      setSearchQuery("");
+      setSelectedCoords(null);
     } catch {
       Alert.alert("Error", "Failed to add address");
     } finally {
@@ -228,45 +276,81 @@ export default function BookingAddressScreen() {
                   ))}
                 </View>
 
-                <TextInput
-                  style={styles.input}
-                  placeholder="House / Flat / Floor"
-                  placeholderTextColor={Colors.light.textSecondary}
-                  value={form.house}
-                  onChangeText={(t) => setForm((p) => ({ ...p, house: t }))}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Area / Landmark"
-                  placeholderTextColor={Colors.light.textSecondary}
-                  value={form.area}
-                  onChangeText={(t) => setForm((p) => ({ ...p, area: t }))}
-                />
-                <View style={styles.rowInputs}>
+                <View style={{ zIndex: 10, position: "relative", marginBottom: 12 }}>
                   <TextInput
-                    style={[styles.input, { flex: 1 }]}
-                    placeholder="City"
+                    style={styles.input}
+                    placeholder="Search area, landmark or neighborhood..."
                     placeholderTextColor={Colors.light.textSecondary}
-                    value={form.city}
-                    onChangeText={(t) => setForm((p) => ({ ...p, city: t }))}
+                    value={searchQuery}
+                    onChangeText={handleSearchChange}
                   />
-                  <TextInput
-                    style={[styles.input, { flex: 1 }]}
-                    placeholder="State"
-                    placeholderTextColor={Colors.light.textSecondary}
-                    value={form.state}
-                    onChangeText={(t) => setForm((p) => ({ ...p, state: t }))}
-                  />
+                  {loadingSuggestions && (
+                    <ActivityIndicator size="small" color={Colors.light.primary} style={{ position: "absolute", right: 12, top: 12 }} />
+                  )}
+                  {suggestions.length > 0 && (
+                    <View style={styles.suggestionsContainer}>
+                      {suggestions.map((s, idx) => (
+                        <Pressable
+                          key={idx}
+                          onPress={() => selectSuggestion(s)}
+                          style={styles.suggestionItem}
+                        >
+                          <Text style={styles.suggestionText}>{s.label}</Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  )}
                 </View>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Pincode"
-                  placeholderTextColor={Colors.light.textSecondary}
-                  keyboardType="numeric"
-                  maxLength={6}
-                  value={form.pincode}
-                  onChangeText={(t) => setForm((p) => ({ ...p, pincode: t }))}
-                />
+
+                {form.city && !["Ahmedabad"].includes(form.city) ? (
+                  <View style={styles.warningContainer}>
+                    <Text style={styles.warningText}>We are not available in {form.city} yet. Stay tuned!</Text>
+                  </View>
+                ) : null}
+
+                {form.city && ["Ahmedabad"].includes(form.city) ? (
+                  <>
+                    <TextInput
+                      style={[styles.input, { marginBottom: 12 }]}
+                      placeholder="House / Flat / Floor"
+                      placeholderTextColor={Colors.light.textSecondary}
+                      value={form.house}
+                      onChangeText={(t) => setForm((p) => ({ ...p, house: t }))}
+                    />
+                    <TextInput
+                      style={[styles.input, { marginBottom: 12 }]}
+                      placeholder="Area / Landmark"
+                      placeholderTextColor={Colors.light.textSecondary}
+                      value={form.area}
+                      onChangeText={(t) => setForm((p) => ({ ...p, area: t }))}
+                    />
+                    <View style={[styles.rowInputs, { marginBottom: 12 }]}>
+                      <TextInput
+                        style={[styles.input, { flex: 1 }]}
+                        placeholder="City"
+                        placeholderTextColor={Colors.light.textSecondary}
+                        value={form.city}
+                        onChangeText={(t) => setForm((p) => ({ ...p, city: t }))}
+                      />
+                      <TextInput
+                        style={[styles.input, { flex: 1 }]}
+                        placeholder="State"
+                        placeholderTextColor={Colors.light.textSecondary}
+                        value={form.state}
+                        onChangeText={(t) => setForm((p) => ({ ...p, state: t }))}
+                      />
+                    </View>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Pincode"
+                      placeholderTextColor={Colors.light.textSecondary}
+                      keyboardType="numeric"
+                      maxLength={6}
+                      value={form.pincode}
+                      onChangeText={(t) => setForm((p) => ({ ...p, pincode: t }))}
+                    />
+                  </>
+                ) : null}
 
                 <View style={styles.formActions}>
                   <Pressable
@@ -515,4 +599,36 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   continueButtonText: { color: "#fff", fontSize: 15, fontWeight: "700" },
+  suggestionsContainer: {
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    borderRadius: 12,
+    marginTop: 4,
+    maxHeight: 180,
+  },
+  suggestionItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+  },
+  suggestionText: {
+    fontSize: 13,
+    color: Colors.light.textSecondary,
+  },
+  warningContainer: {
+    backgroundColor: "#fffbeb",
+    borderWidth: 1,
+    borderColor: "#fef3c7",
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 6,
+    marginBottom: 12,
+  },
+  warningText: {
+    fontSize: 12,
+    color: "#b45309",
+    lineHeight: 16,
+  },
 });

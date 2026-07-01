@@ -9,7 +9,7 @@ import AssistantChat from "./AssistantChat";
 const HIDE_ON = ["/login", "/select-city", "/"];
 
 export type AskCanoContext = {
-  intent?: "report" | "feedback" | "help" | "reschedule" | "complain";
+  intent?: "report" | "feedback" | "help" | "reschedule" | "complain" | "review";
   bookingId?: string;
   category?: string;
 };

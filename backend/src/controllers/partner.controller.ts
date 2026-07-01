@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { partnerService } from "../services/partner.service";
+import { redisClient } from "../utils/redis";
 
 export const partnerController = {
   async list(req: Request, res: Response) {
@@ -28,7 +29,22 @@ export const partnerController = {
 
   async getClinics(req: Request, res: Response) {
     try {
+      res.setHeader("Cache-Control", "public, max-age=60");
       const search = (req.query.search as string) || "";
+      const cacheKey = `cache:clinics:search:${search.toLowerCase().trim()}`;
+
+      if (redisClient.isOpen) {
+        try {
+          const cached = await redisClient.get(cacheKey);
+          if (cached) {
+            console.log(`[REDIS_CACHE] Hit clinics search for: "${search}"`);
+            return res.json({ clinics: JSON.parse(cached) });
+          }
+        } catch (cacheErr) {
+          console.error("[REDIS_CACHE] Error reading clinics cache:", cacheErr);
+        }
+      }
+
       const { prisma } = require("../utils/prisma"); // Direct import since it's just a controller
 
       const partners = await prisma.partner.findMany({
@@ -58,6 +74,16 @@ export const partnerController = {
         },
         take: 20,
       });
+
+      if (redisClient.isOpen) {
+        try {
+          // Cache results for 5 minutes (300 seconds)
+          await redisClient.setEx(cacheKey, 300, JSON.stringify(partners));
+          console.log(`[REDIS_CACHE] Miss clinics search. Cached results for: "${search}"`);
+        } catch (cacheErr) {
+          console.error("[REDIS_CACHE] Error writing clinics cache:", cacheErr);
+        }
+      }
 
       return res.json({ clinics: partners });
     } catch (err: unknown) {

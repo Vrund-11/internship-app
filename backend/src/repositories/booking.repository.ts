@@ -39,7 +39,7 @@ export const bookingRepository = {
   },
 
   async findById(id: string) {
-    return prisma.booking.findUnique({
+    const booking = await prisma.booking.findUnique({
       where: { id },
       include: {
         partner: {
@@ -66,8 +66,16 @@ export const bookingRepository = {
         review: true,
         complaints: true,
         rescheduleLogs: true,
+        payments: true,
       },
     });
+
+    if (!booking) return null;
+
+    return {
+      ...booking,
+      amount: booking.payments?.[0]?.amount ?? null,
+    };
   },
 
   async findPetsByUserId(userId: string) {
@@ -132,9 +140,12 @@ export const bookingRepository = {
     });
   },
 
-  async findBookingsByUserId(userId: string, skip = 0, take = 10) {
-    return prisma.booking.findMany({
-      where: { userId },
+  async findBookingsByUserId(userId: string, skip = 0, take = 10, status?: string) {
+    const bookings = await prisma.booking.findMany({
+      where: {
+        userId,
+        ...(status ? { status } : {}),
+      },
       orderBy: { createdAt: "desc" },
       skip,
       take,
@@ -163,7 +174,13 @@ export const bookingRepository = {
         review: true,
         complaints: true,
         rescheduleLogs: true,
+        payments: true,
       },
     });
+
+    return bookings.map((b) => ({
+      ...b,
+      amount: b.payments?.[0]?.amount ?? null,
+    }));
   },
 };
