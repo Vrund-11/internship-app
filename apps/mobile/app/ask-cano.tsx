@@ -389,10 +389,8 @@ export default function AskCanoScreen() {
     setIntent("feedback");
     setLoading(true);
     try {
-      const res = await api.get("/booking/history");
-      const done = (res.data.bookings ?? [])
-        .filter((b: { status: string }) => b.status === "COMPLETED")
-        .slice(0, 5);
+      const res = await api.get("/booking/history", { params: { status: "COMPLETED", limit: 20 } });
+      const done = (res.data.bookings ?? []).slice(0, 5);
       if (!done.length) {
         addBot("No completed visits to review yet.", [{ label: "Back", value: "root" }]);
         return;
@@ -475,7 +473,7 @@ export default function AskCanoScreen() {
     setIntent("reschedule");
     setLoading(true);
     try {
-      const res = await api.get("/booking/history");
+      const res = await api.get("/booking/history", { params: { limit: 100 } });
       const bookings: { id: string; serviceType: string; slotStart: string; status: string }[] =
         res.data.bookings ?? [];
       const activeBookings = bookings.filter(

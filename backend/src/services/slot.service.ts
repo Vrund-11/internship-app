@@ -2,6 +2,7 @@ import { prisma } from "../utils/prisma";
 import { BookingStatus, ServiceType } from "@canovet/shared";
 import { getDistanceKm } from "../utils/geo";
 import { generateSlots, SlotWindow } from "../utils/slots";
+import { redisClient } from "../utils/redis";
 
 const MAX_DISTANCE_KM = 10;
 
@@ -10,6 +11,48 @@ export const slotService = {
    * Returns all available time slots for a given date, city, service, and address.
    */
   async getAvailableSlots(
+    date: Date,
+    cityId: string,
+    serviceType: string,
+    addressId: string | null,
+    clinicId: string | null
+  ): Promise<{ slots: Array<SlotWindow & { available: boolean }>; noPartnersNearby: boolean }> {
+    const dateStr = date.toISOString().split("T")[0];
+    const cacheKey = `cache:slots:city:${cityId}:service:${serviceType}:date:${dateStr}:addr:${addressId || "null"}:clinic:${clinicId || "null"}`;
+
+    if (redisClient.isOpen) {
+      try {
+        const cached = await redisClient.get(cacheKey);
+        if (cached) {
+          console.log(`[REDIS_CACHE] Hit slots list: "${cacheKey}"`);
+          const parsed = JSON.parse(cached);
+          const slots = parsed.slots.map((s: any) => ({
+            ...s,
+            slotStart: new Date(s.slotStart),
+            slotEnd: new Date(s.slotEnd),
+          }));
+          return { slots, noPartnersNearby: parsed.noPartnersNearby };
+        }
+      } catch (cacheErr) {
+        console.error("[REDIS_CACHE] Error reading slots cache:", cacheErr);
+      }
+    }
+
+    const result = await slotService.computeAvailableSlots(date, cityId, serviceType, addressId, clinicId);
+
+    if (redisClient.isOpen) {
+      try {
+        await redisClient.setEx(cacheKey, 60, JSON.stringify(result));
+        console.log(`[REDIS_CACHE] Miss slots list. Cached slots for 60s under key: "${cacheKey}"`);
+      } catch (cacheErr) {
+        console.error("[REDIS_CACHE] Error writing slots cache:", cacheErr);
+      }
+    }
+
+    return result;
+  },
+
+  async computeAvailableSlots(
     date: Date,
     cityId: string,
     serviceType: string,

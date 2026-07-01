@@ -298,14 +298,7 @@ export default function BookingsScreen() {
               <Text style={styles.btnGrayText}>View Details</Text>
             </Pressable>
 
-            {activeTab === "upcoming" && (
-              <Pressable
-                onPress={() => router.push(`/ask-cano?bookingId=${item.id}&intent=feedback` as any)}
-                style={styles.btnOutline}
-              >
-                <Text style={styles.btnOutlineText}>Review or Complain?</Text>
-              </Pressable>
-            )}
+
 
             {isPastCompleted && (
               <>

@@ -21,3 +21,10 @@ graphify-out/
 
 # Expo
 .expo/
+
+# Scratch files
+scratch_diff.txt
+chat_integration_research.md
+utho_vs_aws_analysis.md
+
+

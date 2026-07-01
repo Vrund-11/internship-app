@@ -7,6 +7,7 @@ import {
   TextInput,
 } from "react-native";
 import Colors from "@/constants/Colors";
+import { api } from "@/lib/api";
 
 export interface Address {
   id: string;
@@ -16,14 +17,11 @@ export interface Address {
   city: string;
   state: string;
   pincode: string;
+  latitude?: number;
+  longitude?: number;
 }
 
-interface AddressPickerProps {
-  addresses: Address[];
-  selectedAddress: Address | null;
-  onSelect: (address: Address) => void;
-  onAddAddress: (address: { label: string; house: string; area: string; state: string; city: string; pincode: string }) => void;
-}
+
 
 const labelColors: Record<string, string> = {
   Home: "#E8F3FF",
@@ -39,7 +37,7 @@ const labelEmojis: Record<string, string> = {
 
 const states = [
   { name: "Gujarat", active: true },
-  { name: "Maharashtra", active: true },
+  { name: "Maharashtra", active: false },
   { name: "Rajasthan", active: false },
   { name: "Karnataka", active: false },
   { name: "Delhi", active: false },
@@ -53,7 +51,7 @@ const cities: Record<string, { name: string; active: boolean }[]> = {
     { name: "Rajkot", active: false },
   ],
   Maharashtra: [
-    { name: "Mumbai", active: true },
+    { name: "Mumbai", active: false },
     { name: "Pune", active: false },
   ],
 };
@@ -62,7 +60,7 @@ interface AddressPickerProps {
   addresses: Address[];
   selectedAddress: Address | null;
   onSelect: (address: Address) => void;
-  onAddAddress: (address: { label: string; house: string; area: string; state: string; city: string; pincode: string }) => void;
+  onAddAddress: (address: { label: string; house: string; area: string; state: string; city: string; pincode: string; latitude?: number; longitude?: number }) => void;
   themeColor?: string;
   softThemeColor?: string;
 }
@@ -78,10 +76,58 @@ export default function AddressPicker({
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [newAddress, setNewAddress] = useState({ label: "Home", house: "", area: "", state: "", city: "", pincode: "" });
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [selectedCoords, setSelectedCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+
+  const handleSearchChange = async (val: string) => {
+    setSearchQuery(val);
+    if (val.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    setLoadingSuggestions(true);
+    try {
+      const res = await api.get("/booking/addresses/autocomplete", {
+        params: { query: val },
+      });
+      if (res.data && res.data.suggestions) {
+        setSuggestions(res.data.suggestions);
+      }
+    } catch (err) {
+      console.error("Mobile Autocomplete request failed", err);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
+  const selectSuggestion = (s: any) => {
+    setSearchQuery(s.label);
+    setNewAddress((prev) => ({
+      ...prev,
+      city: s.city,
+      state: s.state,
+      area: s.area,
+      pincode: s.pincode,
+    }));
+    setSelectedCoords({
+      latitude: s.latitude,
+      longitude: s.longitude,
+    });
+    setSuggestions([]);
+  };
+
   const handleSave = () => {
     if (!newAddress.house || !newAddress.area || !newAddress.city || !newAddress.pincode) return;
-    onAddAddress(newAddress);
+    onAddAddress({
+      ...newAddress,
+      latitude: selectedCoords?.latitude,
+      longitude: selectedCoords?.longitude,
+    });
     setNewAddress({ label: "Home", house: "", area: "", state: "", city: "", pincode: "" });
+    setSearchQuery("");
+    setSelectedCoords(null);
     setShowAddressForm(false);
   };
 
@@ -92,7 +138,7 @@ export default function AddressPicker({
       <View style={styles.listGap}>
         {addresses.map((addr) => {
           const isSelected = selectedAddress?.id === addr.id;
-          const isServiceable = ["Ahmedabad", "Mumbai"].includes(addr.city);
+          const isServiceable = ["Ahmedabad"].includes(addr.city);
 
           return (
             <Pressable
@@ -153,51 +199,38 @@ export default function AddressPicker({
             ))}
           </View>
 
-          {/* State Select */}
-          <Text style={styles.formSubtitle}>State</Text>
-          <View style={styles.gridContainer}>
-            {states.map(state => (
-              <Pressable
-                key={state.name}
-                disabled={!state.active}
-                onPress={() => setNewAddress(prev => ({ ...prev, state: state.name, city: "" }))}
-                style={[
-                  styles.gridBtn,
-                  newAddress.state === state.name ? { borderColor: themeColor, backgroundColor: softThemeColor } : null,
-                  !state.active ? styles.comingSoonOpacity : null,
-                ]}
-              >
-                <Text style={styles.gridBtnText}>{state.name}</Text>
-                {!state.active && <Text style={styles.soonText}>SOON</Text>}
-              </Pressable>
-            ))}
-          </View>
-
-          {/* City Select */}
-          {newAddress.state ? (
-            <>
-              <Text style={styles.formSubtitle}>City</Text>
-              <View style={styles.gridContainer}>
-                {(cities[newAddress.state] ?? []).map(city => (
+          {/* Autocomplete Search input */}
+          <Text style={styles.formSubtitle}>Search Address</Text>
+          <View style={{ zIndex: 10, position: "relative" }}>
+            <TextInput
+              style={styles.formInput}
+              placeholder="Search area, landmark or neighborhood..."
+              placeholderTextColor={Colors.light.textTertiary}
+              value={searchQuery}
+              onChangeText={handleSearchChange}
+            />
+            {suggestions.length > 0 && (
+              <View style={styles.suggestionsContainer}>
+                {suggestions.map((s, idx) => (
                   <Pressable
-                    key={city.name}
-                    disabled={!city.active}
-                    onPress={() => setNewAddress(prev => ({ ...prev, city: city.name }))}
-                    style={[
-                      styles.gridBtn,
-                      newAddress.city === city.name ? { borderColor: themeColor, backgroundColor: softThemeColor } : null,
-                      !city.active ? styles.comingSoonOpacity : null,
-                    ]}
+                    key={idx}
+                    onPress={() => selectSuggestion(s)}
+                    style={styles.suggestionItem}
                   >
-                    <Text style={styles.gridBtnText}>{city.name}</Text>
-                    {!city.active && <Text style={styles.soonText}>SOON</Text>}
+                    <Text style={styles.suggestionText}>{s.label}</Text>
                   </Pressable>
                 ))}
               </View>
-            </>
+            )}
+          </View>
+
+          {newAddress.city && !["Ahmedabad"].includes(newAddress.city) ? (
+            <View style={styles.warningContainer}>
+              <Text style={styles.warningText}>We are not available in {newAddress.city} yet. Stay tuned!</Text>
+            </View>
           ) : null}
 
-          {newAddress.city ? (
+          {newAddress.city && ["Ahmedabad"].includes(newAddress.city) ? (
             <View style={styles.listGap}>
               <TextInput
                 style={styles.formInput}
@@ -456,5 +489,38 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#ffffff",
     fontFamily: Colors.fonts.bold,
+  },
+  suggestionsContainer: {
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    borderRadius: 12,
+    marginTop: 4,
+    maxHeight: 180,
+  },
+  suggestionItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+  },
+  suggestionText: {
+    fontSize: 13,
+    color: Colors.light.textSecondary,
+    fontFamily: Colors.fonts.medium,
+  },
+  warningContainer: {
+    backgroundColor: "#fffbeb",
+    borderWidth: 1,
+    borderColor: "#fef3c7",
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 6,
+  },
+  warningText: {
+    fontSize: 12,
+    color: "#b45309",
+    fontFamily: Colors.fonts.medium,
+    lineHeight: 16,
   },
 });

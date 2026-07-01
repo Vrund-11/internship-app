@@ -88,18 +88,31 @@ export default function AssistantChat({ onClose, active, context }: { onClose: (
   useEffect(() => {
     if (!active) return;
     // If opened with a specific context, go directly to that intent
+    if (context?.intent === "review" && context?.bookingId) {
+      setTurns([]);
+      setIntent("feedback");
+      setFeedbackBookingId(context.bookingId);
+      setTimeout(() => {
+        addBot("Please select a rating out of 5 stars and add a comment if you like (optional):", undefined, "review");
+      }, 100);
+      return;
+    }
+    if (context?.intent === "complain") {
+      setTurns([]);
+      setIntent("idle");
+      if (context.bookingId) {
+        setTimeout(() => startContextualComplaint(context.bookingId!), 100);
+      } else {
+        setTimeout(() => startComplainFlow(), 100);
+      }
+      return;
+    }
     if ((context?.intent === "report" || context?.intent === "feedback") && context?.bookingId) {
       setFeedbackBookingId(context.bookingId);
       setTurns([]);
       setIntent("idle");
       // Load the specific booking and start the feedback flow
       setTimeout(() => startContextualFeedback(context.bookingId!), 100);
-      return;
-    }
-    if (context?.intent === "complain") {
-      setTurns([]);
-      setIntent("idle");
-      setTimeout(() => startComplainFlow(), 100);
       return;
     }
     if (context?.intent === "reschedule" && context?.bookingId) {
@@ -294,8 +307,8 @@ export default function AssistantChat({ onClose, active, context }: { onClose: (
     setIntent("feedback");
     setLoading(true);
     try {
-      const res = await api.get("/booking/history");
-      const done = (res.data.bookings ?? []).filter((b: { status: string }) => b.status === "COMPLETED").slice(0, 5);
+      const res = await api.get("/booking/history", { params: { status: "COMPLETED", limit: 20 } });
+      const done = (res.data.bookings ?? []).slice(0, 5);
       if (!done.length) { addBot("No completed visits to review yet.", [{ label: "Back", value: "root" }]); return; }
       addBot("Which visit would you like to give feedback on?", done.map((b: { id: string; serviceType: string; slotStart: string }) => ({
         label: `${b.serviceType.replace(/_/g," ")} · ${format(new Date(b.slotStart),"d MMM")}`,
@@ -344,6 +357,13 @@ export default function AssistantChat({ onClose, active, context }: { onClose: (
     );
   };
 
+  const startContextualComplaint = (bookingId: string) => {
+    setIntent("complain");
+    setFeedbackBookingId(bookingId);
+    setBookCtx(prev => ({ ...prev, variantLabel: "BOOKING_ISSUE" }));
+    addBot("Please describe your issue below so our team can help:", undefined, "complaint");
+  };
+
   /* ══════════════════════════════════════════════════════════════════════
      HELP & SUPPORT FLOW
      ══════════════════════════════════════════════════════════════════════ */
@@ -372,7 +392,7 @@ export default function AssistantChat({ onClose, active, context }: { onClose: (
     setIntent("reschedule");
     setLoading(true);
     try {
-      const res = await api.get("/booking/history");
+      const res = await api.get("/booking/history", { params: { limit: 100 } });
       const bookings: { id: string; serviceType: string; slotStart: string; status: string }[] = res.data.bookings ?? [];
       const activeBookings = bookings.filter(b => b.status === "CONFIRMED" || b.status === "AWAITING_PAYMENT");
       if (!activeBookings.length) {

@@ -13,26 +13,29 @@ const badges = [
 const TrustBadges = () => {
   return (
     <section className="px-4 py-5 pb-8">
-      {/* Mobile layout (unchanged) */}
-      <div className="md:hidden rounded-[24px] bg-white/80 border border-[#EDE4EB] p-4 shadow-[0_12px_30px_rgba(26,10,24,0.06)]">
-        <h2 className="text-[17px] font-bold text-[#1a0a18] tracking-[-0.2px] mb-3">Why Canovet 🐾</h2>
+      {/* Mobile layout */}
+      <div className="md:hidden">
+        <h2 className="text-[20px] font-extrabold text-[#121212] tracking-[-0.5px] mb-4 px-1">Why Canovet 🐾</h2>
 
-        <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide -mx-4 px-4">
+        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6">
           {badges.map((b) => {
             const Icon = b.icon;
             return (
               <div
                 key={b.label}
-                className="min-w-[106px] bg-white rounded-[18px] p-3.5 border border-[#EDE4EB] shrink-0"
+                className="min-w-[128px] bg-white rounded-[16px] p-4 border border-[#EDE4EB] shrink-0 shadow-card"
               >
-                <div className="w-9 h-9 rounded-[10px] flex items-center justify-center mb-2.5 bg-primary-fixed/30">
-                  <Icon className="w-[18px] h-[18px] text-primary" />
+                <div 
+                  className="w-10 h-10 rounded-full flex items-center justify-center mb-3"
+                  style={{ background: "rgba(255, 16, 240, 0.08)" }}
+                >
+                  <Icon className="w-5 h-5 text-[#FF10F0]" />
                 </div>
-                <div className="text-[12px] font-bold text-[#1a0a18] leading-tight">
+                <div className="text-[13px] font-extrabold text-[#121212] leading-tight">
                   {b.label}
                 </div>
-                <div className="text-[10px] text-[#8A6888] mt-0.5 leading-snug">
-                  {b.label === "Verified Pros" ? "Verified" : b.label === "4.9 Rated" ? "8.2k+ reviews" : b.label === "Pet-Safe Only" ? "Organic" : "Satisfaction"}
+                <div className="text-[10px] text-[#4A4A4A] mt-1 leading-snug font-semibold">
+                  {b.label === "Verified Pros" ? "Verified" : b.label === "4.9 Rated" ? "8.2k+ reviews" : b.label === "Pet-Safe Only" ? "100% Organic" : "Satisfaction Guaranteed"}
                 </div>
               </div>
             );

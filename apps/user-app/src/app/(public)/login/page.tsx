@@ -217,7 +217,7 @@ function LoginContent() {
                   setEmail(e.target.value);
                   if (error) setError("");
                 }}
-                className="rounded-2xl h-12 md:h-14 text-base px-4 border-muted-foreground/30 focus:border-primary focus:ring-1 focus:ring-primary"
+                className="rounded-xl h-12 md:h-14 text-base px-4 border-muted-foreground/30 focus:border-[#FF10F0] focus:ring-1 focus:ring-[#FF10F0]"
                 required
                 autoFocus
               />
@@ -232,38 +232,24 @@ function LoginContent() {
                   setPassword(e.target.value);
                   if (error) setError("");
                 }}
-                className="rounded-2xl h-12 md:h-14 text-base px-4 border-muted-foreground/30 focus:border-primary focus:ring-1 focus:ring-primary"
+                className="rounded-xl h-12 md:h-14 text-base px-4 border-muted-foreground/30 focus:border-[#FF10F0] focus:ring-1 focus:ring-[#FF10F0]"
                 required
               />
             </div>
 
-            {/* Premium Interactive password strength checklist */}
+            {/* Compact single-line password hint */}
             {password.length > 0 && (
-              <div className="p-4 bg-muted/40 rounded-2xl border border-border/50 text-xs space-y-2 animate-fade-in-up">
-                <span className="font-semibold text-muted-foreground block mb-1">Password Strength Checklist:</span>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className={`flex items-center gap-1.5 ${passLength ? "text-green-500" : "text-muted-foreground/75"}`}>
-                    {passLength ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
-                    <span>8+ characters</span>
-                  </div>
-                  <div className={`flex items-center gap-1.5 ${passUpper ? "text-green-500" : "text-muted-foreground/75"}`}>
-                    {passUpper ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
-                    <span>Uppercase letter</span>
-                  </div>
-                  <div className={`flex items-center gap-1.5 ${passLower ? "text-green-500" : "text-muted-foreground/75"}`}>
-                    {passLower ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
-                    <span>Lowercase letter</span>
-                  </div>
-                  <div className={`flex items-center gap-1.5 ${passNumber ? "text-green-500" : "text-muted-foreground/75"}`}>
-                    {passNumber ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
-                    <span>Number</span>
-                  </div>
-                  <div className={`flex items-center gap-1.5 ${passSymbol ? "text-green-500" : "text-muted-foreground/75"}`}>
-                    {passSymbol ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
-                    <span>Special character</span>
-                  </div>
-                </div>
-              </div>
+              <p className="text-[11px] text-[#4A4A4A] bg-[#F8F8F8] rounded-xl px-3 py-2 border border-[#EDE4EB] animate-fade-in-up">
+                <span className={passLength ? "text-[#FF10F0] font-semibold" : ""}>8+ chars</span>
+                {" · "}
+                <span className={passUpper ? "text-[#FF10F0] font-semibold" : ""}>Uppercase</span>
+                {" · "}
+                <span className={passLower ? "text-[#FF10F0] font-semibold" : ""}>Lowercase</span>
+                {" · "}
+                <span className={passNumber ? "text-[#FF10F0] font-semibold" : ""}>Number</span>
+                {" · "}
+                <span className={passSymbol ? "text-[#FF10F0] font-semibold" : ""}>Symbol</span>
+              </p>
             )}
           </div>
 
@@ -274,7 +260,7 @@ function LoginContent() {
                 setStep("forgot");
                 setError("");
               }}
-              className="text-sm font-semibold text-primary hover:opacity-80 transition-opacity"
+              className="text-sm font-semibold text-[#FF10F0] hover:opacity-80 transition-opacity"
             >
               Forgot Password?
             </button>
@@ -289,7 +275,7 @@ function LoginContent() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full h-12 md:h-14 text-base md:text-lg font-bold shadow-elevated bg-gradient-to-r from-accent to-primary text-white hover:brightness-105 transition-all"
+            className="w-full rounded-full h-12 md:h-14 text-base md:text-lg font-bold shadow-elevated bg-[#FF10F0] hover:bg-[#FF10F0]/90 text-white transition-all border-none cursor-pointer"
           >
             {loading ? (
               <span className="flex items-center justify-center">
@@ -314,7 +300,7 @@ function LoginContent() {
             onClick={handleGoogleLogin}
             disabled={loading}
             variant="outline"
-            className="w-full rounded-full h-12 md:h-14 text-base font-semibold border-muted-foreground/30 hover:bg-muted/30 hover:border-muted-foreground/50 transition-all flex items-center justify-center"
+            className="w-full rounded-full h-12 md:h-14 text-base font-semibold border-[#121212] text-[#121212] bg-transparent hover:bg-neutral-50 transition-all flex items-center justify-center"
           >
             <GoogleIcon />
             Sign in with Google
@@ -343,7 +329,7 @@ function LoginContent() {
                   setForgotSuccess(false);
                   setForgotEmail("");
                 }}
-                className="w-full rounded-full h-12 md:h-14 text-base font-bold text-white bg-primary hover:opacity-90"
+                className="w-full rounded-full h-12 md:h-14 text-base font-bold text-white bg-[#FF10F0] hover:bg-[#FF10F0]/90 transition-all"
               >
                 Back to Sign In
               </Button>
@@ -359,7 +345,7 @@ function LoginContent() {
                     setForgotEmail(e.target.value);
                     if (error) setError("");
                   }}
-                  className="rounded-2xl h-12 md:h-14 text-base px-4 border-muted-foreground/30 focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="rounded-xl h-12 md:h-14 text-base px-4 border-muted-foreground/30 focus:border-[#FF10F0] focus:ring-1 focus:ring-[#FF10F0]"
                   required
                   autoFocus
                 />
@@ -374,7 +360,7 @@ function LoginContent() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-full h-12 md:h-14 text-base md:text-lg font-bold shadow-elevated bg-primary text-white hover:opacity-90 transition-opacity"
+                className="w-full rounded-full h-12 md:h-14 text-base md:text-lg font-bold shadow-elevated bg-[#FF10F0] hover:bg-[#FF10F0]/90 text-white transition-all"
               >
                 {loading ? (
                   <span className="flex items-center justify-center">
@@ -405,23 +391,20 @@ function LoginContent() {
   return (
     <>
       {/* ===== MOBILE VIEW (Glassmorphism layout) ===== */}
-      <div className="md:hidden min-h-screen bg-background flex flex-col justify-between px-4 pt-safe pb-8">
+      <div className="md:hidden min-h-screen bg-background flex flex-col justify-center px-5 pt-safe pb-8">
         <div className="w-full max-w-md mx-auto">
-
-          <div className="pt-6 pb-8">
-            <div className="flex justify-center mb-6">
-              <div className="w-20 h-20 rounded-[22px] bg-gradient-to-br from-accent to-primary flex items-center justify-center shadow-elevated animate-glow-pulse">
-                <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-                  <ellipse cx="24" cy="32" rx="10" ry="9" fill="white" opacity="0.95" />
-                  <ellipse cx="13" cy="22" rx="5" ry="6.5" fill="white" opacity="0.8" />
-                  <ellipse cx="35" cy="22" rx="5" ry="6.5" fill="white" opacity="0.8" />
-                  <ellipse cx="18" cy="15" rx="4" ry="5" fill="white" opacity="0.7" />
-                  <ellipse cx="30" cy="15" rx="4" ry="5" fill="white" opacity="0.7" />
-                </svg>
-              </div>
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-[14px] bg-gradient-to-br from-accent to-primary flex items-center justify-center shadow-elevated">
+              <svg width="28" height="28" viewBox="0 0 48 48" fill="none">
+                <ellipse cx="24" cy="32" rx="10" ry="9" fill="white" opacity="0.95" />
+                <ellipse cx="13" cy="22" rx="5" ry="6.5" fill="white" opacity="0.8" />
+                <ellipse cx="35" cy="22" rx="5" ry="6.5" fill="white" opacity="0.8" />
+                <ellipse cx="18" cy="15" rx="4" ry="5" fill="white" opacity="0.7" />
+                <ellipse cx="30" cy="15" rx="4" ry="5" fill="white" opacity="0.7" />
+              </svg>
             </div>
-            {formContent}
           </div>
+          {formContent}
         </div>
       </div>
 
@@ -431,7 +414,7 @@ function LoginContent() {
         <div
           className="w-1/2 relative overflow-hidden flex flex-col justify-between p-12 lg:p-16"
           style={{
-            background: "linear-gradient(160deg, #1a0a18 0%, #390035 25%, #A7009D 60%, #CC00BE 85%, #E040D0 100%)",
+            background: "linear-gradient(160deg, #121212 0%, #390035 30%, #A7009D 70%, #FF10F0 100%)",
           }}
         >
           {/* Animated background elements */}
