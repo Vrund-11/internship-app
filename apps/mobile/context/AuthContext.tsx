@@ -11,7 +11,6 @@ type AuthContextType = {
   loading: boolean;
   setUser: (user: User | null) => void;
   login: (email: string, pass: string) => Promise<User>;
-  loginWithGoogle: (code: string, redirectUri?: string) => Promise<User>;
   logout: () => Promise<void>;
 };
 
@@ -42,26 +41,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const loginWithGoogle = async (code: string, redirectUri?: string) => {
-    try {
-      await SecureStore.deleteItemAsync("dev_logged_out");
-      const res = await api.post("/auth/google", {
-        code,
-        redirectUri,
-        platform: "mobile",
-      });
-
-      const { accessToken, refreshToken, user } = res.data;
-
-      await secureTokenStorage.setAccessToken(accessToken);
-      await secureTokenStorage.setRefreshToken(refreshToken);
-      setUser(user);
-      return user as User;
-    } catch (err) {
-      console.error("Google login failed");
-      throw err;
-    }
-  };
 
   const logout = async () => {
     try {
@@ -132,7 +111,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, setUser, login, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, loading, setUser, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

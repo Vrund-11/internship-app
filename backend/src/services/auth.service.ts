@@ -1,7 +1,6 @@
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import axios from "axios";
 import { authRepository } from "../repositories/auth.repository";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt";
 import { redisClient } from "../utils/redis";
@@ -57,7 +56,7 @@ export const authService = {
 
     // Login flow
     if (!user.passwordHash) {
-      throw new Error("This email is registered using Google Sign-In. Please sign in with Google.");
+      throw new Error("Password is not set for this account. Please use password reset to set a password.");
     }
 
     const isMatch = await bcrypt.compare(pass, user.passwordHash);
@@ -77,65 +76,6 @@ export const authService = {
     };
   },
 
-  async loginWithGoogle(code: string, redirectUriFromClient?: string) {
-    const clientId = process.env.GOOGLE_CLIENT_ID;
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = redirectUriFromClient || process.env.GOOGLE_REDIRECT_URI || "http://localhost:3000/login";
-
-    let email = "";
-    let name = "";
-
-    // Dev/Sandbox bypass
-    if (code.startsWith("mock_google_code_")) {
-      email = code.replace("mock_google_code_", "").trim().toLowerCase();
-      name = email.split("@")[0];
-      name = name.charAt(0).toUpperCase() + name.slice(1);
-    } else {
-      if (!clientId || !clientSecret) {
-        throw new Error("Google OAuth environment variables are not configured");
-      }
-
-      try {
-        const tokenRes = await axios.post("https://oauth2.googleapis.com/token", {
-          code,
-          client_id: clientId,
-          client_secret: clientSecret,
-          redirect_uri: redirectUri,
-          grant_type: "authorization_code",
-        });
-
-        const { access_token } = tokenRes.data;
-
-        const userInfoRes = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
-          headers: { Authorization: `Bearer ${access_token}` },
-        });
-
-        email = userInfoRes.data.email;
-        name = userInfoRes.data.name;
-      } catch (err: any) {
-        console.error("Google OAuth token exchange failed:", err?.response?.data || err?.message);
-        throw new Error("Google sign-in failed. Please try again.");
-      }
-    }
-
-    const normalizedEmail = email.trim().toLowerCase();
-    let user = await authRepository.findUserByEmail(normalizedEmail);
-
-    if (!user) {
-      user = await authRepository.createUserWithEmail(normalizedEmail, undefined, name);
-    }
-
-    const accessToken = generateAccessToken(user.id);
-    const refreshToken = generateRefreshToken(user.id);
-
-    await authService.createRedisSession(user.id, refreshToken);
-
-    return {
-      user,
-      accessToken,
-      refreshToken,
-    };
-  },
 
   async forgotPassword(email: string) {
     const normalizedEmail = email.trim().toLowerCase();

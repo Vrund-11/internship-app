@@ -32,34 +32,6 @@ export const authController = {
     }
   },
 
-  async loginWithGoogle(req: Request, res: Response) {
-    try {
-      const { code, redirectUri, platform } = req.body;
-      const result = await authService.loginWithGoogle(code, redirectUri);
-
-      if (platform === "mobile") {
-        res.json({
-          user: result.user,
-          accessToken: result.accessToken,
-          refreshToken: result.refreshToken,
-        });
-      } else {
-        res.cookie("refreshToken", result.refreshToken, {
-          httpOnly: true,
-          secure: false,
-          sameSite: "lax",
-        });
-
-        res.json({
-          user: result.user,
-          accessToken: result.accessToken,
-        });
-      }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Google sign-in failed";
-      res.status(400).json({ error: message });
-    }
-  },
 
   async forgotPassword(req: Request, res: Response) {
     try {

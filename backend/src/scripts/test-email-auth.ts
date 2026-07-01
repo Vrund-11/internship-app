@@ -170,15 +170,6 @@ async function main() {
         process.exit(1);
       }
 
-      console.log(`\n--- Test 10: Dev Sandbox Google Sign-in ---`);
-      console.log("Requesting Google login with mock code...");
-      const mockGoogleCode = `mock_google_code_google_user_${Math.floor(Math.random() * 100000)}@example.com`;
-      const googleLoginRes = await axios.post(`${testUrl}/auth/google`, {
-        code: mockGoogleCode,
-        platform: "mobile",
-      });
-      const googleUser = googleLoginRes.data.user;
-      console.log(`✅ SUCCESS: Sandbox Google login succeeded. ID: ${googleUser.id}, Email: ${googleUser.email}, Name: ${googleUser.name}`);
 
       console.log("\n🎉 ALL EMAIL/PASSWORD AUTH TESTS PASSED SUCCESSFULLY!");
       cleanup(server);
