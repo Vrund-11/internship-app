@@ -8,9 +8,10 @@ import {
   ActivityIndicator,
   Platform,
   KeyboardAvoidingView,
+  BackHandler,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import { useCity } from "@/context/CityContext";
 import { api } from "@/lib/api";
@@ -68,6 +69,7 @@ const atClinicServices: ServiceItem[] = [
 
 export default function BookingWizard() {
   const router = useRouter();
+  const navigation = useNavigation();
   const searchParams = useLocalSearchParams();
   const typeParam = (searchParams.type as string) || "grooming";
   const serviceType = resolveServiceType(typeParam);
@@ -293,6 +295,29 @@ export default function BookingWizard() {
     }
   }, [canShowMode, canShowServices, canShowClinic, canShowAddress, canShowDateTime, canShowPayment, scrollToNext]);
 
+  // Prevent back handler (Android/Hardware) when payment step is shown
+  useEffect(() => {
+    if (canShowPayment) {
+      const backAction = () => {
+        return true; // Return true to prevent going back
+      };
+
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        backAction
+      );
+
+      return () => backHandler.remove();
+    }
+  }, [canShowPayment]);
+
+  // Disable back gestures (swipe back on iOS/Android) when payment step is shown
+  useEffect(() => {
+    navigation.setOptions({
+      gestureEnabled: !canShowPayment,
+    });
+  }, [canShowPayment, navigation]);
+
   // Horizontal date setup (next 7 days)
   const dateOptions = useMemo(() => {
     const options: Date[] = [];
@@ -425,14 +450,10 @@ export default function BookingWizard() {
   };
 
   // Save address to API
-  const handleAddAddress = async (addrForm: { label: string; house: string; area: string; state: string; city: string; pincode: string }) => {
+  const handleAddAddress = async (addrForm: { label: string; house: string; area: string; state: string; city: string; pincode: string; latitude?: number; longitude?: number }) => {
     try {
-      let latitude = 23.0225;
-      let longitude = 72.5714;
-      if (addrForm.city === "Mumbai") {
-        latitude = 19.0760;
-        longitude = 72.8777;
-      }
+      const latitude = addrForm.latitude ?? 23.0225;
+      const longitude = addrForm.longitude ?? 72.5714;
       const res = await api.post("/booking/addresses", {
         label: addrForm.label,
         house: addrForm.house,
@@ -536,6 +557,10 @@ export default function BookingWizard() {
       const slotStart = parseTime(slotParts[0]);
       const slotEnd = parseTime(slotParts[1]);
 
+      const discount = appliedPromo ? appliedPromo.discount : 0;
+      const gst = Math.round((subtotal - discount) * 0.18);
+      const finalTotal = appliedPromo ? appliedPromo.total : subtotal + gst;
+
       const res = await api.post("/booking", {
         serviceType: effectiveServiceType,
         petId: booking.selectedPets[0].id,
@@ -544,9 +569,12 @@ export default function BookingWizard() {
         cityId: city.id,
         slotStart: slotStart.toISOString(),
         slotEnd: slotEnd.toISOString(),
+        amount: finalTotal,
+        paymentMethod: booking.paymentMethod,
       });
 
       setBookingResult(res.data);
+      setIsSearching(false);
     } catch (err: any) {
       setError(err.response?.data?.error || "Booking failed. Please try again.");
       setIsSearching(false);
@@ -645,7 +673,15 @@ export default function BookingWizard() {
       >
         {/* Header */}
         <View style={styles.navbar}>
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Pressable
+            onPress={() => {
+              if (!canShowPayment) {
+                router.back();
+              }
+            }}
+            disabled={canShowPayment}
+            style={[styles.backButton, canShowPayment && { opacity: 0.5 }]}
+          >
             <Text style={styles.backButtonText}>← Back</Text>
           </Pressable>
           <Text style={styles.navbarTitle} numberOfLines={1}>

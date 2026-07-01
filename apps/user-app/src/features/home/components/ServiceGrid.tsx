@@ -11,11 +11,10 @@ const ServiceGrid = () => {
 
   return (
     <section id="services-section" className="px-4 pt-3">
-      {/* Mobile layout (unchanged) */}
-      <div className="md:hidden rounded-[24px] bg-white/80 border border-[#EDE4EB] p-4 shadow-[0_12px_30px_rgba(26,10,24,0.06)]">
-        <div className="flex justify-between items-center mb-4">
-          <div className="text-[17px] font-bold text-[#1a0a18] tracking-[-0.2px]">Our Services</div>
-          <span className="text-[12px] font-semibold text-[#A7009D]">Ahmedabad, IN</span>
+      {/* Mobile layout */}
+      <div className="md:hidden">
+        <div className="flex justify-between items-center mb-4 px-1">
+          <h2 className="text-[20px] font-extrabold text-[#121212] tracking-[-0.5px]">All Services</h2>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -24,9 +23,8 @@ const ServiceGrid = () => {
             const inactive = svc.soon;
 
             const cardClass = cn(
-              "bg-white rounded-[20px] p-4 cursor-pointer border border-[#EDE4EB] relative overflow-hidden transition-shadow duration-150",
-              isWide ? "col-span-2" : "",
-              "hover:shadow-card active:scale-[0.98]"
+              "bg-white rounded-[16px] p-4 cursor-pointer border border-[#EDE4EB] relative overflow-hidden transition-shadow duration-150 shadow-card hover:shadow-card active:scale-[0.98]",
+              isWide ? "col-span-2" : ""
             );
 
             if (isWide) {
@@ -36,33 +34,30 @@ const ServiceGrid = () => {
                   onClick={() => router.push(svc.route)}
                   className={cardClass}
                 >
-                  {svc.tag && (
-                    <div className="absolute top-3 right-3">
-                      <span
-                        className="text-[9px] font-bold px-2.5 py-[3px] rounded-full tracking-[0.05em] uppercase"
-                        style={{ color: svc.accentColor, background: svc.softColor }}
-                      >
-                        {svc.tag}
-                      </span>
-                    </div>
-                  )}
                   <div className="flex items-center gap-3.5">
                     <div
-                      className="w-[46px] h-[46px] rounded-[14px] flex items-center justify-center shrink-0"
-                      style={{ background: svc.softColor }}
+                      className="w-[46px] h-[46px] rounded-full flex items-center justify-center shrink-0"
+                      style={{ background: "rgba(255, 16, 240, 0.08)" }}
                     >
-                      <span className="text-[20px]" style={{ color: svc.accentColor }}>{svc.emoji}</span>
+                      <span className="text-[20px]">🛡️</span>
                     </div>
-                    <div>
-                      <div className="text-[14px] font-bold text-[#1a0a18]">
-                        {svc.name}
+                    <div className="flex-grow min-w-0">
+                      <div className="flex items-center gap-2">
+                        <div className="text-[14px] font-extrabold text-[#121212]">
+                          {svc.name}
+                        </div>
+                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#FFF0FC] text-[#FF10F0] tracking-[0.05em] uppercase">
+                          SOON
+                        </span>
                       </div>
-                      <div className="text-[11px] text-[#8A6888] mt-0.5">{svc.tagline}</div>
+                      <div className="text-[11px] text-[#4A4A4A] mt-0.5">{svc.tagline}</div>
                     </div>
                   </div>
                 </div>
               );
             }
+
+            const tagBg = svc.tag === "Popular" ? "bg-[#FFF0FC] text-[#FF10F0]" : "bg-[#F3EEF1] text-[#4A4A4A]";
 
             return (
               <div
@@ -73,8 +68,7 @@ const ServiceGrid = () => {
                 {svc.tag && (
                   <div className="absolute top-3 right-3">
                     <span
-                      className="text-[9px] font-bold px-2.5 py-[3px] rounded-full tracking-[0.05em] uppercase"
-                      style={{ color: svc.accentColor, background: svc.softColor }}
+                      className={cn("text-[9px] font-extrabold px-2.5 py-[3px] rounded-full tracking-[0.05em] uppercase", tagBg)}
                     >
                       {svc.tag}
                     </span>
@@ -82,28 +76,28 @@ const ServiceGrid = () => {
                 )}
 
                 <div
-                  className="w-[46px] h-[46px] rounded-[14px] flex items-center justify-center mb-3.5"
+                  className="w-[46px] h-[46px] rounded-full flex items-center justify-center mb-3.5"
                   style={{ background: svc.softColor }}
                 >
-                  <span className="text-[22px]" style={{ color: svc.accentColor }}>{svc.emoji}</span>
+                  <span className="text-[22px]">{svc.emoji}</span>
                 </div>
 
-                <div className="text-[13px] font-bold leading-[1.3] mb-1 text-[#1a0a18]">
+                <div className="text-[14px] font-extrabold leading-[1.3] mb-1 text-[#121212]">
                   {svc.name}
                 </div>
-                <div className="text-[11px] text-[#8A6888] leading-[1.4] mb-2.5 line-clamp-2">
+                <div className="text-[11px] text-[#4A4A4A] leading-[1.4] mb-3 line-clamp-2">
                   {svc.tagline}
                 </div>
 
                 {!inactive && svc.price ? (
                   <div className="flex items-baseline gap-0.5">
-                    <span className="text-[16px] font-extrabold" style={{ color: svc.accentColor }}>
+                    <span className="text-[15px] font-extrabold text-[#FF10F0]">
                       ₹{svc.price}
                     </span>
-                    <span className="text-[10px] text-[#8A6888] font-medium"> from</span>
+                    <span className="text-[10px] text-[#4A4A4A] font-semibold"> onwards</span>
                   </div>
                 ) : (
-                  <div className="text-[11px] text-[#8A6888] italic font-medium">
+                  <div className="text-[10px] text-[#4A4A4A] italic font-semibold">
                     Launching soon…
                   </div>
                 )}

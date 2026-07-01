@@ -68,18 +68,18 @@ const DateTimePicker = ({
   }, [timeSlots]);
 
   return (
-    <div className="px-4 py-5 animate-fade-in-up lg:px-0">
-      <div className="text-[12px] text-[#5C3A58] font-bold uppercase tracking-[0.8px] mb-3">Schedule</div>
+    <div className="px-5 py-5 animate-fade-in-up lg:px-0">
+      <div className="text-[12px] text-[#121212] font-extrabold uppercase tracking-[0.8px] mb-3 px-1">SCHEDULE</div>
 
       {/* Custom 30-Day Scrollable Calendar Card */}
-      <div className="bg-white rounded-[18px] border border-[#EDE4EB] p-4 mb-5">
+      <div className="bg-white rounded-[18px] border border-[#EDE4EB] p-4 mb-5 shadow-card">
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
-            <CalendarDays className="w-[18px] h-[18px] text-[#A7009D]" />
-            <span className="text-[13px] font-bold text-[#1a0a18]">Select Date</span>
+            <CalendarDays className="w-[18px] h-[18px] text-[#FF10F0]" />
+            <span className="text-[13px] font-extrabold text-[#121212]">Select Date</span>
           </div>
-          <div className="flex items-center gap-1.5 text-[12px] font-medium text-[#5C3A58]">
-            <Calendar className="w-3.5 h-3.5 text-[#8A6888]" />
+          <div className="flex items-center gap-1.5 text-[12px] font-bold text-[#4A4A4A]">
+            <Calendar className="w-3.5 h-3.5 text-[#FF10F0]" />
             {selectedDate
               ? selectedDate.toLocaleDateString(undefined, {
                   weekday: "short",
@@ -110,12 +110,12 @@ const DateTimePicker = ({
                 className={cn(
                   "flex flex-col items-center justify-center min-w-[70px] h-[90px] rounded-2xl border transition-all cursor-pointer select-none",
                   isSelected
-                    ? "border-[#A7009D] bg-[#FBF0FB] text-[#A7009D] shadow-sm font-bold scale-[1.02]"
-                    : "border-[#EDE4EB] bg-white text-[#5C3A58] hover:border-[#A7009D]/40 hover:bg-[#FDF9FD]"
+                    ? "border-[#FF10F0] bg-[#FFF0FC] text-[#FF10F0] shadow-sm font-extrabold scale-[1.02]"
+                    : "border-[#EDE4EB] bg-white text-[#4A4A4A] hover:border-[#FF10F0]/40 hover:bg-[#FFF0FC]/20 font-semibold"
                 )}
               >
-                <span className="text-[10px] uppercase tracking-wider opacity-85">{weekday}</span>
-                <span className="text-lg font-bold my-1">{dayNum}</span>
+                <span className="text-[10px] uppercase tracking-wider opacity-80">{weekday}</span>
+                <span className="text-lg font-extrabold my-1">{dayNum}</span>
                 <span className="text-[10px] font-semibold opacity-90">{month}</span>
               </button>
             );
@@ -126,14 +126,14 @@ const DateTimePicker = ({
       {selectedDate && (
         <div className="mb-5 animate-fade-in-up">
           <div className="flex items-center gap-2 mb-3">
-            <Clock className="w-[18px] h-[18px] text-[#A7009D]" />
-            <span className="text-[13px] font-bold text-[#1a0a18]">Available Slots</span>
+            <Clock className="w-[18px] h-[18px] text-[#FF10F0]" />
+            <span className="text-[13px] font-extrabold text-[#121212]">Available Slots</span>
           </div>
-          <div className="rounded-[18px] border border-[#EDE4EB] bg-white p-4">
+          <div className="rounded-[18px] border border-[#EDE4EB] bg-white p-4 shadow-card">
             {slotsLoading ? (
-              <div className="flex flex-col items-center justify-center py-6 gap-3 text-sm text-[#5C3A58]">
-                <div className="h-6 w-6 rounded-full border-2 border-[#EDE4EB] border-t-[#A7009D] animate-spin" />
-                <span className="text-[13px] font-semibold animate-pulse">Getting you a time slot, please wait...</span>
+              <div className="flex flex-col items-center justify-center py-6 gap-3 text-sm text-[#4A4A4A]">
+                <div className="h-6 w-6 rounded-full border-2 border-[#EDE4EB] border-t-[#FF10F0] animate-spin" />
+                <span className="text-[13px] font-bold animate-pulse text-[#4A4A4A]">Getting you a time slot, please wait...</span>
               </div>
             ) : noPartnersNearby ? (
               <div className="text-[13px] font-bold text-[#b91c1c] bg-[#FEF2F2] p-4 rounded-xl border border-[#fca5a5] flex items-center gap-2.5 animate-fade-in">
@@ -150,7 +150,7 @@ const DateTimePicker = ({
                         <button
                           key={label}
                           disabled
-                          className="py-3 px-2 rounded-xl text-[12px] font-bold border border-[#EDE4EB] bg-[#F3EEF1] text-[#8A6888] opacity-50 cursor-not-allowed flex items-center justify-center gap-1 select-none"
+                          className="py-3 px-2 rounded-xl text-[12px] font-bold border border-[#EDE4EB] bg-[#F8F8F8] text-[#4A4A4A] opacity-50 cursor-not-allowed flex items-center justify-center gap-1 select-none"
                         >
                           <span>{label}</span>
                           <span>🔒</span>
@@ -163,9 +163,9 @@ const DateTimePicker = ({
                         onClick={() => onSelectTime(label)}
                         className="py-3 px-2 rounded-xl text-[12px] font-bold transition-all cursor-pointer"
                         style={{
-                          border: `${isSelected ? 2 : 1}px solid ${isSelected ? "#A7009D" : "#EDE4EB"}`,
-                          background: isSelected ? "rgba(167,0,157,0.08)" : "#FFFFFF",
-                          color: isSelected ? "#A7009D" : "#5C3A58",
+                          border: `${isSelected ? 2 : 1}px solid ${isSelected ? "#FF10F0" : "#EDE4EB"}`,
+                          background: isSelected ? "rgba(255,16,240,0.04)" : "#FFFFFF",
+                          color: isSelected ? "#FF10F0" : "#4A4A4A",
                         }}
                       >
                         {label}
@@ -174,7 +174,7 @@ const DateTimePicker = ({
                   })}
                 </div>
                 {slots.length === 0 ? (
-                  <div className="text-[12px] text-[#b45309] bg-[#FEF3C7] p-3 rounded-xl border border-[#b45309]/20">
+                  <div className="text-[12px] text-[#b45309] bg-[#FEF3C7] p-3 rounded-xl border border-[#b45309]/20 font-semibold">
                     No slots available. Please select another date.
                   </div>
                 ) : null}
@@ -187,7 +187,7 @@ const DateTimePicker = ({
       {(showBackButton || showContinueButton) && (
         <div className="flex gap-3 mt-6">
           {showBackButton && onBack && (
-            <Button variant="outline" onClick={onBack} className="flex-1 rounded-2xl h-12 border-[#EDE4EB]">
+            <Button variant="outline" onClick={onBack} className="flex-1 rounded-full h-[52px] border-[#EDE4EB] text-[14px] font-bold">
               Back
             </Button>
           )}
@@ -195,7 +195,7 @@ const DateTimePicker = ({
             <Button
               onClick={onNext}
               disabled={!selectedDate || !selectedTime || slotsLoading || noPartnersNearby}
-              className="flex-1 rounded-2xl h-[48px] bg-[#A7009D] hover:bg-[#6B0068] text-white text-[14px] font-bold shadow-elevated"
+              className="flex-1 rounded-full h-[52px] bg-[#FF10F0] hover:bg-[#FF10F0]/90 text-white text-[14px] font-bold shadow-elevated border-none active:scale-[0.98] transition-transform"
             >
               {continueLabel}
             </Button>

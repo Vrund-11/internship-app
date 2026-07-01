@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { ServiceType } from "@canovet/shared";
+import { cn } from "@/shared/lib/utils";
 import {
   getServicesForType,
   getServiceCategoryName,
@@ -23,6 +24,7 @@ import ClinicSearchPicker from "@/features/booking/components/ClinicSearchPicker
 import PaymentOptions from "@/features/booking/components/PaymentOptions";
 import SearchingPartner from "@/features/booking/components/SearchingPartner";
 import BookingSuccess from "@/features/booking/components/BookingSuccess";
+import AppShell from "@/features/layout/components/AppShell";
 
 export default function ServiceBooking() {
   const params = useParams();
@@ -135,6 +137,12 @@ export default function ServiceBooking() {
   } | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<{
+    code: string;
+    discountPercent: number;
+    discount: number;
+    total: number;
+  } | null>(null);
 
   // Refs for smooth scrolling
   const clinicRef = useRef<HTMLDivElement | null>(null);
@@ -381,15 +389,8 @@ export default function ServiceBooking() {
   // --- Add address via backend ---
   const handleAddAddress = async (address: Address) => {
     try {
-      let latitude = 0;
-      let longitude = 0;
-      if (address.city === "Ahmedabad") {
-        latitude = 23.0225;
-        longitude = 72.5714;
-      } else if (address.city === "Mumbai") {
-        latitude = 19.0760;
-        longitude = 72.8777;
-      }
+      const latitude = address.latitude ?? 23.0225;
+      const longitude = address.longitude ?? 72.5714;
 
       const res = await api.post("/booking/addresses", {
         label: address.label,
@@ -472,6 +473,9 @@ export default function ServiceBooking() {
       const slotStart = parseTime(slotParts[0]);
       const slotEnd = slotParts[1] ? parseTime(slotParts[1]) : new Date(slotStart.getTime() + 2 * 60 * 60 * 1000);
 
+      const subtotal = calcTotal(booking.selectedPets, booking.selectedServices);
+      const totalAmount = appliedPromo ? appliedPromo.total : subtotal + (booking.selectedServices.length > 0 ? 50 : 0);
+
       const res = await api.post("/booking", {
         serviceType: effectiveServiceType,
         petId: booking.selectedPets[0].id,
@@ -480,9 +484,13 @@ export default function ServiceBooking() {
         cityId: city.id,
         slotStart: slotStart.toISOString(),
         slotEnd: slotEnd.toISOString(),
+        amount: totalAmount,
+        paymentMethod: booking.paymentMethod,
       });
 
       setBookingResult(res.data);
+      setIsSearching(false);
+      setIsSuccess(true);
     } catch (err: unknown) {
       const message =
         typeof err === "object" &&
@@ -541,37 +549,6 @@ export default function ServiceBooking() {
     if (careMode) scrollToRef(servicesRef);
   }, [careMode, scrollToRef]);
 
-  // Prevent back navigation during creation process
-  useEffect(() => {
-    if (isCreating) {
-      window.history.pushState(null, "", window.location.href);
-
-      const handlePopState = () => {
-        window.history.pushState(null, "", window.location.href);
-      };
-
-      window.addEventListener("popstate", handlePopState);
-      return () => {
-        window.removeEventListener("popstate", handlePopState);
-      };
-    }
-  }, [isCreating]);
-
-  // Redirect to home if user tries to go back after successful booking
-  useEffect(() => {
-    if (isSuccess) {
-      const handlePopState = () => {
-        router.push("/home");
-      };
-
-      window.history.pushState(null, "", window.location.href);
-      window.addEventListener("popstate", handlePopState);
-      return () => {
-        window.removeEventListener("popstate", handlePopState);
-      };
-    }
-  }, [isSuccess, router]);
-
   // --- Visibility conditions ---
   const canShowPets = true;
   // Hide mode selector if the mode was already pre-set via URL param
@@ -610,6 +587,37 @@ export default function ServiceBooking() {
       booking.selectedServices.length > 0
   );
 
+  // Prevent back navigation during payment and creation process
+  useEffect(() => {
+    if (isCreating) {
+      window.history.pushState(null, "", window.location.href);
+
+      const handlePopState = () => {
+        window.history.pushState(null, "", window.location.href);
+      };
+
+      window.addEventListener("popstate", handlePopState);
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+      };
+    }
+  }, [isCreating]);
+
+  // Redirect to home if user tries to go back after successful booking
+  useEffect(() => {
+    if (isSuccess) {
+      const handlePopState = () => {
+        router.push("/home");
+      };
+
+      window.history.pushState(null, "", window.location.href);
+      window.addEventListener("popstate", handlePopState);
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+      };
+    }
+  }, [isSuccess, router]);
+
   const headerTitle = useMemo(() => {
     if (isClinic && !booking.selectedClinic) return "Your Nearby Clinics";
     if (isHeroEntry && booking.selectedPets.length === 0) return "Add Your Pet";
@@ -636,17 +644,17 @@ export default function ServiceBooking() {
     } : null);
     const partner = bookingResult?.partner?.id ? {
       name: bookingResult.partner.name || "Assigned Partner",
-      rating: 4.8,
-      sessions: 200,
-      experience: 5,
+      rating: bookingResult.partner.rating ?? 4.8,
+      sessions: bookingResult.partner.totalCompleted ?? 200,
+      experience: bookingResult.partner.totalCompleted ? Math.max(1, Math.round(bookingResult.partner.totalCompleted / 20)) : 5,
       specialization: effectiveServiceType === ServiceType.GROOMING ? "Pet Groomer" : "Veterinarian",
       description: undefined,
       phone: bookingResult.partner.phone || null,
     } : bookingResult?.clinic?.id ? {
       name: bookingResult.clinic.name || "Clinic Partner",
-      rating: 4.8,
-      sessions: 100,
-      experience: 5,
+      rating: bookingResult.clinic.rating ?? 4.8,
+      sessions: bookingResult.clinic.totalCompleted ?? 100,
+      experience: bookingResult.clinic.totalCompleted ? Math.max(1, Math.round(bookingResult.clinic.totalCompleted / 20)) : 5,
       specialization: "Veterinary Clinic",
       description: undefined,
       phone: bookingResult.clinic.phone || null,
@@ -712,14 +720,22 @@ export default function ServiceBooking() {
 
   // --- Main wizard ---
   return (
-    <>
+    <AppShell hideMobileNav={true} hideNav={isSearching} fullWidth={true}>
       {/* ===== MOBILE VIEW (unchanged) ===== */}
       <div className="md:hidden min-h-screen bg-background">
         {/* Booking Confirmed popup overlay */}
         {successOverlay}
         <div className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border pt-safe">
           <div className="max-w-4xl mx-auto flex items-center gap-3 px-4 h-14">
-            <button onClick={() => router.back()}>
+            <button 
+              onClick={() => {
+                if (!isCreating) {
+                  router.back();
+                }
+              }}
+              disabled={isCreating}
+              className={cn(isCreating && "opacity-50 cursor-not-allowed")}
+            >
               <ArrowLeft className="w-5 h-5 text-foreground" />
             </button>
             <h1 className="text-base font-semibold text-foreground">{headerTitle}</h1>
@@ -798,7 +814,7 @@ export default function ServiceBooking() {
                         <div className="text-[12px] text-[#5C3A58] mt-0.5">Visit a nearby partner clinic</div>
                       </div>
                       {careMode === "at-clinic" && (
-                        <div className="ml-auto w-5 h-5 rounded-full bg-[#A7009D] flex items-center justify-center">
+                        <div className="ml-auto w-5 h-5 rounded-full bg-[#FF10F0] flex items-center justify-center">
                           <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l2.5 2.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         </div>
                       )}
@@ -810,7 +826,7 @@ export default function ServiceBooking() {
                   disabled={!careMode}
                   onClick={() => scrollToRef(servicesRef)}
                   className="w-full mt-4 h-[50px] rounded-2xl text-[15px] font-bold text-white transition-all disabled:opacity-40"
-                  style={{ background: careMode ? "#A7009D" : "#8A6888" }}
+                  style={{ background: careMode ? "#FF10F0" : "#8A6888" }}
                 >
                   Continue
                 </button>
@@ -891,12 +907,13 @@ export default function ServiceBooking() {
                   setBooking((prev) => ({ ...prev, paymentMethod }));
                 }}
                 allowOffline={!isVetOnCall}
+                onAppliedPromoChange={setAppliedPromo}
               />
               <div className="px-4 pb-10 mt-4">
                 <button 
                   onClick={handleConfirmBooking}
                   disabled={!booking.paymentMethod || isCreating}
-                  className="w-full h-[52px] rounded-2xl bg-[#A7009D] text-white text-[15px] shadow-elevated transition-colors hover:bg-[#6B0068] disabled:opacity-50 flex items-center justify-center font-semibold"
+                  className="w-full h-[52px] rounded-2xl bg-[#FF10F0] text-white text-[15px] shadow-elevated transition-colors hover:bg-[#FF10F0]/90 disabled:opacity-50 flex items-center justify-center font-semibold"
                 >
                   {isCreating ? "Confirming..." : "Confirm Booking"}
                 </button>
@@ -911,18 +928,24 @@ export default function ServiceBooking() {
         {/* Booking Confirmed popup overlay */}
         {successOverlay}
 
-        {/* Top Navigation Bar */}
-        <nav className="fixed top-0 left-0 w-full z-50 flex items-center h-16 px-10 bg-white border-b border-slate-200">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-3 cursor-pointer hover:opacity-70 transition-opacity text-slate-800"
-          >
-            <ArrowLeft className="w-5 h-5 text-[#6c005f]" />
-            <h1 className="text-xl font-bold">{headerTitle}</h1>
-          </button>
-        </nav>
-
-        <main className="max-w-[1280px] mx-auto mt-16 px-10 py-10">
+        <main className="max-w-[1280px] mx-auto px-10 pb-10 pt-6">
+          {/* Back Button */}
+          <div className="mb-6">
+            <button
+              onClick={() => {
+                if (!isCreating) {
+                  router.back();
+                }
+              }}
+              disabled={isCreating}
+              className={cn(
+                "w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 shadow-sm transition-all",
+                isCreating ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-50 active:scale-95"
+              )}
+            >
+              <ArrowLeft className="w-4 h-4 text-[#FF10F0]" />
+            </button>
+          </div>
           {error && (
             <div className="mb-6 rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive max-w-4xl mx-auto">
               {error}
@@ -1021,14 +1044,14 @@ export default function ServiceBooking() {
             <div className="lg:col-span-4">
               <div className="sticky top-24 space-y-6">
                 {/* Order Summary Card */}
-                <div className="p-6 bg-white border border-[#d9c0ce]/30 rounded-3xl shadow-sm space-y-6">
-                  <h2 className="font-headline-sm text-[#151c27] mb-6 pb-4 border-b border-[#d9c0ce]/20">Order Summary</h2>
+                <div className="p-6 bg-white border border-[#EDE4EB] rounded-3xl shadow-sm space-y-6">
+                  <h2 className="font-headline-sm text-[#151c27] mb-6 pb-4 border-b border-[#EDE4EB]/50">Order Summary</h2>
                   
                   {booking.selectedPets.length > 0 && booking.selectedServices.length > 0 ? (
                     <div className="space-y-4 mb-6">
                       <div className="flex justify-between items-start">
                         <div className="flex gap-3">
-                          <span className="text-[#6c005f] text-lg">🐾</span>
+                          <span className="text-[#FF10F0] text-lg">🐾</span>
                           <div>
                             <p className="font-bold text-slate-900">{booking.selectedPets.map(p => p.name).join(", ")}</p>
                             <p className="text-xs text-slate-500">{booking.selectedServices.map(s => s.name).join(", ")}</p>
@@ -1041,7 +1064,7 @@ export default function ServiceBooking() {
                     <p className="text-sm text-slate-400 italic">Select a pet and service to view pricing.</p>
                   )}
 
-                  <div className="space-y-3 py-6 border-y border-[#d9c0ce]/20 border-dashed">
+                  <div className="space-y-3 py-6 border-y border-[#EDE4EB]/50 border-dashed">
                     <div className="flex justify-between text-slate-600 text-sm">
                       <span>Subtotal</span>
                       <span>₹{calcTotal(booking.selectedPets, booking.selectedServices)}</span>
@@ -1050,7 +1073,7 @@ export default function ServiceBooking() {
                       <span>Service Fee</span>
                       <span>₹{booking.selectedServices.length > 0 ? 50 : 0}</span>
                     </div>
-                    <div className="flex justify-between font-bold text-lg text-[#6c005f]">
+                    <div className="flex justify-between font-bold text-lg text-[#FF10F0]">
                       <span>Total Amount</span>
                       <span>₹{calcTotal(booking.selectedPets, booking.selectedServices) + (booking.selectedServices.length > 0 ? 50 : 0)}</span>
                     </div>
@@ -1062,14 +1085,14 @@ export default function ServiceBooking() {
                       <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Payment Method</h3>
                       <div className="space-y-3">
                         <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
-                          booking.paymentMethod === "online" ? "border-[#A7009D] bg-[#FBF0FB]" : "border-slate-200 hover:border-[#A7009D]"
+                          booking.paymentMethod === "online" ? "border-[#FF10F0] bg-[#FFF0FC]" : "border-slate-200 hover:border-[#FF10F0]"
                         }`}>
                           <input
                             type="radio"
                             name="payment-desktop"
                             checked={booking.paymentMethod === "online"}
                             onChange={() => setBooking((prev) => ({ ...prev, paymentMethod: "online" }))}
-                            className="w-5 h-5 text-[#A7009D] border-slate-300 focus:ring-[#A7009D]"
+                            className="w-5 h-5 text-[#FF10F0] border-slate-300 focus:ring-[#FF10F0]"
                           />
                           <div className="flex items-center gap-3">
                             <span className="text-lg">💳</span>
@@ -1082,14 +1105,14 @@ export default function ServiceBooking() {
 
                         {!isVetOnCall && (
                           <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
-                            booking.paymentMethod === "offline" ? "border-[#A7009D] bg-[#FBF0FB]" : "border-slate-200 hover:border-[#A7009D]"
+                            booking.paymentMethod === "offline" ? "border-[#FF10F0] bg-[#FFF0FC]" : "border-slate-200 hover:border-[#FF10F0]"
                           }`}>
                             <input
                               type="radio"
                               name="payment-desktop"
                               checked={booking.paymentMethod === "offline"}
                               onChange={() => setBooking((prev) => ({ ...prev, paymentMethod: "offline" }))}
-                              className="w-5 h-5 text-[#A7009D] border-slate-300 focus:ring-[#A7009D]"
+                              className="w-5 h-5 text-[#FF10F0] border-slate-300 focus:ring-[#FF10F0]"
                             />
                             <div className="flex items-center gap-3">
                               <span className="text-lg">💵</span>
@@ -1108,7 +1131,7 @@ export default function ServiceBooking() {
                   <button
                     onClick={handleConfirmBooking}
                     disabled={!booking.paymentMethod || isCreating}
-                    className="w-full py-4 bg-[#6c005f] hover:bg-[#6c005f]/95 text-white font-bold rounded-full text-base flex items-center justify-center gap-2 shadow-sm hover:scale-[1.01] active:scale-95 transition-all disabled:opacity-50"
+                    className="w-full py-4 bg-[#FF10F0] hover:bg-[#FF10F0]/90 text-white font-bold rounded-full text-base flex items-center justify-center gap-2 shadow-sm hover:scale-[1.01] active:scale-95 transition-all disabled:opacity-50"
                   >
                     <span>{isCreating ? "Confirming..." : "Confirm Booking"}</span>
                     <span className="rotate-180">←</span>
@@ -1127,6 +1150,6 @@ export default function ServiceBooking() {
           </div>
         </main>
       </div>
-    </>
+    </AppShell>
   );
 }

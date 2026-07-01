@@ -2,7 +2,7 @@ import type { LocationOption } from "@/shared/types";
 
 export const states: LocationOption[] = [
   { name: "Gujarat", active: true },
-  { name: "Maharashtra", active: true },
+  { name: "Maharashtra", active: false },
   { name: "Rajasthan", active: false },
   { name: "Karnataka", active: false },
   { name: "Delhi", active: false },
@@ -16,7 +16,7 @@ export const cities: Record<string, LocationOption[]> = {
     { name: "Rajkot", active: false },
   ],
   Maharashtra: [
-    { name: "Mumbai", active: true },
+    { name: "Mumbai", active: false },
     { name: "Pune", active: false },
   ],
   Rajasthan: [

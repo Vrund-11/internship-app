@@ -56,6 +56,8 @@ export interface Address {
   city: string;
   state: string;
   pincode: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface Clinic {

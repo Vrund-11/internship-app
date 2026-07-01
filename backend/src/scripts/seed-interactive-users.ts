@@ -240,6 +240,7 @@ async function main() {
           bookingId: b1.id,
           amount: 999,
           status: "SUCCESS",
+          method: "online",
         },
       });
 
@@ -273,6 +274,7 @@ async function main() {
           bookingId: b2.id,
           amount: 599,
           status: "PENDING",
+          method: "offline",
         },
       });
 
@@ -309,6 +311,7 @@ async function main() {
           bookingId: b3.id,
           amount: 1199,
           status: "SUCCESS",
+          method: "online",
         },
       });
 
@@ -339,6 +342,7 @@ async function main() {
           bookingId: b4.id,
           amount: 499,
           status: "SUCCESS",
+          method: "online",
         },
       });
 
@@ -362,6 +366,7 @@ async function main() {
           bookingId: b5.id,
           amount: 400,
           status: "SUCCESS",
+          method: "online",
         },
       });
     }

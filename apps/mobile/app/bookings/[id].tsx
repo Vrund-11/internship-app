@@ -33,6 +33,7 @@ type BookingDetail = {
   review?: { id: string; rating: number; comment?: string | null } | null;
   complaints?: { id: string; message: string; status: string }[];
   amount?: number;
+  payments?: Array<{ id: string; amount: number; status: string; method: string; createdAt: string }>;
 };
 
 // ─── Color Scheme Variables (view details button.txt) ────────────────────────
@@ -330,58 +331,87 @@ export default function BookingDetailPage() {
         )}
 
         {/* 2. Collapsible Payment Summary Section */}
-        {booking.amount !== undefined && (
-          <View style={styles.accordionSection}>
-            <Pressable onPress={() => toggleSection("payment")} style={styles.accordionHeader}>
-              <View style={styles.accordionHeaderLeft}>
-                <Ionicons name="receipt-outline" size={20} color={PINK_PRIMARY} />
-                <Text style={styles.accordionTitleText}>Payment Summary</Text>
-              </View>
-              <Ionicons
-                name={expanded.payment ? "chevron-up" : "chevron-down"}
-                size={20}
-                color="#64748b"
-              />
-            </Pressable>
+        {booking.amount !== undefined && (() => {
+          const payment = booking.payments?.[0];
+          const isPaid = payment?.status === "PAID" || payment?.status === "SUCCESS";
+          const isOffline = payment?.method === "offline";
+          const totalAmount = booking.amount ?? 0;
+          const platformFee = totalAmount > 50 ? 50 : 0;
+          const serviceFee = totalAmount - platformFee;
 
-            {expanded.payment && (
-              <View style={[styles.accordionContent, styles.borderTop]}>
-                <View style={styles.paymentRow}>
-                  <Text style={styles.paymentLabel}>Consultation/Service Fee</Text>
-                  <Text style={styles.paymentVal}>₹{booking.amount - 20}</Text>
+          return (
+            <View style={styles.accordionSection}>
+              <Pressable onPress={() => toggleSection("payment")} style={styles.accordionHeader}>
+                <View style={styles.accordionHeaderLeft}>
+                  <Ionicons name="receipt-outline" size={20} color={PINK_PRIMARY} />
+                  <Text style={styles.accordionTitleText}>Payment Summary</Text>
                 </View>
-                <View style={styles.paymentRow}>
-                  <Text style={styles.paymentLabel}>Service Tax (5%)</Text>
-                  <Text style={styles.paymentVal}>₹20</Text>
-                </View>
-                <View style={styles.paymentTotalRow}>
-                  <Text style={styles.paymentTotalLabel}>Total Amount</Text>
-                  <Text style={styles.paymentTotalVal}>₹{booking.amount}</Text>
-                </View>
+                <Ionicons
+                  name={expanded.payment ? "chevron-up" : "chevron-down"}
+                  size={20}
+                  color="#64748b"
+                />
+              </Pressable>
 
-                {/* Status Indicator inside payment summary */}
-                <View style={styles.paymentStatusCard}>
-                  <Text style={styles.statusCardTitle}>Payment Status</Text>
-                  {booking.status === "AWAITING_PAYMENT" ? (
-                    <View style={styles.statusRow}>
-                      <Ionicons name="card" size={18} color="#d97706" />
-                      <Text style={styles.statusCardText}>
-                        <Text style={styles.boldText}>₹{booking.amount}</Text> Payable at Session
-                      </Text>
-                    </View>
-                  ) : (
-                    <View style={styles.statusRow}>
-                      <Ionicons name="checkmark-circle" size={18} color="#22c55e" />
-                      <Text style={styles.statusCardText}>
-                        <Text style={styles.boldText}>₹{booking.amount}</Text> Paid Online
-                      </Text>
+              {expanded.payment && (
+                <View style={[styles.accordionContent, styles.borderTop]}>
+                  <View style={styles.paymentRow}>
+                    <Text style={styles.paymentLabel}>Consultation/Service Fee</Text>
+                    <Text style={styles.paymentVal}>₹{serviceFee}</Text>
+                  </View>
+                  {platformFee > 0 && (
+                    <View style={styles.paymentRow}>
+                      <Text style={styles.paymentLabel}>Service Fee</Text>
+                      <Text style={styles.paymentVal}>₹{platformFee}</Text>
                     </View>
                   )}
+                  {payment?.id && (
+                    <View style={styles.paymentRow}>
+                      <Text style={styles.paymentLabel}>Payment ID</Text>
+                      <Text style={[styles.paymentVal, { fontFamily: "monospace", fontSize: 12 }]}>{payment.id}</Text>
+                    </View>
+                  )}
+                  {payment?.createdAt && (
+                    <View style={styles.paymentRow}>
+                      <Text style={styles.paymentLabel}>Payment Date</Text>
+                      <Text style={styles.paymentVal}>{formatDate(payment.createdAt)}</Text>
+                    </View>
+                  )}
+                  <View style={styles.paymentTotalRow}>
+                    <Text style={styles.paymentTotalLabel}>Total Amount</Text>
+                    <Text style={styles.paymentTotalVal}>₹{totalAmount}</Text>
+                  </View>
+
+                  {/* Status Indicator inside payment summary */}
+                  <View style={styles.paymentStatusCard}>
+                    <Text style={styles.statusCardTitle}>Payment Method & Status</Text>
+                    <View style={styles.statusRow}>
+                      <Ionicons
+                        name={isPaid ? "checkmark-circle" : (payment?.status === "CANCELLED" ? "close-circle" : "card")}
+                        size={18}
+                        color={isPaid ? "#22c55e" : (payment?.status === "CANCELLED" ? "#ef4444" : "#d97706")}
+                      />
+                      <Text style={styles.statusCardText}>
+                        <Text style={styles.boldText}>₹{totalAmount}</Text>
+                        {isPaid
+                          ? ` Paid Online (${payment?.method || "online"})`
+                          : payment?.status === "REFUNDED"
+                          ? " Refunded"
+                          : payment?.status === "PARTIALLY_REFUNDED"
+                          ? " Partially Refunded (80%)"
+                          : payment?.status === "CANCELLED"
+                          ? " Cancelled"
+                          : isOffline
+                          ? " Payable at Session (Cash/UPI)"
+                          : " Awaiting Online Payment"}
+                      </Text>
+                    </View>
+                  </View>
                 </View>
-              </View>
-            )}
-          </View>
-        )}
+              )}
+            </View>
+          );
+        })()}
 
         {/* 3. Collapsible Preparation Checklist Section */}
         <View style={styles.accordionSection}>

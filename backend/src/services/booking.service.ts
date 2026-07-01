@@ -3,6 +3,21 @@ import { bookingRepository } from "../repositories/booking.repository";
 import { ServiceType, BookingStatus } from "@canovet/shared";
 import { prisma } from "../utils/prisma";
 import { getDistanceKm } from "../utils/geo";
+import { redisClient } from "../utils/redis";
+
+const invalidateSlotsCache = async () => {
+  if (redisClient.isOpen) {
+    try {
+      const keys = await redisClient.keys("cache:slots:*");
+      if (keys.length > 0) {
+        await redisClient.del(keys);
+        console.log(`[REDIS_CACHE] Invalidated ${keys.length} slots cache keys`);
+      }
+    } catch (err) {
+      console.error("[REDIS_CACHE] Error invalidating slots cache:", err);
+    }
+  }
+};
 
 type CreateBookingInput = {
   userId: string;
@@ -15,11 +30,13 @@ type CreateBookingInput = {
   slotStart: Date;
   slotEnd: Date;
   preferredPartnerId?: string;
+  amount?: number;
+  paymentMethod?: string;
 };
 
 export const bookingService = {
   async createBooking(data: CreateBookingInput) {
-    const { preferredPartnerId, ...bookingData } = data;
+    const { preferredPartnerId, amount, paymentMethod, ...bookingData } = data;
 
     const isClinicBooking = bookingData.serviceType === ServiceType.VET_CLINIC;
 
@@ -111,6 +128,15 @@ export const bookingService = {
         verificationOtp,
       });
 
+      await prisma.payment.create({
+        data: {
+          bookingId: clinicBooking.id,
+          amount: amount !== undefined ? Math.round(amount) : 500,
+          status: "PENDING",
+          method: paymentMethod || "online",
+        },
+      });
+
       await prisma.partner.update({
         where: { id: clinic.id },
         data: { activeBookings: { increment: 1 } },
@@ -166,6 +192,15 @@ export const bookingService = {
       verificationOtp,
     });
 
+    await prisma.payment.create({
+      data: {
+        bookingId: booking.id,
+        amount: amount !== undefined ? Math.round(amount) : (bookingData.serviceType === "GROOMING" ? 999 : 599),
+        status: "PENDING",
+        method: paymentMethod || "online",
+      },
+    });
+
     console.log("BOOKING_CREATED:", booking.id);
     await matchingService.assignPartner(
       {
@@ -175,6 +210,7 @@ export const bookingService = {
       preferredPartnerId
     );
 
+    await invalidateSlotsCache();
     return bookingRepository.findById(booking.id);
   },
 
@@ -286,14 +322,15 @@ export const bookingService = {
     );
   },
 
-  async listBookings(userId: string, page = 1, limit = 10) {
+  async listBookings(userId: string, page = 1, limit = 10, status?: string) {
     const safePage = Number.isFinite(page) && page > 0 ? page : 1;
-    const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.min(limit, 20) : 10;
+    const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.min(limit, 100) : 10;
     const skip = (safePage - 1) * safeLimit;
     const rows = await bookingRepository.findBookingsByUserId(
       userId,
       skip,
-      safeLimit + 1
+      safeLimit + 1,
+      status
     );
 
     const hasMore = rows.length > safeLimit;
@@ -385,6 +422,8 @@ export const bookingService = {
         });
       }
     }
+
+    await invalidateSlotsCache();
 
     return {
       booking: updatedBooking,
@@ -668,6 +707,9 @@ export const bookingService = {
       });
 
       return updatedBooking;
+    }).then(async (result) => {
+      await invalidateSlotsCache();
+      return result;
     });
   },
 
@@ -755,6 +797,85 @@ export const bookingService = {
     });
 
     return updatedBooking;
+  },
+
+  async getAutocompleteSuggestions(query: string) {
+    const LOCAL_FALLBACKS = [
+      { label: "Shahpur Cross Road, Shahpur, Ahmedabad, Gujarat", houseNumber: "", area: "Shahpur", city: "Ahmedabad", state: "Gujarat", pincode: "380001", latitude: 23.0362, longitude: 72.5811 },
+      { label: "Dariapur Circle, Dariapur, Ahmedabad, Gujarat", houseNumber: "", area: "Dariapur", city: "Ahmedabad", state: "Gujarat", pincode: "380001", latitude: 23.0333, longitude: 72.5954 },
+      { label: "Jamalpur Gate, Jamalpur, Ahmedabad, Gujarat", houseNumber: "", area: "Jamalpur", city: "Ahmedabad", state: "Gujarat", pincode: "380001", latitude: 23.0129, longitude: 72.5848 },
+      { label: "Khadia Cross Road, Khadia, Ahmedabad, Gujarat", houseNumber: "", area: "Khadia", city: "Ahmedabad", state: "Gujarat", pincode: "380001", latitude: 23.0214, longitude: 72.5891 },
+      { label: "Asarwa Lake, Asarwa, Ahmedabad, Gujarat", houseNumber: "", area: "Asarwa", city: "Ahmedabad", state: "Gujarat", pincode: "380016", latitude: 23.0469, longitude: 72.6089 },
+      { label: "Shahibaug Underbridge, Shahibaug, Ahmedabad, Gujarat", houseNumber: "", area: "Shahibaug", city: "Ahmedabad", state: "Gujarat", pincode: "380004", latitude: 23.0582, longitude: 72.5932 },
+      { label: "Behrampura Police Station, Behrampura, Ahmedabad, Gujarat", houseNumber: "", area: "Behrampura", city: "Ahmedabad", state: "Gujarat", pincode: "380022", latitude: 23.0092, longitude: 72.5807 },
+      { label: "Raipur Darwaja, Raipur, Ahmedabad, Gujarat", houseNumber: "", area: "Raipur", city: "Ahmedabad", state: "Gujarat", pincode: "380001", latitude: 23.0396, longitude: 72.5660 },
+      { label: "Kankaria Lake, Kankaria, Ahmedabad, Gujarat", houseNumber: "", area: "Kankaria", city: "Ahmedabad", state: "Gujarat", pincode: "380022", latitude: 23.0067, longitude: 72.5962 },
+      { label: "Bapunagar Cross Road, Bapunagar, Ahmedabad, Gujarat", houseNumber: "", area: "Bapunagar", city: "Ahmedabad", state: "Gujarat", pincode: "380024", latitude: 23.0384, longitude: 72.6305 }
+    ];
+
+    const token = process.env.MAPBOX_ACCESS_TOKEN;
+    if (token && token.trim().startsWith("pk.") && query.trim().length > 2) {
+      try {
+        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?country=IN&types=address,neighborhood,locality,postcode&access_token=${token}&limit=5`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data && data.features) {
+          return data.features.map((feature: any) => {
+            let pincode = "";
+            let city = "";
+            let state = "";
+            let area = feature.text || "";
+            
+            if (feature.context) {
+              for (const ctx of feature.context) {
+                if (ctx.id.startsWith("postcode")) {
+                  pincode = ctx.text;
+                } else if (ctx.id.startsWith("place")) {
+                  city = ctx.text;
+                } else if (ctx.id.startsWith("region")) {
+                  state = ctx.text;
+                }
+              }
+            }
+            
+            if (!city) {
+              if (feature.place_name.includes("Ahmedabad")) city = "Ahmedabad";
+              else if (feature.place_name.includes("Mumbai")) city = "Mumbai";
+            }
+            if (!state) {
+              if (city === "Ahmedabad") state = "Gujarat";
+              else if (city === "Mumbai") state = "Maharashtra";
+            }
+
+            return {
+              label: feature.place_name,
+              houseNumber: "",
+              area,
+              city: city || "Ahmedabad",
+              state: state || "Gujarat",
+              pincode: pincode || "380015",
+              latitude: feature.center ? feature.center[1] : 23.0225,
+              longitude: feature.center ? feature.center[0] : 72.5714,
+            };
+          });
+        }
+      } catch (err) {
+        console.error("Mapbox API request failed, falling back to local matches:", err);
+      }
+    }
+
+    // Fallback search logic
+    const searchTerm = query.toLowerCase().trim();
+    if (!searchTerm) {
+      return LOCAL_FALLBACKS.slice(0, 5);
+    }
+
+    return LOCAL_FALLBACKS.filter(item => 
+      item.label.toLowerCase().includes(searchTerm) ||
+      item.area.toLowerCase().includes(searchTerm) ||
+      item.city.toLowerCase().includes(searchTerm)
+    ).slice(0, 5);
   },
 };
 // Trigger nodemon restart
