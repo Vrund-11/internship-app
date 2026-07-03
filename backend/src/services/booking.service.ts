@@ -818,7 +818,7 @@ export const bookingService = {
       try {
         const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?country=IN&types=address,neighborhood,locality,postcode&access_token=${token}&limit=5`;
         const response = await fetch(url);
-        const data = await response.json();
+        const data: any = await response.json();
         
         if (data && data.features) {
           return data.features.map((feature: any) => {
