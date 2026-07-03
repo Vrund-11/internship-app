@@ -5,7 +5,7 @@
   "main": "src/server.ts",
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
-    "build": "tsc && npx prisma generate --schema ../prisma/schema.prisma",
+    "build": "npx prisma generate --schema ../prisma/schema.prisma && tsc",
     "start": "node dist/server.js"
   },
   "dependencies": {

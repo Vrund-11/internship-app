@@ -613,7 +613,7 @@ export const bookingService = {
         partner.services.some((s) => s.serviceType === booking.serviceType)
       );
 
-      const availablePartners = [];
+      const availablePartners: any[] = [];
 
       for (const partner of eligible) {
         const conflict = await prisma.booking.findFirst({

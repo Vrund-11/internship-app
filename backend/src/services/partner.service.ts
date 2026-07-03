@@ -91,7 +91,7 @@ export const partnerService = {
       (await partnerRepository.createTestingCity());
 
     await partnerRepository.deleteByPhones(TEST_PARTNERS.map((p) => p.phone));
-    const partners = [];
+    const partners: any[] = [];
 
     for (const row of TEST_PARTNERS) {
       const partner = await partnerRepository.upsertTestPartner({
