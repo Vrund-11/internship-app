@@ -13,7 +13,11 @@
       "android": {
         "buildType": "apk"
       },
-      "channel": "preview"
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://internship-app-wbsh.onrender.com",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "49455701861-48snk2kbj224206u7ijobg3ambf7jra4.apps.googleusercontent.com"
+      }
     },
     "production": {
       "channel": "production"

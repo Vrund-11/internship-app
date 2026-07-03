@@ -431,6 +431,10 @@
     "mtime": 1782895928.5453405,
     "hash": "4be44e38c8f441d33cbb3cc22c26af5b"
   },
+  "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\backend\\build.js": {
+    "mtime": 1783058080.033473,
+    "hash": "97edb5b7ea5c96fdc6775f91455c7a20"
+  },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\backend\\src\\app.ts": {
     "mtime": 1782895928.5480425,
     "hash": "247546b21c04153cf6efc8f9b91ab05b"
@@ -692,12 +696,12 @@
     "hash": "3e48ebf6dfb5e1349b7794f54557da2e"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\packages\\shared\\index.ts": {
-    "mtime": 1783057499.4617958,
-    "hash": "1fcd8e1b6c56d1dc686c388338f93521"
+    "mtime": 1783058051.9859047,
+    "hash": "3fcfb294bc358a094853aad03b94ae29"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\packages\\shared\\src\\index.ts": {
-    "mtime": 1783057503.834602,
-    "hash": "3166076baa7756fe2708f42b9a738ced"
+    "mtime": 1783058057.0594835,
+    "hash": "ebe081dac8c4f61ae1a36000ac074b85"
   },
   "C:\\Users\\vrund\\OneDrive\\Desktop\\canovet\\packages\\shared\\src\\validation.ts": {
     "mtime": 1782895928.9351752,

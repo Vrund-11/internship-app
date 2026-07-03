@@ -1,16 +1,16 @@
 # Graph Report - canovet  (2026-07-03)
 
 ## Corpus Check
-- 190 files · ~136,431 words
+- 191 files · ~136,502 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 603 nodes · 695 edges · 129 communities (118 shown, 11 thin omitted)
+- 604 nodes · 695 edges · 130 communities (119 shown, 11 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 37 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `21317304`
+- Built from commit: `ef0aa094`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -67,7 +67,7 @@
 - `handleAddAddress()` --calls--> `validateCity()`  [INFERRED]
   apps/mobile/app/booking/address.tsx → packages/shared/src/validation.ts
 
-## Communities (129 total, 11 thin omitted)
+## Communities (130 total, 11 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
@@ -140,11 +140,11 @@ Nodes (4): fail(), login(), main(), ok()
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `useAuth()` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 9`?**
-  _High betweenness centrality (0.154) - this node is a cross-community bridge._
+  _High betweenness centrality (0.153) - this node is a cross-community bridge._
 - **Why does `useCity()` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 8`, `Community 9`, `Community 17`?**
-  _High betweenness centrality (0.110) - this node is a cross-community bridge._
+  _High betweenness centrality (0.109) - this node is a cross-community bridge._
 - **Why does `cn()` connect `Community 1` to `Community 0`, `Community 2`, `Community 4`, `Community 6`?**
-  _High betweenness centrality (0.102) - this node is a cross-community bridge._
+  _High betweenness centrality (0.101) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `useAuth()` (e.g. with `ProtectedLayout()` and `Navbar()`) actually correct?**
   _`useAuth()` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 2 inferred relationships involving `useCity()` (e.g. with `ProtectedLayout()` and `Navbar()`) actually correct?**
