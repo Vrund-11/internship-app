@@ -12,15 +12,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
-import { secureTokenStorage } from "@/lib/token-storage";
-import { api } from "@/lib/api";
 import Colors from "@/constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
 import { validateEmail, validatePassword } from "@canovet/shared";
-import * as WebBrowser from "expo-web-browser";
-import * as Linking from "expo-linking";
-
-WebBrowser.maybeCompleteAuthSession();
 
 const PawIcon = () => (
   <View style={styles.pawContainer}>
@@ -33,7 +27,7 @@ const PawIcon = () => (
 );
 
 export default function LoginScreen() {
-  const { login, loginWithGoogle, setUser } = useAuth();
+  const { login } = useAuth();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -43,8 +37,6 @@ export default function LoginScreen() {
 
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
-
-  const GOOGLE_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || "";
 
   const handleSubmit = async () => {
     const emailError = validateEmail(email);
@@ -70,64 +62,6 @@ export default function LoginScreen() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    const redirectUrl = Linking.createURL("login");
-
-    if (!GOOGLE_CLIENT_ID) {
-      setError("Google Client ID not configured. Running mock Google Login for development...");
-      setLoading(true);
-      setTimeout(async () => {
-        try {
-          await loginWithGoogle("mock_google_code_mobile_user@example.com", redirectUrl);
-          router.replace("/home" as any);
-        } catch (err: any) {
-          setError(err?.message || "Mock login failed");
-        } finally {
-          setLoading(false);
-        }
-      }, 1000);
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    try {
-      // Point OAuth flow to Next.js user-app proxy
-      const apiUr = process.env.EXPO_PUBLIC_API_URL || "";
-      // Replace :5000 with :3000 to get the Next.js web application host
-      const webUrl = apiUr ? apiUr.replace(":5000", ":3000") : "http://localhost:3000";
-
-      const authUrl = `${webUrl}/login?platform=mobile&redirect_scheme=${encodeURIComponent(redirectUrl)}`;
-      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
-
-      if (result.type === "success") {
-        const { queryParams } = Linking.parse(result.url);
-        const accessToken = queryParams?.accessToken;
-        const refreshToken = queryParams?.refreshToken;
-
-        if (accessToken && refreshToken) {
-          await secureTokenStorage.setAccessToken(accessToken as string);
-          await secureTokenStorage.setRefreshToken(refreshToken as string);
-
-          // Hydrate user profile from backend
-          const meRes = await api.get("/auth/me", {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          });
-          setUser(meRes.data);
-
-          router.replace("/home" as any);
-        } else {
-          setError("OAuth login succeeded but did not return access tokens.");
-        }
-      }
-    } catch (err: any) {
-      setError(err?.message || "Google sign-in failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
 
 
@@ -226,24 +160,7 @@ export default function LoginScreen() {
                 </LinearGradient>
               </Pressable>
 
-              <View style={styles.dividerRow}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or</Text>
-                <View style={styles.dividerLine} />
-              </View>
 
-              <Pressable
-                style={({ pressed }) => [
-                  styles.googleButtonContainer,
-                  pressed && { transform: [{ scale: 0.98 }] },
-                ]}
-                onPress={handleGoogleLogin}
-                disabled={loading}
-              >
-                <View style={styles.googleButtonContent}>
-                  <Text style={styles.googleButtonText}>Sign in with Google</Text>
-                </View>
-              </Pressable>
             </View>
           </View>
         </View>
@@ -379,45 +296,5 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     fontFamily: Colors.fonts.extraBold,
   },
-  googleButtonContainer: {
-    height: 52,
-    borderRadius: 100,
-    borderWidth: 1.5,
-    borderColor: Colors.light.border,
-    backgroundColor: "#FFFFFF",
-    overflow: "hidden",
-    shadowColor: "#1a0a18",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  googleButtonContent: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-  },
-  googleButtonText: {
-    color: Colors.light.textSecondary,
-    fontSize: 15,
-    fontWeight: "700",
-    fontFamily: Colors.fonts.bold,
-  },
-  dividerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 10,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: Colors.light.border,
-  },
-  dividerText: {
-    marginHorizontal: 10,
-    fontSize: 12,
-    color: Colors.light.textTertiary,
-    fontFamily: Colors.fonts.medium,
-  },
+
 });

@@ -10,6 +10,9 @@
     "dev:user": "npm run dev -w apps/user-app",
     "dev:backend": "npm run dev -w backend",
     "dev:mobile": "npm run dev -w apps/mobile",
+    "build:mobile-apk": "npm run build:apk -w apps/mobile",
+    "build:backend": "npm run build -w backend",
+    "start:backend": "npm run start -w backend",
     "dev": "concurrently \"npm run dev:user\" \"npm run dev:backend\"",
     "db:generate": "npx prisma generate",
     "db:migrate": "npx prisma migrate dev",
@@ -23,5 +26,8 @@
     "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "expo-updates": "~29.0.18"
   }
 }

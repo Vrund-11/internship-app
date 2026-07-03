@@ -22,7 +22,6 @@ type AuthContextType = {
   loading: boolean;
   setUser: (user: User | null) => void;
   login: (email: string, pass: string) => Promise<User>;
-  loginWithGoogle: (code: string, redirectUri?: string, platform?: string) => Promise<any>;
   logout: () => Promise<void>;
 };
 
@@ -63,27 +62,6 @@ export const AuthProvider = ({
     }
   };
 
-  const loginWithGoogle = async (code: string, redirectUri?: string, platform?: string) => {
-    try {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("dev_logged_out");
-      }
-      const res = await api.post("/auth/google", {
-        code,
-        redirectUri,
-        platform,
-      });
-
-      const { accessToken, user } = res.data;
-
-      updateAccessToken(accessToken);
-      setUser(user);
-      return res.data;
-    } catch (err) {
-      console.error("Google login failed");
-      throw err;
-    }
-  };
 
   const logout = async () => {
     try {
@@ -136,7 +114,7 @@ export const AuthProvider = ({
 
   return (
     <AuthContext.Provider
-      value={{ user, accessToken, loading, setUser, login, loginWithGoogle, logout }}
+      value={{ user, accessToken, loading, setUser, login, logout }}
     >
       {children}
     </AuthContext.Provider>
