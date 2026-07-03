@@ -26,5 +26,8 @@
     "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "expo-updates": "~29.0.18"
   }
 }

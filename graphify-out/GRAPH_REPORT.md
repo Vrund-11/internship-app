@@ -1,4 +1,4 @@
-# Graph Report - canovet  (2026-07-01)
+# Graph Report - canovet  (2026-07-03)
 
 ## Corpus Check
 - 190 files · ~136,428 words
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `088af15d`
+- Built from commit: `0870d2a6`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
